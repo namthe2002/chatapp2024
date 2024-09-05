@@ -216,5 +216,7 @@
   "label_enter_otp_code": "Enter OTP code",
   "label_reset_password_des": "Ensure your password includes both uppercase and \nlowercase letters as well as numbers to protect your \naccount.",
   "label_register": "Register",
-  "label_login_phone_number": "Login By Phone Number"
+  "label_login_phone_number": "Login By Phone Number",
+  "label_preview_chat_setting": "Choose the interface mode that suits you",
+  "label_apply": "Apply"
 }

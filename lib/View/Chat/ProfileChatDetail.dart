@@ -127,7 +127,8 @@ class _ProfileChatDetailState extends State<ProfileChatDetail> {
                                   ),
                                   border: InputBorder.none,
                                 ),
-                              ))
+                              )
+                        )
                             : Expanded(
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,

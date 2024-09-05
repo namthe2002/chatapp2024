@@ -30,6 +30,10 @@ import '../../Controller/Chat/ChatController.dart';
 import '../../Models/Chat/Chat.dart';
 import '../../Service/SocketManager.dart';
 import '../../Utils/thumnail_generator.dart';
+import '../../main.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+
+import '../../widget/utils_widget.dart';
 
 class ChatBoxDetail extends StatelessWidget {
   final Chat? chatDetail;
@@ -43,11 +47,19 @@ class ChatBoxDetail extends StatelessWidget {
   bool _attachHeaders = false;
   int _timeMs = 0;
   GenThumbnailImage? futureImage;
+  List<String> listReaction = [
+    'asset/icons/fire.svg',
+    'asset/icons/heart.svg',
+    'asset/icons/smiling_face_with_heart_eyes.svg',
+    'asset/icons/smiling_face_with_sunglasses.svg',
+    'asset/icons/loudly_crying_face.svg',
+    'asset/icons/face_with_tears_of_joy.svg',
+    'asset/icons/like.svg',
+  ];
 
   @override
   Widget build(BuildContext context) {
     controller.selectedChatDetail.value = chatDetail;
-    print('123namthenam${controller.selectedChatDetail.value?.fullName}');
     size = MediaQuery.of(context).size;
     return Obx(
       () => chatDetail == null
@@ -458,6 +470,7 @@ class ChatBoxDetail extends StatelessWidget {
                                                                       ));
                                                               }
                                                               return _chatItem(
+                                                                  context,
                                                                   index: index -
                                                                       1);
                                                             },
@@ -686,40 +699,8 @@ class ChatBoxDetail extends StatelessWidget {
                                                   icon: Icon(Icons
                                                       .delete_outline_rounded),
                                                 ),
-                                                AudioWaveforms(
-                                                  enableGesture: true,
-                                                  size: Size(20, 20),
-                                                  recorderController: controller
-                                                      .recorderController,
-                                                  waveStyle: const WaveStyle(
-                                                    waveColor: Color.fromRGBO(
-                                                        146, 154, 169, 1),
-                                                    extendWaveform: true,
-                                                    showMiddleLine: false,
-                                                  ),
-                                                  decoration: BoxDecoration(
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            24),
-                                                    color: Get.isDarkMode
-                                                        ? Color(0xff2d383e)
-                                                        : Color.fromRGBO(
-                                                            240, 243, 251, 1),
-                                                  ),
-                                                  padding: const EdgeInsets
-                                                      .symmetric(
-                                                      vertical: 10,
-                                                      horizontal: 12),
-                                                  margin: const EdgeInsets
-                                                      .symmetric(
-                                                      horizontal: 10),
-                                                ),
                                                 IconButton(
-                                                  onPressed: () async {
-                                                    // await controller
-                                                    //     .startOrStopRecording(
-                                                    //         isSend: true);
-                                                  },
+                                                  onPressed: () async {},
                                                   icon:
                                                       Icon(Icons.send_rounded),
                                                 )
@@ -861,32 +842,7 @@ class ChatBoxDetail extends StatelessWidget {
                                         crossAxisAlignment:
                                             CrossAxisAlignment.center,
                                         children: [
-                                          _buildGetMediaIcon(
-                                            onPressed: () {
-                                              controller.getFile();
-                                            },
-                                            iconButton:
-                                                'asset/icons/file_picker.svg',
-                                          ),
-                                          // _buildGetMediaIcon(
-                                          //   onPressed: () async {
-                                          //     await controller.getVideoFiles(
-                                          //         isCamera: false);
-                                          //   },
-                                          //   iconButton: 'asset/icons/image.svg',
-                                          // ),
-                                          // _buildGetMediaIcon(
-                                          //   onPressed: () async {
-                                          //     // controller.getMedia(
-                                          //     //     isCamera: true);
-                                          //     await controller
-                                          //         .requestCameraPermission();
-                                          //     // Capture photo and handle sending logic
-                                          //     await controller.capturePhoto();
-                                          //   },
-                                          //   iconButton:
-                                          //   'asset/icons/camera.svg',
-                                          // )
+                                          _buildGetMediaIcon(),
                                         ],
                                       )
                                     ],
@@ -911,8 +867,7 @@ class ChatBoxDetail extends StatelessWidget {
     );
   }
 
-  Widget _buildGetMediaIcon(
-      {required VoidCallback onPressed, required String iconButton}) {
+  Widget _buildGetMediaIcon() {
     return Container(
         padding: EdgeInsets.symmetric(vertical: 4, horizontal: 4),
         margin: EdgeInsets.symmetric(horizontal: 4),
@@ -923,6 +878,7 @@ class ChatBoxDetail extends StatelessWidget {
         child: PopupMenuButton(
             offset: Offset(100, -150),
             icon: SvgPicture.asset('asset/icons/file_picker.svg'),
+            iconColor: Get.isDarkMode ? ColorValue.white : ColorValue.white,
             shape:
                 RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             itemBuilder: (context) {
@@ -949,7 +905,7 @@ class ChatBoxDetail extends StatelessWidget {
             }));
   }
 
-  _chatItem({required int index}) {
+  _chatItem(BuildContext context, {required int index}) {
     cd.ChatDetail message = controller.chatList[index];
     final bool isMe = message.userSent == controller.userName;
 
@@ -1050,7 +1006,7 @@ class ChatBoxDetail extends StatelessWidget {
                       Expanded(
                           child: Align(
                         alignment: Alignment.topRight,
-                        child: _chatItemContent(
+                        child: _chatItemContent(context,
                             message: message,
                             isMe: isMe,
                             time: dtData,
@@ -1123,7 +1079,7 @@ class ChatBoxDetail extends StatelessWidget {
                                     width: 34,
                                     height: 32,
                                   ),
-                            _chatItemContent(
+                            _chatItemContent(context,
                                 message: message,
                                 isMe: isMe,
                                 time: dtData,
@@ -1151,7 +1107,7 @@ class ChatBoxDetail extends StatelessWidget {
     );
   }
 
-  _chatItemContent(
+  _chatItemContent(BuildContext context,
       {required cd.ChatDetail message,
       required bool isMe,
       required DateTime time,
@@ -1159,10 +1115,6 @@ class ChatBoxDetail extends StatelessWidget {
       bool isNewTime = false,
       bool? isShowEnd,
       double marginMessage = 0}) {
-    // Map<int, int> emojisMap = {};
-    // if (message.emojis != null) {
-    //   emojisMap = controller.countEmojis(message.emojis!);
-    // }
     String decoded = message.content ?? '';
     String decodedFullName = message.fullName ?? '';
     String? decodedForwardFrom = message.forwardFrom;
@@ -1186,9 +1138,12 @@ class ChatBoxDetail extends StatelessWidget {
     }
 
     return GestureDetector(
-      onLongPress: () {
+      onSecondaryTapDown: (details) {
         if (!isBottomSheet) {
-          bottomSheetChatItem(message: message, isMe: isMe, time: time);
+          controller.focusNode.unfocus();
+          controller.isShowEmoji.value = false;
+          bottomSheetChatItem2(context,
+              message: message, isMe: isMe, time: time);
         }
       },
       child: Stack(
@@ -1357,7 +1312,7 @@ class ChatBoxDetail extends StatelessWidget {
               bottom: 0,
               child: GestureDetector(
                 onTap: () {
-                  controller.likeMessage(uuid: message.uuid!);
+                  // controller.likeMessage(uuid: message.uuid!);
                 },
                 child: Container(
                   decoration: BoxDecoration(
@@ -1524,8 +1479,7 @@ class ChatBoxDetail extends StatelessWidget {
                 style: TextStyle(
                     fontWeight: FontWeight.w400,
                     fontSize: controller.sizeText.toDouble(),
-                    color: !reply && Get.isDarkMode ? Colors.black : null
-                ),
+                    color: !reply && Get.isDarkMode ? Colors.black : null),
                 maxLines: pinType == 1 ? 1 : null,
                 overflow: pinType == 1 ? TextOverflow.ellipsis : null,
               ),
@@ -1766,114 +1720,100 @@ class ChatBoxDetail extends StatelessWidget {
                     )
                   ],
                 )
-              : ListView.builder(
-                  shrinkWrap: true,
-                  physics: NeverScrollableScrollPhysics(),
-                  itemCount: 1,
-                  itemBuilder: (context, index) {
-                    return GestureDetector(
-                      onTap: () {
-                        if (controller.isDownload.isEmpty) {
-                          controller.saveFile(
-                              url: Constant.BASE_URL_IMAGE +
-                                  jsonDecode(decoded)[0],
-                              fileName: '${message.mediaName}');
-                        }
-                      },
-                      child: Row(
+              : GestureDetector(
+                  onTap: () async  {
+                    await controller.saveFile(
+                        url: Constant.BASE_URL_IMAGE + jsonDecode(decoded)[0],
+                        fileName: '${message.mediaName}');
+                    print('urlpdf ${ Constant.BASE_URL_IMAGE + jsonDecode(decoded)[0]}');
+                    },
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Container(
+                        padding: EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                            color: Color(controller.textColor),
+                            borderRadius: BorderRadius.circular(12)),
+                        child: Icon(
+                          Icons.download_outlined,
+                          size: 24,
+                          color: Colors.white,
+                        ),
+                      ),
+                      SizedBox(
+                        width: 8,
+                      ),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        mainAxisSize: MainAxisSize.min,
                         children: [
-                          Container(
-                            padding: EdgeInsets.all(12),
-                            decoration: BoxDecoration(
-                                color: Color(controller.textColor),
-                                borderRadius: BorderRadius.circular(12)),
-                            child: Icon(
-                              Icons.download_outlined,
-                              size: 24,
-                              color: Colors.white,
-                            ),
+                          Text(
+                            '${message.mediaName}',
+                            style: TextStyle(
+                                fontWeight: FontWeight.w400, fontSize: 14),
                           ),
                           SizedBox(
-                            width: 8,
+                            height: 8,
                           ),
-                          Expanded(
-                              child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text(
-                                '${message.mediaName}',
-                                style: TextStyle(
-                                    fontWeight: FontWeight.w400, fontSize: 14),
-                              ),
-                              SizedBox(
-                                height: 8,
-                              ),
-                              if (controller.fileTrafficCache.containsKey(
+                          if (controller.fileTrafficCache.containsKey(
+                              Constant.BASE_URL_IMAGE +
+                                  jsonDecode(decoded)[0])) ...[
+                            Obx(() => Text(
+                                  controller.isDownload ==
+                                          '${TextByNation.getStringByKey('downloading')} ${Constant.BASE_URL_IMAGE + jsonDecode(decoded)[0]}'
+                                      ? '${controller.progress.value}% ${controller.isDownload.value.substring(0, controller.isDownload.value.indexOf(' ${Constant.BASE_URL_IMAGE + jsonDecode(decoded)[0]}')).toLowerCase()}'
+                                      : '${controller.fileTrafficCache[Constant.BASE_URL_IMAGE + jsonDecode(decoded)[0]]} $type',
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.w400,
+                                    fontSize: 14,
+                                    color: Color(controller.textColor),
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
+                                ))
+                          ] else ...[
+                            FutureBuilder<String?>(
+                              future: controller.fetchFileSize(
                                   Constant.BASE_URL_IMAGE +
-                                      jsonDecode(decoded)[0])) ...[
-                                Obx(() => Text(
-                                      controller.isDownload ==
-                                              '${TextByNation.getStringByKey('downloading')} ${Constant.BASE_URL_IMAGE + jsonDecode(decoded)[0]}'
-                                          ? '${controller.progress.value}% ${controller.isDownload.value.substring(0, controller.isDownload.value.indexOf(' ${Constant.BASE_URL_IMAGE + jsonDecode(decoded)[0]}')).toLowerCase()}'
-                                          : '${controller.fileTrafficCache[Constant.BASE_URL_IMAGE + jsonDecode(decoded)[0]]} $type',
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.w400,
-                                        fontSize: 14,
-                                        color: Color(controller.textColor),
-                                      ),
-                                      overflow: TextOverflow.ellipsis,
-                                    ))
-                              ] else ...[
-                                FutureBuilder<String?>(
-                                  future: controller.fetchFileSize(
-                                      Constant.BASE_URL_IMAGE +
-                                          jsonDecode(decoded)[0]),
-                                  builder: (context, snapshot) {
-                                    if (snapshot.connectionState ==
-                                            ConnectionState.done &&
-                                        snapshot.hasData) {
-                                      controller.fileTrafficCache[
-                                              Constant.BASE_URL_IMAGE +
-                                                  jsonDecode(decoded)[0]] =
-                                          snapshot.data!;
-                                      return Obx(() => Text(
-                                            controller.isDownload ==
-                                                    '${TextByNation.getStringByKey('downloading')} ${Constant.BASE_URL_IMAGE + jsonDecode(decoded)[0]}'
-                                                ? '${controller.progress.value}% ${controller.isDownload.value.substring(0, controller.isDownload.value.indexOf(' ${Constant.BASE_URL_IMAGE + jsonDecode(decoded)[0]}')).toLowerCase()}'
-                                                : '${snapshot.data!} $type',
-                                            style: TextStyle(
-                                              fontWeight: FontWeight.w400,
-                                              fontSize: 14,
-                                              color:
-                                                  Color(controller.textColor),
-                                            ),
-                                            overflow: TextOverflow.ellipsis,
-                                          ));
-                                    } else {
-                                      return Text(
-                                        '0mb $type',
+                                      jsonDecode(decoded)[0]),
+                              builder: (context, snapshot) {
+                                if (snapshot.connectionState ==
+                                        ConnectionState.done &&
+                                    snapshot.hasData) {
+                                  controller.fileTrafficCache[Constant
+                                          .BASE_URL_IMAGE +
+                                      jsonDecode(decoded)[0]] = snapshot.data!;
+                                  return Obx(() => Text(
+                                        controller.isDownload ==
+                                                '${TextByNation.getStringByKey('downloading')} ${Constant.BASE_URL_IMAGE + jsonDecode(decoded)[0]}'
+                                            ? '${controller.progress.value}% ${controller.isDownload.value.substring(0, controller.isDownload.value.indexOf(' ${Constant.BASE_URL_IMAGE + jsonDecode(decoded)[0]}')).toLowerCase()}'
+                                            : '${snapshot.data!} $type',
                                         style: TextStyle(
                                           fontWeight: FontWeight.w400,
                                           fontSize: 14,
                                           color: Color(controller.textColor),
                                         ),
                                         overflow: TextOverflow.ellipsis,
-                                      );
-                                    }
-                                  },
-                                )
-                              ]
-                            ],
-                          )),
-                          // GestureDetector(
-                          //   onTap: () {},
-                          //   child: Icon(Icons.more_vert_rounded),
-                          // )
+                                      ));
+                                } else {
+                                  return Text(
+                                    '0mb $type',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.w400,
+                                      fontSize: 14,
+                                      color: Color(controller.textColor),
+                                    ),
+                                    overflow: TextOverflow.ellipsis,
+                                  );
+                                }
+                              },
+                            )
+                          ]
                         ],
                       ),
-                    );
-                  },
+                    ],
+                  ),
                 );
         default:
           return Container();
@@ -2236,6 +2176,7 @@ class ChatBoxDetail extends StatelessWidget {
               ),
               SizedBox(height: 12),
               _chatItemContent(
+                context,
                 message: message,
                 isMe: isMe,
                 time: time,
@@ -2261,7 +2202,7 @@ class ChatBoxDetail extends StatelessWidget {
               // ),
               GestureDetector(
                 onTap: () {
-                  controller.likeMessage(uuid: message.uuid!);
+                  // controller.likeMessage(uuid: message.uuid!, type: null);
                   Navigator.pop(context);
                 },
                 child: SvgPicture.asset(
@@ -2409,6 +2350,271 @@ class ChatBoxDetail extends StatelessWidget {
               SizedBox(height: 20),
             ]),
           ),
+        ),
+      ),
+    );
+  }
+
+  bottomSheetChatItem2(BuildContext context,
+      {required cd.ChatDetail message,
+      required bool isMe,
+      required DateTime time}) {
+    final indexMessage = controller.chatList
+        .indexWhere((element) => element.uuid! == message.uuid!);
+    String uuidChat = controller.chatList[indexMessage].uuid!;
+
+    String decoded = message.content ?? '';
+
+    try {
+      decoded = utf8.decode(base64Url.decode(message.content!));
+    } catch (e) {
+      decoded = message.content ?? '';
+    }
+
+    return showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            backgroundColor: Colors.transparent,
+            insetPadding: EdgeInsets.symmetric(horizontal: 24),
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            content: SizedBox(
+              width: Get.width * .7,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(11),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(12),
+                      color: Colors.white,
+                    ),
+                    child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: List.generate(
+                            listReaction.length,
+                            (index) => GestureDetector(
+                                  onTap: () async {
+                                    String uuidUser =
+                                        await Utils.getStringValueWithKey(
+                                            Constant.UUID_USER);
+                                    controller.likeMessage(
+                                        uuid: message.uuid!,
+                                        type: index,
+                                        status: 1,
+                                        uuidUser: uuidUser);
+                                    Navigator.pop(context);
+                                  },
+                                  child: SvgPicture.asset(
+                                    listReaction[index],
+                                    width: 30,
+                                    fit: BoxFit.fitWidth,
+                                  ),
+                                ))),
+                  ),
+                  Divider(
+                    height: 4,
+                    color: Colors.transparent,
+                  ),
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(12)),
+                    child: Column(
+                      children: [
+                        _customChildShowDialog('asset/icons/reply.svg',
+                            AppLocalizations.of(context)!.reply, () {
+                          controller.focusNode.requestFocus();
+                          controller.replyChat.value = message;
+                          controller.isEdit.value = 2;
+                          Navigator.of(context).pop();
+                        }),
+                        if (message.contentType != 6)
+                          _customChildShowDialog('asset/icons/copy.svg',
+                              AppLocalizations.of(context)!.copy, () {
+                            Clipboard.setData(ClipboardData(text: decoded));
+                            Navigator.of(context).pop();
+                          }),
+                        _customChildShowDialog('asset/icons/forward.svg',
+                            AppLocalizations.of(context)!.forward, () async {
+                          Navigator.of(context).pop();
+                          if (Get.isRegistered<ChatController>()) {
+                            if (controller.isAppResume) {
+                              controller.isAppResume = false;
+                            }
+                            ChatController chat = Get.find<ChatController>();
+                            chat.forward = message;
+                            // await Navigation.navigateTo(
+                            //     page: RouterName.chat, arguments: message);
+                            chat.forward = cd.ChatDetail();
+                            chat.update();
+                          }
+                        }),
+                        if (isMe &&
+                            (message.contentType == 1 ||
+                                message.contentType == 2) &&
+                            message.forwardFrom == null)
+                          _customChildShowDialog('asset/icons/edit.svg',
+                              AppLocalizations.of(context)!.edit, () {
+                            controller.focusNode.requestFocus();
+                            controller.replyChat.value = message;
+                            controller.isEdit.value = 1;
+                            controller.textMessageController.text = decoded;
+                            Navigator.of(context).pop();
+                          }),
+                        _customChildShowDialog(
+                            !controller.pinList.value.contains(message)
+                                ? 'asset/icons/pin.svg'
+                                : 'asset/icons/un_pin.svg',
+                            !controller.pinList.value.contains(message)
+                                ? AppLocalizations.of(context)!.pin
+                                : AppLocalizations.of(context)!.un_pin, () {
+                          Navigator.of(context).pop();
+                          controller.selectedItems.value.add(uuidChat);
+                          controller.pinMessage(
+                              state: !controller.pinList.value.contains(message)
+                                  ? 1
+                                  : 0);
+                        }),
+                        if (controller.chatList.value.length > 1)
+                          _customChildShowDialog(
+                              'asset/icons/multiple_select.svg',
+                              AppLocalizations.of(context)!.multiple_select,
+                              () async {
+                            controller.selectedItems.clear();
+                            controller.selectedItems.add(message.uuid!);
+                            controller.isShowMultiselect.value = true;
+                            Navigator.of(context).pop();
+                          }),
+                        if (isMe)
+                          _customChildShowDialog('asset/icons/delete.svg',
+                              AppLocalizations.of(context)!.delete, () {
+                            Navigator.pop(context);
+                            UtilsWidget.showDialogCustomInChatScreen(
+                                controller.isDeleteOwnOrMulti,
+                                AppLocalizations.of(context)!.delete_message,
+                                AppLocalizations.of(context)!.delete_message,
+                                AppLocalizations.of(context)!
+                                    .delete_group_confirm,
+                                (value) => controller.isDeleteOwnOrMulti.value =
+                                    !controller.isDeleteOwnOrMulti.value, () {
+                              if (controller.isClickLoading) {
+                                controller.isClickLoading = false;
+                                controller.selectedItems.value.clear();
+                                controller.selectedItems.value.add(uuidChat);
+                                controller.deleteMessage();
+                                Navigator.of(context).pop();
+                                controller.isClickLoading = true;
+                              }
+                            }, isDelete: true);
+                          }),
+                        if (roleId == 1 && !isMe)
+                          _customChildShowDialog('asset/icons/copy.svg',
+                              AppLocalizations.of(context)!.lock_account,
+                              () async {
+                            Navigator.pop(context);
+                            UtilsWidget.showModalBottomSheetCustom([
+                              SizedBox(height: 14),
+                              Text(AppLocalizations.of(context)!.lock_account,
+                                  style: TextStyle(
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.w500,
+                                      height: 28 / 20,
+                                      color: ColorValue.neutralColor)),
+                              SizedBox(height: 4),
+                              Text(
+                                // TextByNation.getStringByKey(KeyByNation
+                                //     .choose_one_of_the_reasons_below),
+
+                                AppLocalizations.of(context)!.choose_mode,
+                                style: TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w400,
+                                    height: 24 / 14,
+                                    color: ColorValue.neutralColor),
+                              ),
+                              SizedBox(height: 14),
+                              UtilsWidget.itemShowBlockPopup(
+                                  // TextByNation.getStringByKey(
+                                  //     KeyByNation.lock_message),
+                                  AppLocalizations.of(context)!.delete_message,
+                                  // TextByNation.getStringByKey(KeyByNation
+                                  //     .block_this_account_messages_in_the_group),
+                                  AppLocalizations.of(context)!.delete_message,
+                                  () {
+                                controller.blockMember(
+                                    13,
+                                    message.msgRoomUuid ?? '',
+                                    message.userSent ?? '');
+                              }),
+                              SizedBox(height: 14),
+                              UtilsWidget.itemShowBlockPopup(
+                                  // TextByNation.getStringByKey(
+                                  //     KeyByNation.lock_and_delete_messages),
+                                  AppLocalizations.of(context)!.delete_message,
+
+                                  // TextByNation.getStringByKey(KeyByNation
+                                  //     .block_and_delete_this_account_messages_in_the_group),
+                                  AppLocalizations.of(context)!
+                                      .delete_group_confirm, () {
+                                Navigator.pop(Get.context!);
+                                UtilsWidget.showDialogCustomInChatScreen(
+                                    controller.isBlockMemberCheck,
+                                    // TextByNation.getStringByKey(
+                                    //     KeyByNation.lock_message),
+                                    AppLocalizations.of(context)!
+                                        .delete_group_confirm,
+
+                                    // TextByNation.getStringByKey(KeyByNation
+                                    //     .block_and_delete_this_account_messages_in_the_group),
+                                    AppLocalizations.of(context)!.delete_chat,
+
+                                    // TextByNation.getStringByKey(
+                                    //     KeyByNation.remove_account_from_group),
+                                    AppLocalizations.of(context)!
+                                        .delete_group_confirm, (p0) {
+                                  controller.isBlockMemberCheck.value =
+                                      !controller.isBlockMemberCheck.value;
+                                }, () {
+                                  controller.blockMember(
+                                      16,
+                                      message.msgRoomUuid ?? '',
+                                      message.userSent ?? '');
+                                }, isLock: true);
+                              }),
+                            ]);
+                          }, isMore: true),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        });
+  }
+
+  Widget _customChildShowDialog(String icon, String title, VoidCallback? onTap,
+      {bool? isMore = false}) {
+    return InkWell(
+      onTap: onTap,
+      splashFactory: NoSplash.splashFactory,
+      child: Padding(
+        padding: EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Row(children: [
+              SvgPicture.asset(icon),
+              SizedBox(width: 12),
+              Text(title),
+            ]),
+            isMore == true
+                ? Icon(Icons.arrow_forward_ios_outlined, size: 20)
+                : const SizedBox()
+          ],
         ),
       ),
     );

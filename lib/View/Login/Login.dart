@@ -79,7 +79,9 @@ class _LoginState extends State<Login> {
                   colors: [
                     Color(0xFF0CBE8C).withOpacity(1),
                     Color(0xFF5B72DE).withOpacity(1),
-                  ])),
+                  ])
+
+          ),
           child: Center(
             child: Container(
               width: 480,

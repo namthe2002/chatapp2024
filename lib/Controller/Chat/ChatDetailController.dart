@@ -4,12 +4,9 @@ import 'dart:io';
 import 'dart:isolate';
 import 'dart:typed_data';
 import 'dart:ui';
-
 import 'package:audio_waveforms/audio_waveforms.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:camera/camera.dart';
-import 'package:ffmpeg_kit_flutter/ffmpeg_kit.dart';
-import 'package:ffmpeg_kit_flutter/return_code.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -20,7 +17,6 @@ import 'package:image_gallery_saver/image_gallery_saver.dart';
 import 'package:image_picker_web/image_picker_web.dart';
 import 'package:intl/intl.dart';
 import 'package:live_yoko/Controller/AppController.dart';
-import 'package:live_yoko/Controller/Chat/ChatController.dart';
 import 'package:live_yoko/Global/Constant.dart';
 import 'package:live_yoko/Global/GlobalValue.dart';
 import 'package:live_yoko/Global/TextByNation.dart';
@@ -32,14 +28,13 @@ import 'package:live_yoko/Utils/Speech2Text.dart';
 import 'package:live_yoko/Utils/Translator.dart';
 import 'package:live_yoko/Utils/Utils.dart';
 import "dart:html" as html;
-import 'package:mime/mime.dart';
 import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
-import 'package:web/web.dart' as web;
 import '../../Models/Chat/Chat.dart';
-import '../../Navigation/Navigation.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
+import 'dart:js' as js;
 
 class ChatDetailController extends GetxController {
   String uuidUser = '';
@@ -56,6 +51,7 @@ class ChatDetailController extends GetxController {
   RxInt progress = 0.obs;
   RxList<String> selectedItems = RxList();
   RxBool isShowMultiselect = false.obs;
+  final focusNode = FocusNode();
 
   // RxList<Emojis> emojiList = RxList<Emojis>();
   RxBool isTextFieldFocused = false.obs;
@@ -80,7 +76,8 @@ class ChatDetailController extends GetxController {
   final ItemScrollController itemScrollController = ItemScrollController();
   final ItemPositionsListener itemPositionsListener =
       ItemPositionsListener.create();
-  final focusNode = FocusNode();
+
+  // final focusNode = FocusNode();
   RxBool isSearch = false.obs;
   TextEditingController textSearchController = TextEditingController();
   RxString chatName = ''.obs;
@@ -108,12 +105,15 @@ class ChatDetailController extends GetxController {
   var chatRoomData = {}.obs;
   final SocketManager _socketManager = SocketManager();
   var capturedImage = Rxn<XFile>();
-
   List<html.File> files = [];
+  RxBool isShowEmoji = false.obs;
+  RxBool isDeleteOwnOrMulti = false.obs;
+  RxBool isBlockMemberCheck = false.obs;
+  RxBool isDeleteConversation = false.obs;
+  RxBool isBlockMember = false.obs;
+  int roleId = 0;
+  RxBool isExtendShowEmoji = false.obs;
 
-  // List<String> responseFile = [];
-
-  // var previewData = Rxn<PreviewData>();
 
   @override
   void onInit() async {
@@ -353,75 +353,26 @@ class ChatDetailController extends GetxController {
 
   Future<void> saveFile({required String url, required String fileName}) async {
     isDownload.value = '${TextByNation.getStringByKey('downloading')} $url';
-    final status = await Permission.storage.request();
-    Directory pathIos = await getApplicationDocumentsDirectory();
-    if (status.isGranted) {
+    if (kIsWeb) {
       try {
-        final id = await FlutterDownloader.enqueue(
-          url: url,
-          savedDir: Platform.isAndroid
-              ? '/storage/emulated/0/Download/'
-              : pathIos.path,
-          fileName: fileName.replaceAll(' ', '_'),
-        );
+        final anchor = html.AnchorElement(href: url)
+          ..setAttribute('download', fileName.replaceAll(' ', '_'))
+          ..style.display = 'none';
+        html.document.body?.append(anchor);
+        js.context.callMethod('eval', [
+          'document.querySelector("a[download=\'${fileName.replaceAll(' ', '_')}\']").click()'
+        ]);
+        anchor.remove();
       } catch (e) {
-        print(' download exception: $e');
+        print('Download exception (web): $e');
       }
+      return;
     } else {
       Utils.showSnackBar(
           title: TextByNation.getStringByKey('notification'),
           message: TextByNation.getStringByKey('no_access'));
     }
   }
-
-  /*
-  startOrStopRecording({bool isSend = false}) async {
-    try {
-      if (isRecording.value) {
-        recorderController.reset();
-
-        pathRecording = (await recorderController.stop(false))!;
-
-        if (isSend && pathRecording != null) {
-          Directory directory = await getTemporaryDirectory();
-          String outputWavPath = directory.path +
-              '/${File(pathRecording!).lengthSync()}output.wav';
-          await FFmpegKit.execute(
-                  "-i $pathRecording -c:a pcm_s16le $outputWavPath")
-              .then((result) async {
-            final returnCode = await result.getReturnCode();
-            if (ReturnCode.isSuccess(returnCode)) {
-              file.add(File(outputWavPath));
-              await pushFile();
-              await sendMessage(content: responseFile.toString(), type: 5);
-            } else if (ReturnCode.isCancel(returnCode)) {
-              // CANCEL
-            } else {
-              // ERROR
-            }
-          });
-          debugPrint(pathRecording);
-          debugPrint(
-              "Recorded file size: ${File(pathRecording!).lengthSync()}");
-        }
-      } else {
-        await recorderController.record(path: pathRecording);
-      }
-    } catch (e) {
-      debugPrint(e.toString());
-    } finally {
-      isRecording.value = !isRecording.value;
-    }
-  }
-*/
-
-  // Map<int, int> countEmojis(List<Emojis> emojis) {
-  //   final Map<int, int> emojiCount = {};
-  //   for (final emoji in emojis) {
-  //     emojiCount.update(emoji.id!, (value) => value + 1, ifAbsent: () => 1);
-  //   }
-  //   return emojiCount;
-  // }
 
   bool isJson(String str) {
     try {
@@ -664,10 +615,7 @@ class ChatDetailController extends GetxController {
     }
   }
 
-  getFile() async {
-    if (!Get.isRegistered<ChatDetailController>()) {
-      Get.put(ChatDetailController());
-    }
+  Future<void> getFile() async {
     FilePickerResult? result = await FilePicker.platform.pickFiles(
       type: FileType.custom,
       allowedExtensions: [
@@ -683,62 +631,57 @@ class ChatDetailController extends GetxController {
         'rar'
       ],
     );
-
     if (result != null && result.files.isNotEmpty) {
-      String? filePath = result.files.single.path;
-      File file = File(filePath!);
-      int fileSizeInBytes = await file.length();
-      double fileSizeInMB = fileSizeInBytes / (1024 * 1024);
-      if (fileSizeInMB <= 20) {
-        this.file.add(file);
-        await pushFileWeb(type: 4, fileData: []);
-        if (responseFile.isNotEmpty) {
-          await sendMessage(
-              content: responseFile.toString(),
-              type: 4);
-        } else {
-          Utils.showSnackBar(
-              title: TextByNation.getStringByKey('notification'),
-              message: TextByNation.getStringByKey('unable_send'));
-        }
+      Uint8List? bytes = result.files.single.bytes;
+      String fileName = result.files.single.name;
+      List<Uint8List> filePath = [];
+      if (bytes != null) {
+        filePath.add(bytes);
+      }
+      await pushFileWeb2(type: 4, fileData: filePath, fileName: fileName);
+      if (responseFile.isNotEmpty) {
+        await sendMessage(content: responseFile.toString(), type: 4);
       } else {
         Utils.showSnackBar(
-            title: TextByNation.getStringByKey('notification'),
-            message: TextByNation.getStringByKey('file_size'));
+          title: TextByNation.getStringByKey('notification'),
+          message: TextByNation.getStringByKey('unable_send'),
+        );
       }
     }
   }
 
-  // pushFile({int type = 1}) async {
-  //   String formattedTime = DateFormat('MM/dd/yyyy HH:mm:ss').format(timeNow);
-  //   try {
-  //     // isImageLoading.value = true;
-  //     var data = await APICaller.getInstance().putFiles(
-  //         endpoint: 'v1/Upload/upload-image',
-  //         filePath: file,
-  //         type: type,
-  //         keyCert:
-  //         Utils.generateMd5(Constant.NEXT_PUBLIC_KEY_CERT + formattedTime),
-  //         time: formattedTime);
-  //     //await SocketManager.getInstance().connect();
-  //     if (data != null) {
-  //       List<dynamic> list = data['items'];
-  //       var listItem = list.map((dynamic json) => '"$json"').toList();
-  //       responseFile = listItem;
-  //       file.clear();
-  //     } else {
-  //       Utils.showSnackBar(
-  //           title: TextByNation.getStringByKey('error_file'),
-  //           message: 'Upload file fail');
-  //     }
-  //   } catch (e) {
-  //     Utils.showSnackBar(
-  //         title: TextByNation.getStringByKey('error_file'), message: '$e');
-  //     //await SocketManager.getInstance().connect();
-  //     // isImageLoading.value = false;
-  //   }
-  // }
+  pushFileWeb2(
+      {required int type,
+      required List<Uint8List> fileData,
+      required fileName}) async {
+    String formattedTime =
+        DateFormat('MM/dd/yyyy HH:mm:ss').format(DateTime.now());
+    try {
+      var data = await APICaller.getInstance().putFilesWeb2(
+        endpoint: 'v1/Upload/upload-image',
+        fileData: fileData,
+        type: type,
+        keyCert:
+            Utils.generateMd5(Constant.NEXT_PUBLIC_KEY_CERT + formattedTime),
+        time: formattedTime,
+        fileName: fileName,
+      );
 
+      if (data != null) {
+        List<dynamic> list = data['items'];
+        var listItem = list.map((dynamic json) => '"$json"').toList();
+        responseFile = listItem;
+        fileData.clear();
+      } else {
+        Utils.showSnackBar(
+            title: TextByNation.getStringByKey('error_file'),
+            message: 'Upload file failed');
+      }
+    } catch (e) {
+      Utils.showSnackBar(
+          title: TextByNation.getStringByKey('error_file'), message: '$e');
+    }
+  }
 
   getImageFiles({required bool isCamera}) async {
     if (!Get.isRegistered<ChatDetailController>()) {
@@ -747,11 +690,12 @@ class ChatDetailController extends GetxController {
     final List<html.File>? images = await ImagePickerWeb.getMultiImagesAsFile();
     if (images != null && images.isNotEmpty) {
       List<html.File> fileData = [];
-      for( var img in images) {
+      for (var img in images) {
         fileData.add(img);
       }
       String type = 'Image';
-      await pushFileWeb(type: type == 'Image' || type == 'Video' ? 1 : 4, fileData: fileData);
+      await pushFileWeb(
+          type: type == 'Image' || type == 'Video' ? 1 : 4, fileData: fileData);
       if (responseFile.isNotEmpty) {
         await sendMessage(
             content: responseFile.toString(),
@@ -775,11 +719,12 @@ class ChatDetailController extends GetxController {
     final List<html.File>? videos = await ImagePickerWeb.getMultiVideosAsFile();
     if (videos != null && videos.isNotEmpty) {
       List<html.File> fileData = [];
-        for( var img in videos) {
-          fileData.add(img);
-        }
+      for (var img in videos) {
+        fileData.add(img);
+      }
       String type = 'Video';
-      await pushFileWeb(type: type == 'Image' || type == 'Video' ? 1 : 4, fileData: fileData);
+      await pushFileWeb(
+          type: type == 'Image' || type == 'Video' ? 1 : 4, fileData: fileData);
       if (responseFile.isNotEmpty) {
         await sendMessage(
             content: responseFile.toString(),
@@ -1057,14 +1002,18 @@ class ChatDetailController extends GetxController {
     replyChat.value = ChatDetail();
   }
 
-  likeMessage({required String uuid}) async {
+  likeMessage(
+      {required String uuid,
+        required int type,
+        required int status,
+        required String uuidUser}) async {
     if (isAppResume) {
       isAppResume = false;
-      // await SocketManager().connect();
     }
+    //status
+    /// 1: liked - 0: remove like
     await _socketManager.likeMessage(
-      msgLineUuid: uuid,
-    );
+        msgLineUuid: uuid, type: type, status: status, uuidUser: uuidUser);
   }
 
   setRead(dynamic message) {
@@ -1135,6 +1084,12 @@ class ChatDetailController extends GetxController {
       chatList[index].likeCount = chatList[index].likeCount! + 1;
       chatList.refresh();
     }
+  }
+
+
+  blockMember(int type, String roomUuid, String userName) {
+    //socket
+    _socketManager.blockMember(roomUuid: roomUuid, type: type, userName: userName);
   }
 
   void showGroupInfoMode() {

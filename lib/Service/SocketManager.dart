@@ -75,10 +75,8 @@ class SocketManager {
       }
       if (Get.isRegistered<ChatController>()) {
         if (data['MsgType'] == 1) {
-          // đang nhập
           Get.find<ChatController>().setTyping(json.decode(data['Data']));
         } else if (data['MsgType'] == 2) {
-          // đã xem
           Get.find<ChatController>().setRead(json.decode(data['Data']));
         } else if (data['MsgType'] == 6) {
           Get.find<ChatController>().updateChat(json.decode(data['Data']));
@@ -172,10 +170,32 @@ class SocketManager {
     _channel?.sink.add(jsonEncode(data));
   }
 
-  likeMessage({required String msgLineUuid}) async {
-    var body = {'MsgLineUuid': msgLineUuid};
+  likeMessage(
+      {required String msgLineUuid,
+        required int type,
+        required int status,
+        required String uuidUser}) async {
+    var body = {
+      'MsgLineUuid': msgLineUuid,
+      "Type": type,
+      "Status": status,
+      "Uuid": uuidUser
+    };
     var data = {'MsgType': 8, 'Data': jsonEncode(body)};
-    _channel?.sink.add(jsonEncode(data));
+
+            _channel?.sink.add(jsonEncode(data));
+  }
+
+
+  blockMember(
+      {required String roomUuid,
+        required int type,
+        required String userName}) async {
+    var body = {"RoomUuid": roomUuid, "UserName": userName};
+    var data = {'MsgType': type, 'Data': jsonEncode(body)};
+    print('-----$body');
+
+            _channel?.sink.add(jsonEncode(data));
   }
 }
 

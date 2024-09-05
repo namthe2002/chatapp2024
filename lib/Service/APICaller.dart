@@ -157,9 +157,7 @@ class APICaller {
     );
     Utils.backLogin(response.statusCode == 401);
     if (response.statusCode != 200) {
-      // Utils.showSnackBar(
-      //     title: TextByNation.getStringByKey('notification'),
-      //     message: response.body);
+
       return null;
     }
     if (jsonDecode(response.body)['error']['code'] != 0) {
@@ -173,6 +171,64 @@ class APICaller {
     }
     return jsonDecode(response.body);
   }
+
+
+
+  Future<dynamic> putFilesWeb2(
+      {required String endpoint,
+        required List<Uint8List> fileData,
+        required int type,
+        required String keyCert,
+        required String time,required String fileName}) async {
+    Map<String, String> requestHeaders = {
+      'Content-type': 'multipart/form-data',
+      'Authorization': GlobalValue.getInstance().getToken(),
+    };
+    final uri = Uri.parse(BASE_URL + endpoint);
+
+    final request = http.MultipartRequest('PUT', uri);
+    List<http.MultipartFile> files = [];
+    for (var file in fileData) {
+      var f = http.MultipartFile.fromBytes(
+        'ImageFile',
+        file,
+        filename:fileName,
+      );
+      files.add(f);
+    }
+
+
+    request.files.addAll(files);
+    request.fields['Type'] = '$type';
+    request.fields['KeyCert'] = '$keyCert';
+    request.fields['Time'] = '$time';
+    request.headers.addAll(requestHeaders);
+
+    var streamedResponse = await request.send();
+    var response = await http.Response.fromStream(streamedResponse).timeout(
+      const Duration(seconds: 30),
+      onTimeout: () {
+        return http.Response(
+            TextByNation.getStringByKey('error_api_no_connect'), 408);
+      },
+    );
+
+    Utils.backLogin(response.statusCode == 401);
+    if (response.statusCode != 200) {
+      return null;
+    }
+    if (jsonDecode(response.body)['error']['code'] != 0) {
+      translator.init2();
+      String translateData = await translator
+          .translate(jsonDecode(response.body)['error']['message']);
+      Utils.showSnackBar(
+          title: TextByNation.getStringByKey('notification'),
+          message: translateData);
+      return null;
+    }
+    return jsonDecode(response.body);
+  }
+
 
   Future<dynamic> putFilesWeb(
       {required String endpoint,

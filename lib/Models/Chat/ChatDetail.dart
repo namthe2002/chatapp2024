@@ -148,7 +148,6 @@ class ReplyMsgUu {
     this.fullName,
     this.avatar,
     this.mediaName,
-    // this.emojis
   });
 
   ReplyMsgUu.fromJson(Map<String, dynamic> json) {

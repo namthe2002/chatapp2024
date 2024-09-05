@@ -1,0 +1,66 @@
+Flutter crash report.
+Please report a bug at https://github.com/flutter/flutter/issues.
+
+## command
+
+flutter run --machine --start-paused -d chrome --devtools-server-address http://127.0.0.1:9101/ --target /Users/macbook/chatappgithub/chatapp2024/lib/main.dart
+
+## exception
+
+HttpException: HttpException: Connection closed before full header was received, uri = http://localhost:59995/json
+
+```
+```
+
+## flutter doctor
+
+```
+[✓] Flutter (Channel master, 3.23.0-14.0.pre.76, on macOS 14.5 23F79 darwin-x64, locale en-GB)
+    • Flutter version 3.23.0-14.0.pre.76 on channel master at /Users/macbook/Downloads/flutter
+    • Upstream repository https://github.com/flutter/flutter.git
+    • Framework revision 1c9c375e4e (9 weeks ago), 2024-06-30 07:43:26 -0400
+    • Engine revision 0d93da7e2f
+    • Dart version 3.5.0 (build 3.5.0-318.0.dev)
+    • DevTools version 2.37.0
+
+[✓] Android toolchain - develop for Android devices (Android SDK version 35.0.0)
+    • Android SDK at /Users/macbook/Library/Android/sdk
+    • Platform android-34, build-tools 35.0.0
+    • ANDROID_HOME = /Users/macbook/Library/Android/sdk
+    • Java binary at: /Applications/Android Studio.app/Contents/jbr/Contents/Home/bin/java
+    • Java version OpenJDK Runtime Environment (build 17.0.10+0-17.0.10b1087.21-11609105)
+    • All Android licenses accepted.
+
+[✓] Xcode - develop for iOS and macOS (Xcode 15.4)
+    • Xcode at /Applications/Xcode.app/Contents/Developer
+    • Build 15F31d
+    • CocoaPods version 1.15.2
+
+[✓] Chrome - develop for the web
+    • Chrome at /Applications/Google Chrome.app/Contents/MacOS/Google Chrome
+
+[✓] Android Studio (version 2024.1)
+    • Android Studio at /Applications/Android Studio.app/Contents
+    • Flutter plugin can be installed from:
+      🔨 https://plugins.jetbrains.com/plugin/9212-flutter
+    • Dart plugin can be installed from:
+      🔨 https://plugins.jetbrains.com/plugin/6351-dart
+    • Java version OpenJDK Runtime Environment (build 17.0.10+0-17.0.10b1087.21-11609105)
+
+[✓] VS Code (version 1.92.2)
+    • VS Code at /Applications/Visual Studio Code.app/Contents
+    • Flutter extension version 3.94.0
+
+[✓] Connected device (4 available)
+    • Em bé Dun ❤️ (mobile)   • 00008110-001C44991AF2201E • ios            • iOS 17.2.1 21C66
+    • Iphone của Thế (mobile) • 00008101-000921A41E98001E • ios            • iOS 17.6.1 21G93
+    • macOS (desktop)         • macos                     • darwin-x64     • macOS 14.5 23F79 darwin-x64
+    • Chrome (web)            • chrome                    • web-javascript • Google Chrome 128.0.6613.114
+    ! Error: Browsing on the local area network for HeoHeo. Ensure the device is unlocked and attached with a cable or associated with the same local area network as this Mac.
+      The device must be opted into Developer Mode to connect wirelessly. (code -27)
+
+[✓] Network resources
+    • All expected network resources are available.
+
+• No issues found!
+```

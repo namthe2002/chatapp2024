@@ -25,6 +25,7 @@ import 'package:live_yoko/View/Register/register.dart';
 
 import '../Utils/Utils.dart';
 import '../View/Chat/home_chat.dart';
+import '../View/Chat/theme_mode_page.dart';
 
 class RouteDefine {
   static Widget getPageByName(String pageName) {
@@ -76,6 +77,8 @@ class RouteDefine {
         return Register();
       case 'ForgotPassword':
         return ForgotPassword();
+      case 'SelectThemeMode' :
+        return SelectThemeMode();
       default:
         return Splash();
     }

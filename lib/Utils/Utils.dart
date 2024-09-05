@@ -517,8 +517,7 @@ class Utils {
 
           Utils.saveStringWithKey(
               Constant.session_uuid, data['data']['sessionUuid']);
-          String abcd = await Utils.getStringValueWithKey(Constant.session_uuid);
-              print('namthe1234 $abcd');
+          String session_uuid_web = await Utils.getStringValueWithKey(Constant.session_uuid);
           await SocketManager().connect();
           Navigation.navigateGetOffAll(page: 'Chat');
           Timer(Duration(seconds: 5), () {

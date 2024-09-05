@@ -21,7 +21,6 @@ class ChangePassword extends StatelessWidget {
               },
               child: Icon(
                 Icons.close,
-                // color: ColorValue.textColor,
               ),
             ),
             centerTitle: true,

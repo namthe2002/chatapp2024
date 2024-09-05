@@ -1,7 +1,9 @@
 import 'dart:convert';
-import 'dart:typed_data';
+import 'dart:html' as html;
+
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:live_yoko/Controller/Chat/ChatController.dart';
@@ -9,22 +11,19 @@ import 'package:live_yoko/Controller/Chat/ProfileChatDetailController.dart';
 import 'package:live_yoko/Global/ColorValue.dart';
 import 'package:live_yoko/Global/Constant.dart';
 import 'package:live_yoko/Global/TextByNation.dart';
-import 'package:live_yoko/Models/Account/Contact.dart';
-import 'package:live_yoko/Service/SocketManager.dart';
 import 'package:live_yoko/Utils/Utils.dart';
 import 'package:live_yoko/View/Account/ChatSetting.dart';
 import 'package:live_yoko/View/Account/LanguageSettings.dart';
 import 'package:live_yoko/View/Account/ManageFriends.dart';
 import 'package:live_yoko/View/Account/UpdateProfile.dart';
 import 'package:live_yoko/View/Chat/ChatBoxDetail.dart';
+import 'package:live_yoko/View/Chat/theme_mode_page.dart';
 import 'package:live_yoko/widget/single_tap_detector.dart';
 import 'package:lottie/lottie.dart';
 import 'package:video_thumbnail/video_thumbnail.dart';
 import '../../Controller/Account/UpdateProfileController.dart';
 import '../../Controller/Chat/ChatDetailController.dart';
 import '../../Navigation/Navigation.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-
 import '../../widget/my_entry.dart';
 import '../Account/Friend.dart';
 import '../Account/NotificationSetting.dart';
@@ -261,8 +260,7 @@ class _HomeChatWebsiteState extends State<HomeChatWebsite> {
                                 height: 12,
                               ),
                               Text(
-                                TextByNation.getStringByKey(
-                                    'you_sure_loguot'),
+                                TextByNation.getStringByKey('you_sure_loguot'),
                                 style: TextStyle(
                                   fontSize: 14,
                                   fontWeight: FontWeight.w400,
@@ -340,21 +338,38 @@ class _HomeChatWebsiteState extends State<HomeChatWebsite> {
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Obx(() => iconToolBar(
-                image: 'asset/images/ic_account_avatar.png',
-                size: 36,
-                borderRadius: 40,
-                message: _homeController.fullNameUser.value,
-                buttonColor: _homeController.selectedChatItemIndex.value == 0
-                    ? ColorValue.white
-                    : null,
-                iconButton: _homeController.selectedChatItemIndex.value == 0
-                    ? ColorValue.colorPrimary
-                    : null,
-                onTap: () {
-                  // _homeController.selectIcon(0);
-                },
-              )),
+          Obx(() => _homeController.avatarUser.isNotEmpty
+              ? Padding(
+                  padding: EdgeInsets.only(top: 6),
+                  child: Tooltip(
+                    message: _homeController.fullNameUser.value,
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(40),
+                      child: Image.network(
+                        Constant.BASE_URL_IMAGE +
+                            _homeController.avatarUser.value,
+                        fit: BoxFit.cover,
+                        width: 36,
+                        height: 36,
+                      ),
+                    ),
+                  ),
+                )
+              : iconToolBar(
+                  image: 'asset/images/ic_account_avatar.png',
+                  size: 36,
+                  borderRadius: 40,
+                  message: _homeController.fullNameUser.value,
+                  buttonColor: _homeController.selectedChatItemIndex.value == 0
+                      ? ColorValue.white
+                      : null,
+                  iconButton: _homeController.selectedChatItemIndex.value == 0
+                      ? ColorValue.colorPrimary
+                      : null,
+                  onTap: () {
+                    // _homeController.selectIcon(0);
+                  },
+                )),
           Obx(() => iconToolBar(
                 image: 'asset/images/ic_home_chat.png',
                 buttonColor: _homeController.selectedChatItemIndex.value == 1
@@ -438,9 +453,8 @@ class _HomeChatWebsiteState extends State<HomeChatWebsite> {
                                   : null,
                           message: AppLocalizations.of(context)!.night_mode,
                           onTap: () {
-                            // showSelectBrightnessMode(context);
                             _homeController.updateFeature(
-                                context, selectThemeMode());
+                                context, SelectThemeMode());
                             _homeController.selectIcon(5);
                           },
                         )),
@@ -1006,7 +1020,7 @@ class _HomeChatWebsiteState extends State<HomeChatWebsite> {
           //   ),
           // ),
 
-            child: _buildGetMediaIcon(),
+          child: _buildGetMediaIcon(),
         ),
       ),
     );
@@ -1037,7 +1051,12 @@ class _HomeChatWebsiteState extends State<HomeChatWebsite> {
               }
             }
           },
-          onLongPress: () {
+
+
+          onSecondaryTap: () {
+            html.document.onContextMenu.listen((event) {
+              event.preventDefault();
+            });
             if (_homeController.forward.uuid == null) {
               showPopupselect(context, index);
             }
@@ -1460,13 +1479,6 @@ class _HomeChatWebsiteState extends State<HomeChatWebsite> {
               SizedBox(
                 height: 12,
               ),
-              // Container(
-              //   height: 1,
-              //   color: Get.isDarkMode
-              //       ? ColorValue.colorTextDark
-              //       : Color(0xffE4E6EC),
-              //   width: Get.width,
-              // ),
               SizedBox(
                 height: 12,
               ),
@@ -2198,7 +2210,7 @@ class _HomeChatWebsiteState extends State<HomeChatWebsite> {
               height: 20,
             ),
             Padding(
-              padding: EdgeInsets.symmetric(horizontal: 20.w),
+              padding: EdgeInsets.symmetric(horizontal: 20),
               child: SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
                 child: Row(
@@ -2483,8 +2495,6 @@ class _HomeChatWebsiteState extends State<HomeChatWebsite> {
     return thumbnail;
   }
 
-
-
   Widget _buildGetMediaIcon() {
     return Container(
         padding: EdgeInsets.symmetric(vertical: 4, horizontal: 4),
@@ -2494,8 +2504,8 @@ class _HomeChatWebsiteState extends State<HomeChatWebsite> {
           gradient: _homeController.isSelected.value == true
               ? null
               : LinearGradient(
-            colors: [Colors.blue, Colors.green],
-          ),
+                  colors: [Colors.blue, Colors.green],
+                ),
         ),
         child: PopupMenuButton(
             offset: Offset(50, -60),
@@ -2509,7 +2519,7 @@ class _HomeChatWebsiteState extends State<HomeChatWebsite> {
               fit: BoxFit.cover,
             ),
             shape:
-            RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             itemBuilder: (context) {
               return [
                 MyEntry(
@@ -2517,12 +2527,15 @@ class _HomeChatWebsiteState extends State<HomeChatWebsite> {
                     title: 'New Message',
                     onTap: () async {
                       // await controller.getImageFiles(isCamera: false);
+                      await Navigation.navigateTo(
+                          page: 'ChatCreate');
                     }),
                 MyEntry(
                     icon: 'asset/icons/ic_new_group.svg',
                     title: 'New Group',
                     onTap: () async {
-                      // await controller.getVideoFiles(isCamera: false);
+                      await Navigation.navigateTo(
+                          page: 'GroupCreate');
                     }),
               ];
             }));

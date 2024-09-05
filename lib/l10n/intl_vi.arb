@@ -216,6 +216,8 @@
   "label_enter_otp_code": "Nhập mã OTP",
   "label_reset_password_des": "Đảm bảo mật khẩu của bạn bao gồm cả chữ hoa và \nchữ thường cũng như số để bảo vệ tài khoản của bạn.",
   "label_register": "Đăng ký",
-  "label_login_phone_number": "Đăng nhập bằng số điện thoại"
+  "label_login_phone_number": "Đăng nhập bằng số điện thoại",
+  "label_preview_chat_setting": "Chọn chế độ giao diện phù hợp với bạn",
+  "label_apply": "Áp dụng"
 }
 

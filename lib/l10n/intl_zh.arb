@@ -216,5 +216,7 @@
   "label_enter_otp_code": "输入OTP码",
   "label_reset_password_des": "确保您的密码包含大写和小写字母以及数字，以保护您的账户。",
   "label_register": "注册",
-  "label_login_phone_number": "通过手机号码登录"
+  "label_login_phone_number": "通过手机号码登录",
+  "label_preview_chat_setting": "选择适合你的界面模式",
+  "label_apply": "应用"
 }

@@ -12,16 +12,20 @@ import 'package:live_yoko/Global/Constant.dart';
 import 'package:live_yoko/Global/TextByNation.dart';
 import 'package:live_yoko/Service/PushNotification/PushNotification.dart';
 import 'package:live_yoko/Utils/Utils.dart';
+import 'package:live_yoko/View/Account/LanguageSettings.dart';
 import 'package:live_yoko/View/Account/Splash.dart';
+import 'package:live_yoko/View/Account/UpdateProfile.dart';
 import 'package:live_yoko/View/Chat/ProfileChatDetail.dart';
 import 'package:live_yoko/View/Chat/home_chat.dart';
 import 'package:responsive_framework/responsive_wrapper.dart';
 import 'Global/Themes.dart';
 import 'Service/PushNotification/firebase_options.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'View/Account/ChatSetting.dart';
 import 'View/Login/Login.dart';
 
-
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+int roleId = 0;
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   SystemChrome.setSystemUIOverlayStyle(
@@ -60,9 +64,10 @@ Future<void> main() async {
           },
           initialRoute: '/',
           routes: {
-            '/': (context) => Login(),
-            '/home': (context) => HomeChatWebsite(), // Sửa route từ /widget thành /home
-            '/profile': (context) => ProfileChatDetail(),
+            '/': (context) => LanguageSettings(),
+            // '/': (context) => Login(),
+            // '/home': (context) => HomeChatWebsite(), // Sửa route từ /widget thành /home
+            // '/profile': (context) => ProfileChatDetail(),
           },
           theme: lightTheme,
           darkTheme: darkTheme,
@@ -126,7 +131,7 @@ Future startNotification() async {
   });
 
   final RemoteMessage? message = await FirebaseMessaging.instance
-      .getInitialMessage(); // gọi hàm  này khi thông báo được nhấn vào từ trạng thái app đang đóng
+      .getInitialMessage();
   if (message != null) {
     PushNotifications.navigationInNotification(message.data);
   }
