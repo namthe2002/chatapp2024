@@ -26,8 +26,8 @@ class _SelectThemeModeState extends State<SelectThemeMode> {
 
   @override
   Widget build(BuildContext context) {
-    return Obx(() => Scaffold(
-          body: Column(
+    return Scaffold(
+          body: Obx(() => Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.max,
             children: [
@@ -68,13 +68,14 @@ class _SelectThemeModeState extends State<SelectThemeMode> {
                     mainAxisSize: MainAxisSize.max,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children:
-                        List.generate(_homeController.listNode.length, (index) {
+                    children: List.generate(_homeController.listNode.length,
+                        (index) {
                       return GestureDetector(
                         onTap: () {
                           if (index !=
                               _homeController.selectBrightnessMode.value) {
-                            _homeController.selectBrightnessMode.value = index;
+                            _homeController.selectBrightnessMode.value =
+                                index;
                             _homeController.changeTheme(index, context);
                           }
                         },
@@ -94,19 +95,21 @@ class _SelectThemeModeState extends State<SelectThemeMode> {
                               Text(
                                 _homeController.listNode[index].title!,
                                 style: TextStyle(
-                                    fontSize: 14, fontWeight: FontWeight.w400),
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w400),
                               ),
                               Radio(
-                                groupValue:
-                                    _homeController.selectBrightnessMode.value,
+                                groupValue: _homeController
+                                    .selectBrightnessMode.value,
                                 value: index,
                                 onChanged: ((value) {
                                   if (index !=
                                       _homeController
                                           .selectBrightnessMode.value) {
-                                    _homeController.selectBrightnessMode.value =
-                                        index;
-                                    _homeController.changeTheme(index, context);
+                                    _homeController
+                                        .selectBrightnessMode.value = index;
+                                    _homeController.changeTheme(
+                                        index, context);
                                     setState(() {});
                                   }
                                 }),

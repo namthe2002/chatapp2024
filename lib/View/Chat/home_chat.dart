@@ -1019,7 +1019,6 @@ class _HomeChatWebsiteState extends State<HomeChatWebsite> {
           //     fit: BoxFit.cover,
           //   ),
           // ),
-
           child: _buildGetMediaIcon(),
         ),
       ),
@@ -1051,10 +1050,8 @@ class _HomeChatWebsiteState extends State<HomeChatWebsite> {
               }
             }
           },
-
-
           onSecondaryTap: () {
-            html.document.onContextMenu.listen((event) {
+            html.window.document.onContextMenu.listen((event) {
               event.preventDefault();
             });
             if (_homeController.forward.uuid == null) {
@@ -1398,6 +1395,10 @@ class _HomeChatWebsiteState extends State<HomeChatWebsite> {
           ),
         )));
   }
+
+
+
+
 
   Future<dynamic> showPopupselect(BuildContext context, int index) {
     return showDialog(
@@ -2527,15 +2528,13 @@ class _HomeChatWebsiteState extends State<HomeChatWebsite> {
                     title: 'New Message',
                     onTap: () async {
                       // await controller.getImageFiles(isCamera: false);
-                      await Navigation.navigateTo(
-                          page: 'ChatCreate');
+                      await Navigation.navigateTo(page: 'ChatCreate');
                     }),
                 MyEntry(
                     icon: 'asset/icons/ic_new_group.svg',
                     title: 'New Group',
                     onTap: () async {
-                      await Navigation.navigateTo(
-                          page: 'GroupCreate');
+                      await Navigation.navigateTo(page: 'GroupCreate');
                     }),
               ];
             }));

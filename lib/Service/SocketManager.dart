@@ -6,7 +6,6 @@ import 'package:get/get.dart';
 import 'package:live_yoko/Controller/Chat/ChatController.dart';
 import 'package:live_yoko/Controller/Chat/ChatDetailController.dart';
 import 'package:live_yoko/Global/Constant.dart';
-
 import 'package:live_yoko/Utils/Utils.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
@@ -25,18 +24,20 @@ class SocketManager {
     final wsUrl = Uri.parse('wss://tw-apimaster-v2.anbeteam.io.vn/ws?session='
         '$sessionUuid');
     _channel = WebSocketChannel.connect(wsUrl);
+    if (_channel == null) {
+      print('WebSocket connection failed.');
+      return;
+    }
     _channel?.stream.listen((message) {
-      print('---------------- response ---------- ' + message.toString());
-      // var controller = Get.find<CreateLiveController>();
-      // controller.handleSocketMsgReceived(message);
+      print('---------------- response ---------- ' + message);
       if (message.toString() == 'pong') return;
       dynamic data = json.decode(message.toString());
+      print('dadada $data');
       if (data['MsgType'] == 20) {
-        // for socket error response
         if (data['Data'].length > 0)
-          // Utils.showSnackBar(
-          //     title: TextByNation.getStringByKey('notification'),
-          //     message: utf8.decode(base64Url.decode(data['Data'])));
+          Utils.showSnackBar(
+              title: '',
+              message: utf8.decode(base64Url.decode(data['Data'])));
           return;
       } else if (data['MsgType'] == 11) {
         Utils.backLogin(true);
@@ -172,9 +173,9 @@ class SocketManager {
 
   likeMessage(
       {required String msgLineUuid,
-        required int type,
-        required int status,
-        required String uuidUser}) async {
+      required int type,
+      required int status,
+      required String uuidUser}) async {
     var body = {
       'MsgLineUuid': msgLineUuid,
       "Type": type,
@@ -183,19 +184,17 @@ class SocketManager {
     };
     var data = {'MsgType': 8, 'Data': jsonEncode(body)};
 
-            _channel?.sink.add(jsonEncode(data));
+    _channel?.sink.add(jsonEncode(data));
   }
-
 
   blockMember(
       {required String roomUuid,
-        required int type,
-        required String userName}) async {
+      required int type,
+      required String userName}) async {
     var body = {"RoomUuid": roomUuid, "UserName": userName};
     var data = {'MsgType': type, 'Data': jsonEncode(body)};
     print('-----$body');
-
-            _channel?.sink.add(jsonEncode(data));
+    _channel?.sink.add(jsonEncode(data));
   }
 }
 

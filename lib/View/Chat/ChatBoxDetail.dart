@@ -1939,7 +1939,6 @@ class ChatBoxDetail extends StatelessWidget {
                       '${decodedFullName ?? message.replyMsgUu!.userSent}',
                       style: TextStyle(
                         fontWeight: FontWeight.w500,
-                        fontSize: controller.sizeText.toDouble(),
                         color: Color(controller.textColor),
                       ),
                     ),

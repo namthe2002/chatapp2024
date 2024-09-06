@@ -64,10 +64,10 @@ Future<void> main() async {
           },
           initialRoute: '/',
           routes: {
-            '/': (context) => LanguageSettings(),
-            // '/': (context) => Login(),
-            // '/home': (context) => HomeChatWebsite(), // Sửa route từ /widget thành /home
-            // '/profile': (context) => ProfileChatDetail(),
+            // '/': (context) => LanguageSettings(),
+            '/': (context) => Login(),
+            '/home': (context) => HomeChatWebsite(), // Sửa route từ /widget thành /home
+            '/profile': (context) => ProfileChatDetail(),
           },
           theme: lightTheme,
           darkTheme: darkTheme,
