@@ -7,6 +7,8 @@ import 'dart:ui';
 import 'package:audio_waveforms/audio_waveforms.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:camera/camera.dart';
+import 'package:ffmpeg_kit_flutter/ffmpeg_kit.dart';
+import 'package:ffmpeg_kit_flutter/return_code.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -956,6 +958,48 @@ class ChatDetailController extends GetxController {
       Utils.showSnackBar(
           title: TextByNation.getStringByKey('error_message'), message: '$e');
       isPinLoading.value = false;
+    }
+  }
+
+  // recording
+
+  startOrStopRecording({bool isSend = false}) async {
+    try {
+      if (isRecording.value) {
+        recorderController.reset();
+        pathRecording = (await recorderController.stop(false))!;
+        if (isSend && pathRecording != null) {
+          Directory directory = await getTemporaryDirectory();
+          String outputWavPath =
+              '${directory.path}/${File(pathRecording!).lengthSync()}output.wav';
+          await FFmpegKit.execute(
+              "-i $pathRecording -c:a pcm_s16le $outputWavPath")
+              .then((result) async {
+            final returnCode = await result.getReturnCode();
+            if (ReturnCode.isSuccess(returnCode)) {
+              file.add(File(outputWavPath));
+              List<html.File> fileData = [];
+              for (var img in file) {
+                fileData.add(img as html.File);
+              }
+              await pushFileWeb(type: 3, fileData: []);
+              await sendMessage(content: responseFile.toString(), type: 5);
+            } else if (ReturnCode.isCancel(returnCode)) {
+              // CANCEL
+            } else {
+            }
+          });
+          debugPrint(pathRecording);
+          debugPrint(
+              "Recorded file size: ${File(pathRecording!).lengthSync()}");
+        }
+      } else {
+        await recorderController.record(path: pathRecording);
+      }
+    } catch (e) {
+      debugPrint(e.toString());
+    } finally {
+      isRecording.value = !isRecording.value;
     }
   }
 
