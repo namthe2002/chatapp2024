@@ -1,3 +1,5 @@
+import 'emoji/emoji_model.dart';
+
 class ChatDetail {
   String? uuid;
   String? msgRoomUuid;
@@ -19,7 +21,7 @@ class ChatDetail {
   String? forwardFrom;
   String? mediaName;
   ReplyMsgUu? replyMsgUu;
-  // List<Emojis>? emojis;
+  List<Emojis>? emojis;
   String translate = '';
   bool isTranslate = false;
   String translateOrigin = '';
@@ -71,12 +73,9 @@ class ChatDetail {
     replyMsgUu = json['replyMsgUu'] != null
         ? new ReplyMsgUu.fromJson(json['replyMsgUu'])
         : null;
-    // if (json['emojis'] != null) {
-    //   emojis = <Emojis>[];
-    //   json['emojis'].forEach((v) {
-    //     emojis!.add(new Emojis.fromJson(v));
-    //   });
-    // }
+    emojis = json['emojiList'] != null
+        ? List.from(json['emojiList'].map((e) => Emojis.fromJson(e)))
+        : [];
   }
 
   Map<String, dynamic> toJson() {
@@ -103,9 +102,7 @@ class ChatDetail {
     if (this.replyMsgUu != null) {
       data['replyMsgUu'] = this.replyMsgUu!.toJson();
     }
-    // if (this.emojis != null) {
-    //   data['emojis'] = this.emojis!.map((v) => v.toJson()).toList();
-    // }
+    data['emojiList'] = emojis != null ? emojis!.map((v) => v.toJson()) : [];
     return data;
   }
 }
@@ -128,7 +125,7 @@ class ReplyMsgUu {
   String? fullName;
   String? avatar;
   String? mediaName;
-  // List<Emojis>? emojis;
+  List<Emojis>? emojis;
 
   ReplyMsgUu({
     this.uuid,
@@ -168,12 +165,12 @@ class ReplyMsgUu {
     fullName = json['fullName'];
     avatar = json['avatar'];
     mediaName = json['mediaName'];
-    // if (json['emojis'] != null) {
-    //   emojis = <Emojis>[];
-    //   json['emojis'].forEach((v) {
-    //     emojis!.add(new Emojis.fromJson(v));
-    //   });
-    // }
+    if (json['emojis'] != null) {
+      emojis = <Emojis>[];
+      json['emojis'].forEach((v) {
+        emojis!.add(new Emojis.fromJson(v));
+      });
+    }
   }
 
   Map<String, dynamic> toJson() {
@@ -195,9 +192,9 @@ class ReplyMsgUu {
     data['fullName'] = this.fullName;
     data['avatar'] = this.avatar;
     data['mediaName'] = this.mediaName;
-    // if (this.emojis != null) {
-    //   data['emojis'] = this.emojis!.map((v) => v.toJson()).toList();
-    // }
+    if (this.emojis != null) {
+      data['emojis'] = this.emojis!.map((v) => v.toJson()).toList();
+    }
     return data;
   }
 }

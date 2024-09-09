@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 import 'package:live_yoko/Controller/Chat/ChatController.dart';
 import 'package:live_yoko/Controller/Chat/ChatDetailController.dart';
@@ -171,11 +172,27 @@ class SocketManager {
     _channel?.sink.add(jsonEncode(data));
   }
 
+  // likeMessage(
+  //     {required String msgLineUuid,
+  //     required int type,
+  //     required int status,
+  //     required String uuidUser}) async {
+  //   var body = {
+  //     'MsgLineUuid': msgLineUuid,
+  //     "Type": type,
+  //     "Status": status,
+  //     "Uuid": uuidUser
+  //   };
+  //   var data = {'MsgType': 8, 'Data': jsonEncode(body)};
+  //
+  //   _channel?.sink.add(jsonEncode(data));
+  // }
+
   likeMessage(
       {required String msgLineUuid,
-      required int type,
-      required int status,
-      required String uuidUser}) async {
+        required int type,
+        required int status,
+        required String uuidUser}) async {
     var body = {
       'MsgLineUuid': msgLineUuid,
       "Type": type,
@@ -183,8 +200,7 @@ class SocketManager {
       "Uuid": uuidUser
     };
     var data = {'MsgType': 8, 'Data': jsonEncode(body)};
-
-    _channel?.sink.add(jsonEncode(data));
+            _channel?.sink.add(jsonEncode(data));
   }
 
   blockMember(

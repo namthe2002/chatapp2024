@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:just_audio/just_audio.dart';
 // import 'package:waveform/waveform.dart';
-import 'package:waveform_flutter/waveform_flutter.dart';
 
 class ChatBubbleAudio extends StatefulWidget {
   final String url;
@@ -26,7 +25,6 @@ class WaveBubbleState extends State<ChatBubbleAudio> {
   Duration _totalDuration = Duration();
   Duration _currentPosition = Duration();
   late StreamSubscription<PlayerState> playerStateSubscription;
-  late Stream<Amplitude> _amplitudeStream;
 
   @override
   void initState() {

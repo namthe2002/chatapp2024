@@ -1,4 +1,5 @@
 # This is a generated file; do not edit or check into version control.
+audio_session=/Users/ehtNam/.pub-cache/hosted/pub.dev/audio_session-0.1.21/
 audio_waveforms=/Users/ehtNam/.pub-cache/hosted/pub.dev/audio_waveforms-1.0.5/
 audioplayers=/Users/ehtNam/.pub-cache/hosted/pub.dev/audioplayers-6.1.0/
 audioplayers_android=/Users/ehtNam/.pub-cache/hosted/pub.dev/audioplayers_android-5.0.0/
@@ -38,6 +39,8 @@ image_picker_windows=/Users/ehtNam/.pub-cache/hosted/pub.dev/image_picker_window
 in_app_purchase=/Users/ehtNam/.pub-cache/hosted/pub.dev/in_app_purchase-3.2.0/
 in_app_purchase_android=/Users/ehtNam/.pub-cache/hosted/pub.dev/in_app_purchase_android-0.3.6+6/
 in_app_purchase_storekit=/Users/ehtNam/.pub-cache/hosted/pub.dev/in_app_purchase_storekit-0.3.17+3/
+just_audio=/Users/ehtNam/.pub-cache/hosted/pub.dev/just_audio-0.9.40/
+just_audio_web=/Users/ehtNam/.pub-cache/hosted/pub.dev/just_audio_web-0.4.12/
 open_file=/Users/ehtNam/.pub-cache/hosted/pub.dev/open_file-3.3.2/
 path_provider=/Users/ehtNam/.pub-cache/hosted/pub.dev/path_provider-2.1.4/
 path_provider_android=/Users/ehtNam/.pub-cache/hosted/pub.dev/path_provider_android-2.2.10/
@@ -48,6 +51,12 @@ permission_handler=/Users/ehtNam/.pub-cache/hosted/pub.dev/permission_handler-10
 permission_handler_android=/Users/ehtNam/.pub-cache/hosted/pub.dev/permission_handler_android-10.3.6/
 permission_handler_apple=/Users/ehtNam/.pub-cache/hosted/pub.dev/permission_handler_apple-9.1.4/
 permission_handler_windows=/Users/ehtNam/.pub-cache/hosted/pub.dev/permission_handler_windows-0.1.3/
+record=/Users/ehtNam/.pub-cache/hosted/pub.dev/record-5.1.2/
+record_android=/Users/ehtNam/.pub-cache/hosted/pub.dev/record_android-1.2.6/
+record_darwin=/Users/ehtNam/.pub-cache/hosted/pub.dev/record_darwin-1.1.2/
+record_linux=/Users/ehtNam/.pub-cache/hosted/pub.dev/record_linux-0.7.2/
+record_web=/Users/ehtNam/.pub-cache/hosted/pub.dev/record_web-1.1.3/
+record_windows=/Users/ehtNam/.pub-cache/hosted/pub.dev/record_windows-1.0.3/
 share_plus=/Users/ehtNam/.pub-cache/hosted/pub.dev/share_plus-7.2.2/
 shared_preferences=/Users/ehtNam/.pub-cache/hosted/pub.dev/shared_preferences-2.3.2/
 shared_preferences_android=/Users/ehtNam/.pub-cache/hosted/pub.dev/shared_preferences_android-2.3.1/

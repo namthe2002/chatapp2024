@@ -1,5 +1,5 @@
 import 'dart:async';
-import 'dart:convert';
+import 'dart:convert' hide Codec;
 import 'dart:io';
 import 'dart:isolate';
 import 'dart:typed_data';
@@ -7,8 +7,6 @@ import 'dart:ui';
 import 'package:audio_waveforms/audio_waveforms.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:camera/camera.dart';
-import 'package:ffmpeg_kit_flutter/ffmpeg_kit.dart';
-import 'package:ffmpeg_kit_flutter/return_code.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -33,6 +31,7 @@ import "dart:html" as html;
 import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:record/record.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import '../../Models/Chat/Chat.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
@@ -77,7 +76,7 @@ class ChatDetailController extends GetxController {
   List<String> responseFile = [];
   final ItemScrollController itemScrollController = ItemScrollController();
   final ItemPositionsListener itemPositionsListener =
-      ItemPositionsListener.create();
+  ItemPositionsListener.create();
 
   // final focusNode = FocusNode();
   RxBool isSearch = false.obs;
@@ -115,58 +114,29 @@ class ChatDetailController extends GetxController {
   RxBool isBlockMember = false.obs;
   int roleId = 0;
   RxBool isExtendShowEmoji = false.obs;
-
+  late AudioRecorder recorder;
+  bool _recorderIsInited = false;
 
   @override
   void onInit() async {
     super.onInit();
-    // emojiList.add(Emojis(
-    //   id: 1,
-    //   path: 'https://emoji.aranja.com/static/emoji-data/img-apple-160/1f525.png'
-    // ));
-    // emojiList.add(Emojis(
-    //     id: 2,
-    //     path: 'https://emoji.aranja.com/static/emoji-data/img-apple-160/2764-fe0f.png'
-    // ));
-    // emojiList.add(Emojis(
-    //     id: 3,
-    //     path: 'https://emoji.aranja.com/static/emoji-data/img-apple-160/1f60d.png'
-    // ));
-    // emojiList.add(Emojis(
-    //     id: 4,
-    //     path: 'https://emoji.aranja.com/static/emoji-data/img-apple-160/1f61a.png'
-    // ));
-    // emojiList.add(Emojis(
-    //     id: 5,
-    //     path: 'https://emoji.aranja.com/static/emoji-data/img-apple-160/1f60e.png'
-    // ));
-    // emojiList.add(Emojis(
-    //     id: 6,
-    //     path: 'https://emoji.aranja.com/static/emoji-data/img-apple-160/1f62d.png'
-    // ));
-    // emojiList.add(Emojis(
-    //     id: 7,
-    //     path: 'https://emoji.aranja.com/static/emoji-data/img-apple-160/1f602.png'
-    // ));
-    // emojiList.add(Emojis(
-    //     id: 8,
-    //     path: 'https://emoji.aranja.com/static/emoji-data/img-apple-160/1f44d.png'
-    // ));
-
     ever(appController.appState, (state) async {
       if (state == AppLifecycleState.resumed) {
         // Ứng dụng đang chạy
         isAppResume = true;
+
         // SocketManager().connect();
       } else {
         // Ứng dụng không chạy
         readMessage();
       }
     });
-
+    recorder = AudioRecorder();
     itemPositionsListener.itemPositions.addListener(loadMoreItems);
     textMessageController.addListener(() {
-      if (textMessageController.text.trim().isNotEmpty) {
+      if (textMessageController.text
+          .trim()
+          .isNotEmpty) {
         isTextFieldFocused.value = true;
         isVisible.value = false;
         _socketManager.sendTypingRequest(
@@ -194,16 +164,13 @@ class ChatDetailController extends GetxController {
       }
     });
 
-    FlutterDownloader.registerCallback(downloadCallback);
-    _initialiseControllers();
-
     uuidUser = GlobalValue.getInstance().getUuid();
     userName = await Utils.getStringValueWithKey(Constant.USERNAME);
     countryCode = GlobalValue.getInstance().getCountryCode();
 
     int sizeText = await Utils.getIntValueWithKey(Constant.SIZE_TEXT);
     String backgroundColor =
-        await Utils.getStringValueWithKey(Constant.BR_COLOR);
+    await Utils.getStringValueWithKey(Constant.BR_COLOR);
     String textColor = await Utils.getStringValueWithKey(Constant.TEXT_COLOR);
     if (sizeText != 0) {
       this.sizeText = sizeText;
@@ -217,6 +184,7 @@ class ChatDetailController extends GetxController {
     // await SocketManager().connect();
     await translator.init();
     await speech2text.init();
+
   }
 
   @override
@@ -254,15 +222,16 @@ class ChatDetailController extends GetxController {
     FlutterDownloader.remove(taskId: nameChanelDownload);
     receivePort.close();
     IsolateNameServer.removePortNameMapping(nameChanelDownload);
+    recorder.dispose();
   }
 
   loadMoreItems() async {
     final itemPositions = itemPositionsListener.itemPositions.value.toList();
     final lastItemPosition =
-        itemPositions.isNotEmpty ? itemPositions.last : null;
+    itemPositions.isNotEmpty ? itemPositions.last : null;
 
     bool isIndexZeroVisible =
-        itemPositions.any((position) => position.index <= 1);
+    itemPositions.any((position) => position.index <= 1);
     if (isIndexZeroVisible) {
       isAddNewMessage = false;
     } else {
@@ -275,21 +244,6 @@ class ChatDetailController extends GetxController {
         page++;
         await getMessage();
       }
-    }
-  }
-
-  _initialiseControllers() {
-    recorderController = RecorderController();
-    if (Platform.isAndroid) {
-      recorderController.androidEncoder = AndroidEncoder.amr_wb;
-      recorderController.androidOutputFormat = AndroidOutputFormat.three_gpp;
-      recorderController.iosEncoder = IosEncoder.kAudioFormatAMR_WB;
-      recorderController.sampleRate = 44100;
-    } else {
-      recorderController.androidEncoder = AndroidEncoder.opus;
-      recorderController.androidOutputFormat = AndroidOutputFormat.three_gpp;
-      recorderController.iosEncoder = IosEncoder.kAudioFormatOpus;
-      recorderController.sampleRate = 44100;
     }
   }
 
@@ -362,7 +316,8 @@ class ChatDetailController extends GetxController {
           ..style.display = 'none';
         html.document.body?.append(anchor);
         js.context.callMethod('eval', [
-          'document.querySelector("a[download=\'${fileName.replaceAll(' ', '_')}\']").click()'
+          'document.querySelector("a[download=\'${fileName.replaceAll(
+              ' ', '_')}\']").click()'
         ]);
         anchor.remove();
       } catch (e) {
@@ -455,7 +410,7 @@ class ChatDetailController extends GetxController {
       String formattedTime = DateFormat('MM/dd/yyyy HH:mm:ss').format(timeNow);
       var param = {
         "keyCert":
-            Utils.generateMd5(Constant.NEXT_PUBLIC_KEY_CERT + formattedTime),
+        Utils.generateMd5(Constant.NEXT_PUBLIC_KEY_CERT + formattedTime),
         "time": formattedTime,
         "pageSize": pageSize,
         "page": page,
@@ -463,11 +418,11 @@ class ChatDetailController extends GetxController {
         "msgGroupUuid": uuidChat
       };
       var data =
-          await APICaller.getInstance().post('v1/Chat/message-line', param);
+      await APICaller.getInstance().post('v1/Chat/message-line', param);
       if (data != null) {
         List<dynamic> list = data['items'];
         var listItem =
-            list.map((dynamic json) => ChatDetail.fromJson(json)).toList();
+        list.map((dynamic json) => ChatDetail.fromJson(json)).toList();
         bool reached = false;
         if (listItem.isNotEmpty) {
           for (int i = 0; i < listItem.length; i++) {
@@ -551,23 +506,23 @@ class ChatDetailController extends GetxController {
             replyMsgUu: newMessage.replyMsgUu == null
                 ? null
                 : ReplyMsgUu(
-                    userSent: newMessage.replyMsgUu!.userSent,
-                    contentType: newMessage.replyMsgUu!.contentType,
-                    content: newMessage.replyMsgUu!.content,
-                    uuid: newMessage.replyMsgUu!.uuid,
-                    timeCreated: newMessage.replyMsgUu!.timeCreated,
-                    status: newMessage.replyMsgUu!.status,
-                    lastEdited: newMessage.replyMsgUu!.lastEdited,
-                    msgRoomUuid: newMessage.replyMsgUu!.msgRoomUuid,
-                    readState: newMessage.replyMsgUu!.readState,
-                    likeCount: newMessage.replyMsgUu!.likeCount,
-                    countryCode: newMessage.replyMsgUu!.countryCode,
-                    roomName: newMessage.replyMsgUu!.roomName,
-                    fullName: newMessage.replyMsgUu!.fullName,
-                    type: newMessage.replyMsgUu!.type,
-                    avatar: newMessage.replyMsgUu!.avatar,
-                    mediaName: newMessage.replyMsgUu!.mediaName,
-                  ),
+              userSent: newMessage.replyMsgUu!.userSent,
+              contentType: newMessage.replyMsgUu!.contentType,
+              content: newMessage.replyMsgUu!.content,
+              uuid: newMessage.replyMsgUu!.uuid,
+              timeCreated: newMessage.replyMsgUu!.timeCreated,
+              status: newMessage.replyMsgUu!.status,
+              lastEdited: newMessage.replyMsgUu!.lastEdited,
+              msgRoomUuid: newMessage.replyMsgUu!.msgRoomUuid,
+              readState: newMessage.replyMsgUu!.readState,
+              likeCount: newMessage.replyMsgUu!.likeCount,
+              countryCode: newMessage.replyMsgUu!.countryCode,
+              roomName: newMessage.replyMsgUu!.roomName,
+              fullName: newMessage.replyMsgUu!.fullName,
+              type: newMessage.replyMsgUu!.type,
+              avatar: newMessage.replyMsgUu!.avatar,
+              mediaName: newMessage.replyMsgUu!.mediaName,
+            ),
           ));
       if (newMessage.userSent != userName) {
         // readMessage();
@@ -652,19 +607,18 @@ class ChatDetailController extends GetxController {
     }
   }
 
-  pushFileWeb2(
-      {required int type,
-      required List<Uint8List> fileData,
-      required fileName}) async {
+  pushFileWeb2({required int type,
+    required List<Uint8List> fileData,
+    required fileName}) async {
     String formattedTime =
-        DateFormat('MM/dd/yyyy HH:mm:ss').format(DateTime.now());
+    DateFormat('MM/dd/yyyy HH:mm:ss').format(DateTime.now());
     try {
       var data = await APICaller.getInstance().putFilesWeb2(
         endpoint: 'v1/Upload/upload-image',
         fileData: fileData,
         type: type,
         keyCert:
-            Utils.generateMd5(Constant.NEXT_PUBLIC_KEY_CERT + formattedTime),
+        Utils.generateMd5(Constant.NEXT_PUBLIC_KEY_CERT + formattedTime),
         time: formattedTime,
         fileName: fileName,
       );
@@ -745,14 +699,14 @@ class ChatDetailController extends GetxController {
 
   pushFileWeb({required int type, required List<html.File> fileData}) async {
     String formattedTime =
-        DateFormat('MM/dd/yyyy HH:mm:ss').format(DateTime.now());
+    DateFormat('MM/dd/yyyy HH:mm:ss').format(DateTime.now());
     try {
       var data = await APICaller.getInstance().putFilesWeb(
         endpoint: 'v1/Upload/upload-image',
         fileData: fileData,
         type: type,
         keyCert:
-            Utils.generateMd5(Constant.NEXT_PUBLIC_KEY_CERT + formattedTime),
+        Utils.generateMd5(Constant.NEXT_PUBLIC_KEY_CERT + formattedTime),
         time: formattedTime,
       );
 
@@ -824,7 +778,7 @@ class ChatDetailController extends GetxController {
 
   List<TextSpan> searchText(String text) {
     final matches =
-        textSearchController.text.allMatches(text.toLowerCase()).toList();
+    textSearchController.text.allMatches(text.toLowerCase()).toList();
     final spans = <TextSpan>[];
 
     if (matches.isEmpty) {
@@ -862,7 +816,10 @@ class ChatDetailController extends GetxController {
       Uint8List bytes = response.bodyBytes;
       Directory tempDir = await getTemporaryDirectory();
       String tempPath = tempDir.path;
-      String fileName = Uri.parse(imageUrl).pathSegments.last;
+      String fileName = Uri
+          .parse(imageUrl)
+          .pathSegments
+          .last;
       String filePath = '$tempPath/$fileName';
       File file = File(filePath);
       await file.writeAsBytes(bytes);
@@ -915,7 +872,7 @@ class ChatDetailController extends GetxController {
     String formattedTime = DateFormat('MM/dd/yyyy HH:mm:ss').format(timeNow);
     var param = {
       "keyCert":
-          Utils.generateMd5(Constant.NEXT_PUBLIC_KEY_CERT + formattedTime),
+      Utils.generateMd5(Constant.NEXT_PUBLIC_KEY_CERT + formattedTime),
       "time": formattedTime,
       "uuid": lastMsgLineUuid
     };
@@ -939,7 +896,7 @@ class ChatDetailController extends GetxController {
       String formattedTime = DateFormat('MM/dd/yyyy HH:mm:ss').format(timeNow);
       var param = {
         "keyCert":
-            Utils.generateMd5(Constant.NEXT_PUBLIC_KEY_CERT + formattedTime),
+        Utils.generateMd5(Constant.NEXT_PUBLIC_KEY_CERT + formattedTime),
         "time": formattedTime,
         "uuid": uuidChat
       };
@@ -948,7 +905,7 @@ class ChatDetailController extends GetxController {
       if (data != null) {
         List<dynamic> list = data['items'];
         var listItem =
-            list.map((dynamic json) => ChatDetail.fromJson(json)).toList();
+        list.map((dynamic json) => ChatDetail.fromJson(json)).toList();
         pinList.addAll(listItem);
         isPinLoading.value = false;
       } else {
@@ -961,59 +918,101 @@ class ChatDetailController extends GetxController {
     }
   }
 
-  // recording
 
-  startOrStopRecording({bool isSend = false}) async {
-    try {
-      if (isRecording.value) {
-        recorderController.reset();
-        pathRecording = (await recorderController.stop(false))!;
-        if (isSend && pathRecording != null) {
-          Directory directory = await getTemporaryDirectory();
-          String outputWavPath =
-              '${directory.path}/${File(pathRecording!).lengthSync()}output.wav';
-          await FFmpegKit.execute(
-              "-i $pathRecording -c:a pcm_s16le $outputWavPath")
-              .then((result) async {
-            final returnCode = await result.getReturnCode();
-            if (ReturnCode.isSuccess(returnCode)) {
-              file.add(File(outputWavPath));
-              List<html.File> fileData = [];
-              for (var img in file) {
-                fileData.add(img as html.File);
-              }
-              await pushFileWeb(type: 3, fileData: []);
-              await sendMessage(content: responseFile.toString(), type: 5);
-            } else if (ReturnCode.isCancel(returnCode)) {
-              // CANCEL
-            } else {
-            }
-          });
-          debugPrint(pathRecording);
-          debugPrint(
-              "Recorded file size: ${File(pathRecording!).lengthSync()}");
-        }
-      } else {
-        await recorderController.record(path: pathRecording);
-      }
-    } catch (e) {
-      debugPrint(e.toString());
-    } finally {
-      isRecording.value = !isRecording.value;
+
+  Future<void> _initRecorder() async {
+    // Check if the recorder is already initialized
+    if (_recorderIsInited) return;
+
+    // Request microphone permission using the Permissions API
+    final permissionStatus = await html.window.navigator.permissions?.query({'name': 'microphone'});
+
+    if (permissionStatus?.state == 'granted') {
+      // Permission granted, initialize the recorder
+      _recorderIsInited = true;
+      print("Microphone permission granted.");
+    } else if (permissionStatus?.state == 'denied') {
+      // Permission denied, prompt user to allow microphone access
+      print("Microphone permission denied. Please enable it in your browser settings.");
+    } else {
+      // If permission is not granted or denied (prompt status), request permission
+      await _requestMicrophonePermission();
     }
   }
+
+// Function to request microphone permission
+  Future<void> _requestMicrophonePermission() async {
+    try {
+      // Attempt to get microphone access again
+      final stream = await html.window.navigator.getUserMedia(audio: true);
+
+      if (stream != null) {
+        // Permission granted
+        _recorderIsInited = true;
+        stream.getTracks().forEach((track) => track.stop()); // Stop the stream after getting permission
+        print("Microphone permission re-requested and granted.");
+      }
+    } catch (e) {
+      // Handle the error when the user denies the permission request again
+      print("Error requesting microphone permission: $e");
+      // Show a user-friendly message or prompt them to change settings manually
+    }
+  }
+
+
+
+  Future<void> startOrStopRecording({bool isSend = false}) async {
+    if (!_recorderIsInited) await _initRecorder();
+    try {
+      if (isRecording.value) {
+        isRecording.value = !isRecording.value;
+        final path = await recorder.stop();
+        print('Stopped recording: $path');
+        if (isSend && path != null) {
+          if (path.startsWith('blob:')) {
+            final blob = await html.window.fetch(path).then((response) => response.blob());
+            final reader = html.FileReader();
+            reader.readAsArrayBuffer(blob);
+            await reader.onLoadEnd.first;
+            final bytes = reader.result as Uint8List;
+            final file = html.File([bytes], 'audio.wav');
+            List<html.File> fileData = [file];
+            await pushFileWeb(type: 3, fileData: fileData);
+            await sendMessage(content: responseFile.toString(), type: 5);
+          } else {
+            print('Invalid blob URL: $path');
+          }
+        }
+      } else {
+        await recorder.start(
+          RecordConfig(encoder: AudioEncoder.wav),
+          path: 'temp_audio_${DateTime.now().millisecondsSinceEpoch}.wav',
+        );
+        print('Started recording');
+        isRecording.value = !isRecording.value;
+      }
+    } catch (e) {
+      debugPrint('Recording error: $e');
+    }
+  }
+
+
+
+
+
+
 
   groupInfo() async {
     String formattedTime = DateFormat('MM/dd/yyyy HH:mm:ss').format(timeNow);
     var param = {
       "keyCert":
-          Utils.generateMd5(Constant.NEXT_PUBLIC_KEY_CERT + formattedTime),
+      Utils.generateMd5(Constant.NEXT_PUBLIC_KEY_CERT + formattedTime),
       "time": formattedTime,
       "uuid": uuidChat
     };
     try {
       var response =
-          await APICaller.getInstance().post('v1/Chat/group-info', param);
+      await APICaller.getInstance().post('v1/Chat/group-info', param);
       if (response != null) {
         memberLength.value = response['data']['memCount'];
       }
@@ -1046,11 +1045,10 @@ class ChatDetailController extends GetxController {
     replyChat.value = ChatDetail();
   }
 
-  likeMessage(
-      {required String uuid,
-        required int type,
-        required int status,
-        required String uuidUser}) async {
+  likeMessage({required String uuid,
+    required int type,
+    required int status,
+    required String uuidUser}) async {
     if (isAppResume) {
       isAppResume = false;
     }
@@ -1059,6 +1057,7 @@ class ChatDetailController extends GetxController {
     await _socketManager.likeMessage(
         msgLineUuid: uuid, type: type, status: status, uuidUser: uuidUser);
   }
+
 
   setRead(dynamic message) {
     if (message['RoomUuid'] == uuidChat) {
@@ -1080,11 +1079,11 @@ class ChatDetailController extends GetxController {
   setDeleteMessage(dynamic message) async {
     if (message['RoomUuid'] == uuidChat) {
       chatList.removeWhere(
-          (element) => message['ListMsgUuid'].contains(element.uuid));
+              (element) => message['ListMsgUuid'].contains(element.uuid));
       chatList.refresh();
 
       pinList.removeWhere(
-          (element) => message['ListMsgUuid'].contains(element.uuid));
+              (element) => message['ListMsgUuid'].contains(element.uuid));
       pinList.refresh();
     }
   }
@@ -1094,13 +1093,13 @@ class ChatDetailController extends GetxController {
       if (message['State'] == 0) {
         for (int i = 0; i < message['LstMsgUuid'].length; i++) {
           int index = pinList.indexWhere(
-              (element) => element.uuid! == message['LstMsgUuid'][i]);
+                  (element) => element.uuid! == message['LstMsgUuid'][i]);
           pinList.removeAt(index);
         }
       } else {
         for (int i = 0; i < message['LstMsgUuid'].length; i++) {
           int index = chatList.indexWhere(
-              (element) => element.uuid! == message['LstMsgUuid'][i]);
+                  (element) => element.uuid! == message['LstMsgUuid'][i]);
           if (!pinList.any((item) => item.uuid == message['LstMsgUuid'][i])) {
             chatList[index].fullName = decodedName(chatList[index].fullName!);
             pinList.insert(0, chatList[index]);
@@ -1133,7 +1132,8 @@ class ChatDetailController extends GetxController {
 
   blockMember(int type, String roomUuid, String userName) {
     //socket
-    _socketManager.blockMember(roomUuid: roomUuid, type: type, userName: userName);
+    _socketManager.blockMember(
+        roomUuid: roomUuid, type: type, userName: userName);
   }
 
   void showGroupInfoMode() {
@@ -1152,5 +1152,12 @@ class ChatDetailController extends GetxController {
       decoded = name;
     }
     return decoded;
+  }
+
+  @override
+  void dispose() {
+    recorder.cancel();
+    recorder.dispose();
+    super.dispose();
   }
 }

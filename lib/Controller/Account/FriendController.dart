@@ -102,14 +102,17 @@ class FriendController extends GetxController {
         "keyCert":
             Utils.generateMd5(Constant.NEXT_PUBLIC_KEY_CERT + formattedTime),
         "time": formattedTime,
-        "uuid": await Utils.getStringValueWithKey(Constant.UUID_USER),
+        // "uuid": await Utils.getStringValueWithKey(Constant.UUID_USER),
         "pageSize": pageSize,
         "page": page,
         "keyword": filterController.value.text
       };
 
       var response =
-          await APICaller.getInstance().post('v1/Member/find-member', param);
+          await APICaller.getInstance().post('v1/Member/find-friend', param);
+
+      print('checkresponse ${response}'
+      );
       if (response != null) {
         List<dynamic> list = response['items'];
         var listItem =

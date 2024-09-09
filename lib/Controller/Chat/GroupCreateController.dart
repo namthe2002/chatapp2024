@@ -14,6 +14,8 @@ import 'package:live_yoko/Navigation/Navigation.dart';
 import 'package:live_yoko/Service/APICaller.dart';
 import 'package:live_yoko/Utils/Utils.dart';
 
+import '../../View/Chat/home_chat.dart';
+
 class GroupCreateController extends GetxController {
   Rx<TextEditingController> filterController = TextEditingController().obs;
   RxList<Contact> selectedItems = <Contact>[].obs;
@@ -128,17 +130,21 @@ class GroupCreateController extends GetxController {
         if (response != null) {
           Get.close(3);
 
-          await Navigation.navigateTo(page: 'ChatDetail', arguments: {
-            'uuid': response['data']
-                ['roomUuid'], // uuid phòng gọi api tạo phòng trước
-            'name': filterControllerName.value.text,
-            'type': 2,
-            'ownerUuid': response['data']['ownerUuid'],
-            'avatar': avatarUser.value == ""
-                ? ""
-                : avatarUser.value, // chưa có avatar có thì truyền sang  chat
-            'lastMsgLineUuid': ''
-          });
+          // await Navigation.navigateTo(page: 'ChatDetail', arguments: {
+          //   'uuid': response['data']
+          //       ['roomUuid'], // uuid phòng gọi api tạo phòng trước
+          //   'name': filterControllerName.value.text,
+          //   'type': 2,
+          //   'ownerUuid': response['data']['ownerUuid'],
+          //   'avatar': avatarUser.value == ""
+          //       ? ""
+          //       : avatarUser.value, // chưa có avatar có thì truyền sang  chat
+          //   'lastMsgLineUuid': ''
+          // });
+          //
+
+          Get.offAll(() => HomeChatWebsite());
+
           if (Get.isRegistered<ChatController>()) {
             var controller = await Get.find<ChatController>();
             controller.isUnPin.value = await true;

@@ -304,9 +304,15 @@ class Utils {
 
   static String getFileType(String url) {
     String? mimeType = lookupMimeType(url);
+    if (url.toLowerCase().endsWith('.jfif')) {
+      return 'Image';
+    }
+  
     switch (mimeType) {
       case 'image/jpeg':
+      case 'image/jfif':
       case 'image/png':
+      case 'image/webp':
       case 'image/gif':
       case 'image/svg+xml':
         return 'Image';
