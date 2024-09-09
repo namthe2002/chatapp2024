@@ -1,12 +1,9 @@
 import 'dart:async';
-import 'dart:io';
-
-import 'package:audio_waveforms/audio_waveforms.dart';
-import 'package:audioplayers/audioplayers.dart' as ap;
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:http/http.dart' as http;
-import 'package:path_provider/path_provider.dart';
+import 'package:just_audio/just_audio.dart';
+// import 'package:waveform/waveform.dart';
+import 'package:waveform_flutter/waveform_flutter.dart';
 
 class ChatBubbleAudio extends StatefulWidget {
   final String url;
@@ -25,96 +22,68 @@ class ChatBubbleAudio extends StatefulWidget {
 }
 
 class WaveBubbleState extends State<ChatBubbleAudio> {
-  File? file;
-
-  late PlayerController playerController;
-  late StreamSubscription<PlayerState> playerStateSubscription;
-  late Directory directory;
-
-  final playerWaveStyle = const PlayerWaveStyle(
-      fixedWaveColor: Color.fromRGBO(146, 154, 169, 1),
-      liveWaveColor: Color.fromRGBO(17, 185, 145, 1),
-      scaleFactor: 200);
-
-  late ap.AudioPlayer _audioPlayer;
+  late AudioPlayer _audioPlayer;
   Duration _totalDuration = Duration();
-
-  @override
-  void didUpdateWidget(covariant ChatBubbleAudio oldWidget) {
-    if (widget.url != oldWidget.url ||
-        widget.index != oldWidget.index ||
-        widget.width != oldWidget.width) {
-      _preparePlayer(widget.url, widget.index, widget.width);
-    }
-    super.didUpdateWidget(oldWidget);
-  }
+  Duration _currentPosition = Duration();
+  late StreamSubscription<PlayerState> playerStateSubscription;
+  late Stream<Amplitude> _amplitudeStream;
 
   @override
   void initState() {
     super.initState();
-    playerController = PlayerController();
-    _preparePlayer(widget.url, widget.index, widget.width);
-    playerStateSubscription = playerController.onPlayerStateChanged.listen((_) {
-      setState(() {});
-    });
-
-    _audioPlayer = ap.AudioPlayer();
+    _audioPlayer = AudioPlayer();
     _initPlayer();
+    // _amplitudeStream = _createAmplitudeStream();
   }
 
   Future<void> _initPlayer() async {
-    _audioPlayer.onDurationChanged.listen((Duration duration) {
-      setState(() {
-        _totalDuration = duration;
-      });
-    });
+    try {
+      await _audioPlayer.setUrl(widget.url);
 
-    await _audioPlayer.setSourceUrl(widget.url);
+      _audioPlayer.durationStream.listen((duration) {
+        setState(() {
+          _totalDuration = duration ?? Duration();
+        });
+      });
+
+      _audioPlayer.positionStream.listen((position) {
+        setState(() {
+          _currentPosition = position;
+        });
+      });
+
+      _audioPlayer.playerStateStream.listen((state) {
+        if (state.processingState == ProcessingState.completed) {
+          setState(() {
+            _currentPosition = Duration.zero;
+            _audioPlayer.stop();
+          });
+          _audioPlayer.seek(Duration.zero);
+        }
+      });
+    } catch (e) {
+      print("Error loading audio: $e");
+    }
   }
+
+  // Stream<Amplitude> _createAmplitudeStream() {
+  //   return Stream.periodic(Duration(milliseconds: 50), (count) {
+  //     final position = _currentPosition.inMilliseconds;
+  //     final total = _totalDuration.inMilliseconds;
+  //     if (total == 0) return Amplitude(0);
+  //     return Amplitude((position / total).clamp(0.0, 1.0), current: null);
+  //   });
+  // }
 
   String _formatDuration(Duration duration) {
     String twoDigits(int n) => n.toString().padLeft(2, '0');
     String twoDigitMinutes = twoDigits(duration.inMinutes.remainder(60));
     String twoDigitSeconds = twoDigits(duration.inSeconds.remainder(60));
-    String result = '$twoDigitMinutes:$twoDigitSeconds';
-
-    if (duration.inHours > 0) {
-      String twoDigitHours = twoDigits(duration.inHours);
-      result = '$twoDigitHours:$result';
-    }
-
-    return result;
-  }
-
-  void _preparePlayer(String url, String index, double width) async {
-    try {
-      final response = await http.get(Uri.parse(url));
-      if (response.statusCode == 200) {
-        directory = await getTemporaryDirectory();
-        file = File(
-            '${directory.path}/example${index}${Platform.isAndroid ? '.mp3' : '.wav'}');
-        await file!.writeAsBytes((response.bodyBytes));
-
-        await playerController.preparePlayer(
-          path: file!.path,
-          shouldExtractWaveform: false,
-        );
-
-        playerController
-            .extractWaveformData(
-              path: file!.path,
-              noOfSamples: playerWaveStyle.getSamplesForWidth(width),
-            )
-            .then((waveformData) => debugPrint(waveformData.toString()));
-      }
-    } catch (e) {}
+    return "$twoDigitMinutes:$twoDigitSeconds";
   }
 
   @override
   void dispose() {
-    playerStateSubscription.cancel();
-    playerController.dispose();
-
     _audioPlayer.dispose();
     super.dispose();
   }
@@ -122,44 +91,45 @@ class WaveBubbleState extends State<ChatBubbleAudio> {
   @override
   Widget build(BuildContext context) {
     return Row(
+      mainAxisSize: MainAxisSize.min,
       children: [
-        if (!playerController.playerState.isStopped)
-          GestureDetector(
-            onTap: () async {
-              playerController.playerState.isPlaying
-                  ? await playerController.pausePlayer()
-                  : await playerController.startPlayer(
-                      finishMode: FinishMode.pause,
-                    );
-            },
-            child: Container(
-              padding: EdgeInsets.all(7),
-              decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: Color.fromRGBO(17, 185, 145, 1)),
-              child: Icon(
-                playerController.playerState.isPlaying
-                    ? Icons.stop_rounded
-                    : Icons.play_arrow_rounded,
-                size: 16,
-                color: Colors.white,
-              ),
+        GestureDetector(
+          onTap: () async {
+            if (_audioPlayer.playing) {
+              await _audioPlayer.pause();
+            } else {
+              await _audioPlayer.play();
+            }
+          },
+          child: Container(
+            padding: EdgeInsets.all(7),
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: Color.fromRGBO(17, 185, 145, 1),
+            ),
+            child: Icon(
+             _audioPlayer.playing ? Icons.stop_rounded : Icons.play_arrow_rounded,
+              size: 16,
+              color: Colors.white,
             ),
           ),
-        SizedBox(
-          width: 8,
         ),
-        AudioFileWaveforms(
-          size: Size(widget.width, 30),
-          playerController: playerController,
-          waveformType: WaveformType.fitWidth,
-          playerWaveStyle: playerWaveStyle,
-        ),
-        SizedBox(
-          width: 8,
-        ),
-        Flexible(
-            child: Container(
+        SizedBox(width: 8),
+        // Expanded(
+        //   child: SizedBox(
+        //     height: 30,
+        //     child: AnimatedWaveList(
+        //       stream: _amplitudeStream,
+        //       width: widget.width,
+        //       height: 30,
+        //       inactiveColor: Colors.grey,
+        //       activeColor: Colors.lightGreen,
+        //       maxDuration: _totalDuration,
+        //     ),
+        //   ),
+        // ),
+        SizedBox(width: 8),
+        Container(
           padding: EdgeInsets.all(6),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(50),
@@ -168,11 +138,11 @@ class WaveBubbleState extends State<ChatBubbleAudio> {
                 : Color.fromRGBO(228, 230, 236, 1),
           ),
           child: Text(
-            '${_formatDuration(_totalDuration)}',
+            '${_formatDuration(_currentPosition)} / ${_formatDuration(_totalDuration)}',
             style: TextStyle(fontWeight: FontWeight.w400, fontSize: 10),
             overflow: TextOverflow.ellipsis,
           ),
-        ))
+        ),
       ],
     );
   }

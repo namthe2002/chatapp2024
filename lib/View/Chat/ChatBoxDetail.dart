@@ -1837,12 +1837,8 @@ class ChatBoxDetail extends StatelessWidget {
                 )
               ],
             )
-          : ListView.builder(
-              shrinkWrap: true,
-              physics: NeverScrollableScrollPhysics(),
-              itemCount: 1,
-              itemBuilder: (context, index) {
-                return Column(
+          : Column(
+                  mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     ChatBubbleAudio(
@@ -1908,8 +1904,6 @@ class ChatBoxDetail extends StatelessWidget {
                     ]
                   ],
                 );
-              },
-            );
     }
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
