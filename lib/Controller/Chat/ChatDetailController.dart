@@ -117,17 +117,20 @@ class ChatDetailController extends GetxController {
   late AudioRecorder recorder;
   bool _recorderIsInited = false;
 
+  RxDouble tabHeight = 256.0.obs;
+
+
   @override
   void onInit() async {
     super.onInit();
+
+  }
+
+  void initChatData() async {
     ever(appController.appState, (state) async {
       if (state == AppLifecycleState.resumed) {
-        // Ứng dụng đang chạy
         isAppResume = true;
-
-        // SocketManager().connect();
       } else {
-        // Ứng dụng không chạy
         readMessage();
       }
     });
@@ -144,9 +147,7 @@ class ChatDetailController extends GetxController {
         );
       } else {
         isTextFieldFocused.value = false;
-        // Future.delayed(Duration(milliseconds: 200), () {
         isVisible.value = true;
-        // });
       }
     });
 

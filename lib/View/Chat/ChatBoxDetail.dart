@@ -1,8 +1,10 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
 import 'package:any_link_preview/any_link_preview.dart';
 import 'package:audio_waveforms/audio_waveforms.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
@@ -25,29 +27,53 @@ import 'package:live_yoko/widget/my_entry.dart';
 import 'package:live_yoko/widget/single_tap_detector.dart';
 import 'package:lottie/lottie.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
+import 'package:shimmer/shimmer.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../Controller/Chat/ChatController.dart';
 import '../../Models/Chat/Chat.dart';
 import '../../Models/Chat/emoji/emoji_model.dart';
 import '../../Service/SocketManager.dart';
+import '../../Service/giphy_get/screen/giphy_detail.dart';
 import '../../Utils/thumnail_generator.dart';
+import '../../core/constant/sticker/sticker.dart';
 import '../../main.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../../widget/utils_widget.dart';
 
-class ChatBoxDetail extends StatelessWidget {
+class ChatBoxDetail extends StatefulWidget {
   final Chat? chatDetail;
 
   ChatBoxDetail({Key? key, this.chatDetail}) : super(key: key);
+
+  @override
+  State<ChatBoxDetail> createState() => _ChatBoxDetailState();
+}
+
+class _ChatBoxDetailState extends State<ChatBoxDetail>
+    with TickerProviderStateMixin {
   final controller = Get.put(ChatDetailController());
+  late TabController _tabEmojiController;
 
   Size size = Size(0, 0);
+
   ImageFormat _format = ImageFormat.JPEG;
-  int _quality = 50;
+
+  int _quality = 200;
+
   bool _attachHeaders = false;
+
   int _timeMs = 0;
+
   GenThumbnailImage? futureImage;
+
+  OverlayEntry? _overlayEntry;
+  bool _isOverIcon = false;
+  bool _isOverOverlay = false;
+
+  Timer? _overlayTimer;
+  bool _hasMouseEntered = false;
+
   List<String> listReaction = [
     'asset/icons/fire.svg',
     'asset/icons/heart.svg',
@@ -59,11 +85,226 @@ class ChatBoxDetail extends StatelessWidget {
   ];
 
   @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    controller.initChatData();
+    _tabEmojiController = TabController(length: 3, vsync: this);
+    _tabEmojiController.addListener(_updateTabHeight);
+  }
+
+  void _hideOverlay() {
+    _overlayTimer?.cancel();
+    _overlayEntry?.remove();
+    _overlayEntry = null;
+    _hasMouseEntered = false;
+  }
+
+  void _showOverlay(BuildContext context) {
+    if (_overlayEntry == null) {
+      _overlayEntry = _createOverlayEntry(context);
+      Overlay.of(context)!.insert(_overlayEntry!);
+
+      // Start the initial 2-second timer
+      _overlayTimer = Timer(Duration(seconds: 2), () {
+        if (!_hasMouseEntered) {
+          _hideOverlay();
+        }
+      });
+    }
+  }
+
+  void _updateOverlayVisibility() {
+    if (!_isOverIcon && !_isOverOverlay) {
+      // Start a 1-second timer when the mouse leaves
+      _overlayTimer?.cancel();
+      _overlayTimer = Timer(Duration(milliseconds: 100), _hideOverlay);
+    }
+  }
+
+  OverlayEntry _createOverlayEntry(BuildContext context) {
+    return OverlayEntry(
+      builder: (context) => Positioned(
+        bottom: 70,
+        left: Get.width / 3,
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(16),
+          child: MouseRegion(
+            onEnter: (_) {
+              setState(() {
+                _isOverOverlay = true;
+                _hasMouseEntered = true;
+              });
+              _overlayTimer?.cancel(); // Cancel any existing timer
+            },
+            onExit: (_) {
+              setState(() => _isOverOverlay = false);
+              _updateOverlayVisibility();
+            },
+            child: Material(
+              child: AnimatedContainer(
+                width: 550,
+                height: 350,
+                duration: const Duration(milliseconds: 2000),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(16),
+                  // color: Colors.transparent.withOpacity(0.1),
+                  border: Border.all(width: 0.5),
+                ),
+                child: DefaultTabController(
+                  length: 3,
+                  child: Column(
+                    children: [
+                      Expanded(
+                        child: TabBarView(
+                            controller: _tabEmojiController,
+                            children: [
+                              EmojiPicker(
+                                textEditingController:
+                                    controller.textMessageController,
+                                config: Config(
+                                  emojiTextStyle: TextStyle(
+                                    fontFamily: 'NotoColorEmoji',
+                                  ),
+                                  emojiViewConfig: EmojiViewConfig(
+                                    emojiSizeMax: 28 * 1.0,
+                                    backgroundColor: Colors.transparent,
+                                    // Sử dụng customWidget để điều khiển hiển thị emoji với font 'NotoColorEmoji'
+                                  ),
+                                  swapCategoryAndBottomBar: true,
+                                  categoryViewConfig: CategoryViewConfig(
+                                    backgroundColor: Colors.transparent,
+                                    tabBarHeight: 46,
+                                    dividerColor: Colors.transparent,
+                                  ),
+                                  bottomActionBarConfig:
+                                      const BottomActionBarConfig(
+                                    enabled: false,
+                                  ),
+                                ),
+                              ),
+                              Padding(
+                                padding: EdgeInsets.only(top: 12),
+                                child: GiphyTabDetail(
+                                    chatDetailController: controller,
+                                    scrollController: ScrollController()),
+                              ),
+                              //stickers
+                              DefaultTabController(
+                                  length: stickerPacks.length,
+                                  child: Column(
+                                    children: [
+                                      SizedBox(
+                                        height: 12,
+                                      ),
+                                      SizedBox(
+                                          height: 50,
+                                          child: TabBar(
+                                            tabAlignment: TabAlignment.start,
+                                            dividerColor: Colors.transparent,
+                                            isScrollable: true,
+                                            tabs: List.generate(
+                                                stickerPacks.length, (index) {
+                                              return Image.asset(
+                                                  stickerPacks[index]
+                                                          ['tray_image_file']
+                                                      as String);
+                                            }),
+                                          )),
+                                      Expanded(
+                                        child: TabBarView(
+                                            children: List.generate(
+                                                stickerPacks.length, (index) {
+                                          return GridView.builder(
+                                              itemCount: (stickerPacks[index]
+                                                      ['stickers'] as List)
+                                                  .length,
+                                              gridDelegate:
+                                                  SliverGridDelegateWithFixedCrossAxisCount(
+                                                      crossAxisCount: 4,
+                                                      crossAxisSpacing: 10,
+                                                      mainAxisSpacing: 10),
+                                              itemBuilder: (context, indexStic) =>
+                                                  InkWell(
+                                                    onTap: () {
+                                                      controller.sendMessage(
+                                                          content: (stickerPacks[
+                                                                          index]
+                                                                      ['stickers']
+                                                                  as List)[
+                                                              indexStic]['text'],
+                                                          type: 6);
+                                                    },
+                                                    child: Image.asset(
+                                                        (stickerPacks[index]
+                                                                    ['stickers']
+                                                                as List)[indexStic]
+                                                            ['image_file']),
+                                                  ));
+                                        })),
+                                      )
+                                    ],
+                                  )),
+                            ]),
+                      ),
+                      TabBar(
+                        controller: _tabEmojiController,
+                        tabs: const [
+                          Tab(child: Text('Emoji')),
+                          Tab(child: Text('GIFs')),
+                          Tab(child: Text('Sticker')),
+                        ],
+                        unselectedLabelColor: ColorValue.colorTextDark,
+                        dividerColor: Colors.transparent,
+                        indicatorColor: Colors.transparent,
+                        tabAlignment: TabAlignment.center,
+                        labelColor: Get.isDarkMode
+                            ? Colors.lightBlueAccent
+                            : ColorValue.neutralLineIcon,
+                      )
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _updateTabHeight() {
+    if (controller.isExtendShowEmoji.value) {
+      if (_tabEmojiController.indexIsChanging) {
+        if (_tabEmojiController.index == 0) {
+          controller.isExtendShowEmoji.value =
+              !controller.isExtendShowEmoji.value;
+          controller.tabHeight = (256.0).obs;
+        } else {
+          controller.tabHeight = (Get.height * .796).obs;
+        }
+      } else {
+        if (_tabEmojiController.index == 0) {
+          controller.tabHeight = (256.0).obs;
+          controller.isExtendShowEmoji.value =
+              !controller.isExtendShowEmoji.value;
+        } else {
+          controller.tabHeight = (Get.height * .796).obs;
+        }
+      }
+    } else {
+      controller.tabHeight = 256.0.obs;
+    }
+
+    FocusScope.of(context).unfocus();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    controller.selectedChatDetail.value = chatDetail;
+    controller.selectedChatDetail.value = widget.chatDetail;
     size = MediaQuery.of(context).size;
     return Obx(
-      () => chatDetail == null
+      () => controller.selectedChatDetail.value == null
           ? Scaffold(body: emptyChat())
           : Scaffold(
               appBar: AppBar(
@@ -674,14 +915,18 @@ class ChatBoxDetail extends StatelessWidget {
                                                 MainAxisAlignment.start,
                                             mainAxisSize: MainAxisSize.max,
                                             children: [
-                                              IconButton(
-                                                onPressed: () {},
-                                                icon: Icon(Icons
-                                                    .emoji_emotions_outlined),
-                                                color: Get.isDarkMode
-                                                    ? Colors.white
-                                                    : null,
-                                              ),
+                                              // icon, gif, emoji
+                                              MouseRegion(
+                                                  onEnter: (event) =>
+                                                      _showOverlay(context),
+                                                  onExit: (event) {
+                                                    setState(() =>
+                                                        _isOverIcon = false);
+                                                    _updateOverlayVisibility();
+                                                  },
+                                                  child: Icon(Icons
+                                                      .emoji_emotions_outlined)),
+                                              // I
                                               if (controller
                                                   .isRecording.value) ...[
                                                 IconButton(
@@ -710,7 +955,6 @@ class ChatBoxDetail extends StatelessWidget {
                                               ] else ...[
                                                 Expanded(
                                                   child: TextField(
-                                                    // textAlign: TextAlign.center,
                                                     controller: controller
                                                         .textMessageController,
                                                     focusNode:
@@ -744,34 +988,37 @@ class ChatBoxDetail extends StatelessWidget {
                                                         } else {
                                                           await controller
                                                               .sendMessage(
-                                                                  content:
-                                                                      controller
-                                                                          .textMessageController
-                                                                          .text,
-                                                                  type: controller.isImageLink(controller
-                                                                          .textMessageController
-                                                                          .text)
-                                                                      ? 7
-                                                                      : controller.isLink(controller
-                                                                              .textMessageController
-                                                                              .text)
-                                                                          ? 2
-                                                                          : 1);
+                                                            content: controller
+                                                                .textMessageController
+                                                                .text,
+                                                            type: controller.isImageLink(
+                                                                    controller
+                                                                        .textMessageController
+                                                                        .text)
+                                                                ? 7
+                                                                : controller.isLink(
+                                                                        controller
+                                                                            .textMessageController
+                                                                            .text)
+                                                                    ? 2
+                                                                    : 1,
+                                                          );
                                                         }
                                                       }
                                                     },
                                                     decoration: InputDecoration(
                                                       hintText:
                                                           '${TextByNation.getStringByKey('type_a_message')}',
+                                                      hintStyle: TextStyle(
+                                                        color: Get.isDarkMode
+                                                            ? Colors.white70
+                                                            : Colors.grey,
+                                                        fontSize: 14, //
+                                                      ),
                                                       labelStyle: TextStyle(
                                                         color: Get.isDarkMode
                                                             ? Colors.white
                                                             : Colors.black,
-                                                      ),
-                                                      hintStyle: TextStyle(
-                                                        color: Get.isDarkMode
-                                                            ? Colors.white70
-                                                            : null,
                                                       ),
                                                       border: InputBorder.none,
                                                       contentPadding:
@@ -779,9 +1026,12 @@ class ChatBoxDetail extends StatelessWidget {
                                                               left: 15),
                                                     ),
                                                     style: TextStyle(
-                                                        fontSize: 14,
-                                                        fontWeight:
-                                                            FontWeight.w400),
+                                                      fontSize: 14,
+                                                      fontWeight:
+                                                          FontWeight.w400,
+                                                      fontFamily:
+                                                          'NotoColorEmoji',
+                                                    ),
                                                   ),
                                                 ),
                                                 controller.isTextFieldFocused
@@ -864,7 +1114,7 @@ class ChatBoxDetail extends StatelessWidget {
                     child: Expanded(
                         flex: 1,
                         child: ProfileChatDetail(
-                          chatDetail: chatDetail,
+                          chatDetail: widget.chatDetail,
                         )),
                   )
                 ],
@@ -883,8 +1133,11 @@ class ChatBoxDetail extends StatelessWidget {
         ),
         child: PopupMenuButton(
             offset: Offset(100, -150),
-            icon: SvgPicture.asset('asset/icons/file_picker.svg'),
-            iconColor: Get.isDarkMode ? ColorValue.white : ColorValue.white,
+            icon: SvgPicture.asset(
+              'asset/icons/file_picker.svg',
+              color:
+                  Get.isDarkMode ? ColorValue.white : ColorValue.neutralColor,
+            ),
             shape:
                 RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             itemBuilder: (context) {
@@ -1164,9 +1417,6 @@ class ChatBoxDetail extends StatelessWidget {
       }
     }
 
-
-
-
     return GestureDetector(
       onSecondaryTapDown: (details) {
         if (!isBottomSheet) {
@@ -1324,425 +1574,522 @@ class ChatBoxDetail extends StatelessWidget {
           ),
         ),
         if (message.likeCount! > 0) ...[
-          isMe ? Positioned(
+          isMe
+              ? Positioned(
                   left: 8,
                   bottom: 0,
                   child: GestureDetector(
-                    onTap: () {
-                    },
+                    onTap: () {},
                     child: Column(
-                        crossAxisAlignment:
-                        CrossAxisAlignment.end,
+                        crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
                           SizedBox(height: 2),
                           //reaction
                           Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              message.emojis != null && message.emojis!.isNotEmpty
+                              message.emojis != null &&
+                                      message.emojis!.isNotEmpty
                                   ? isMe
-                                  ? Container(
-                                padding: const EdgeInsets.all(4),
-                                decoration: BoxDecoration(
-                                    color: Color(controller.backgroundColor),
-                                    borderRadius: BorderRadius.circular(15)
-                                ),
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.end,
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Container(
-                                      decoration: BoxDecoration(
-                                          color: const Color.fromRGBO(
-                                              240, 243, 251, 1),
-                                          borderRadius:
-                                          BorderRadius.circular(16),
-                                          border: Border.all(
-                                              width: 2, color: Colors.white)),
-
-                                      ///column check
-                                      child: Row(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          Row(
+                                      ? Container(
+                                          padding: const EdgeInsets.all(4),
+                                          decoration: BoxDecoration(
+                                              color: Color(
+                                                  controller.backgroundColor),
+                                              borderRadius:
+                                                  BorderRadius.circular(15)),
+                                          child: Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.end,
                                             mainAxisSize: MainAxisSize.min,
-                                            children: List.generate(
-                                                getListReaction.length > 3
-                                                    ? 3
-                                                    : getListReaction.length,
-                                                    (index) {
-                                                  return GestureDetector(
-                                                    onTap: () async {
-                                                      // String uuidUser = await Utils
-                                                      //     .getStringValueWithKey(
-                                                      //     Constant.UUID_USER);
-                                                      // controller.likeMessage(uuid: message.uuid!,
-                                                      //     type: 0,
-                                                      //     status: 0,
-                                                      //     uuidUser: uuidUser);
-                                                    },
+                                            children: [
+                                              Container(
+                                                decoration: BoxDecoration(
+                                                    color: const Color.fromRGBO(
+                                                        240, 243, 251, 1),
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            16),
+                                                    border: Border.all(
+                                                        width: 2,
+                                                        color: Colors.white)),
 
-                                                    ///column check
-                                                    child: Row(
-                                                      mainAxisSize:
-                                                      MainAxisSize.min,
-                                                      children: [
-                                                        SvgPicture.asset(
-                                                          listReaction[
-                                                          getListReaction.keys
-                                                              .toList()[index]],
-                                                          width: 14,
-                                                          fit: BoxFit.fitWidth,
-                                                        ),
-                                                        // Text('${e.value.length}',
-                                                        //   style: const TextStyle(
-                                                        //       fontSize: 10,
-                                                        //       fontWeight: FontWeight.w400,
-                                                        //       color: Colors.black),
-                                                        // )
-                                                      ],
-                                                    ),
-                                                  );
-                                                }),
-                                          ),
-                                          Text(
-                                            '${message.emojis!.length}',
-                                            style: TextStyle(
-                                                fontSize: 10,
-                                                color: Colors.black,
-                                            fontWeight: FontWeight.w400),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                    Text(
-                                      '${message.status == 2 ? AppLocalizations.of(context)!.edited : ''} ${DateFormat("HH:mm").format(time.toLocal())}',
-                                      style: TextStyle(
-                                          color: Get.isDarkMode
-                                              ? Colors.white70
-                                              : const Color.fromRGBO(
-                                              115, 121, 135, 1),
-                                          fontSize: 12),
-                                      textAlign: TextAlign.right,
-                                    ),
-                                  ],
-                                ),
-                              )
-                                  :
-                              Row(
-                                  mainAxisAlignment: MainAxisAlignment.end,
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Container(
-                                      decoration: BoxDecoration(
-                                          color: const Color.fromRGBO(
-                                              240, 243, 251, 1),
-                                          borderRadius:
-                                          BorderRadius.circular(16),
-                                          border: Border.all(
-                                              width: 2,
-                                              color: Colors.white)),
-                                      child: Row(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          Row(
-                                            mainAxisSize: MainAxisSize.min,
-                                            children: List.generate(
-                                              getListReaction.length > 3
-                                                  ? 3
-                                                  : getListReaction.length,
-                                                  (index) => GestureDetector(
-                                                onTap: () async {},
+                                                ///column check
                                                 child: Row(
                                                   mainAxisSize:
-                                                  MainAxisSize.min,
+                                                      MainAxisSize.min,
                                                   children: [
-                                                    SvgPicture.asset(
-                                                      listReaction[
-                                                      getListReaction.keys
-                                                          .toList()[
-                                                      index]],
-                                                      width: 14,
-                                                      fit: BoxFit.fitWidth,
+                                                    Row(
+                                                      mainAxisSize:
+                                                          MainAxisSize.min,
+                                                      children: List.generate(
+                                                          getListReaction
+                                                                      .length >
+                                                                  3
+                                                              ? 3
+                                                              : getListReaction
+                                                                  .length,
+                                                          (index) {
+                                                        return GestureDetector(
+                                                          onTap: () async {
+                                                            // String uuidUser = await Utils
+                                                            //     .getStringValueWithKey(
+                                                            //     Constant.UUID_USER);
+                                                            // controller.likeMessage(uuid: message.uuid!,
+                                                            //     type: 0,
+                                                            //     status: 0,
+                                                            //     uuidUser: uuidUser);
+                                                          },
+
+                                                          ///column check
+                                                          child: Row(
+                                                            mainAxisSize:
+                                                                MainAxisSize
+                                                                    .min,
+                                                            children: [
+                                                              SvgPicture.asset(
+                                                                listReaction[
+                                                                    getListReaction
+                                                                            .keys
+                                                                            .toList()[
+                                                                        index]],
+                                                                width: 14,
+                                                                fit: BoxFit
+                                                                    .fitWidth,
+                                                              ),
+                                                              // Text('${e.value.length}',
+                                                              //   style: const TextStyle(
+                                                              //       fontSize: 10,
+                                                              //       fontWeight: FontWeight.w400,
+                                                              //       color: Colors.black),
+                                                              // )
+                                                            ],
+                                                          ),
+                                                        );
+                                                      }),
                                                     ),
-                                                    SizedBox(width: 3),
+                                                    Text(
+                                                      '${message.emojis!.length}',
+                                                      style: TextStyle(
+                                                          fontSize: 10,
+                                                          color: Colors.black,
+                                                          fontWeight:
+                                                              FontWeight.w400),
+                                                    ),
                                                   ],
                                                 ),
                                               ),
-                                            ),
+                                              Text(
+                                                '${message.status == 2 ? AppLocalizations.of(context)!.edited : ''} ${DateFormat("HH:mm").format(time.toLocal())}',
+                                                style: TextStyle(
+                                                    color: Get.isDarkMode
+                                                        ? Colors.white70
+                                                        : const Color.fromRGBO(
+                                                            115, 121, 135, 1),
+                                                    fontSize: 12),
+                                                textAlign: TextAlign.right,
+                                              ),
+                                            ],
                                           ),
-                                          Text(
-                                            '${message.emojis!.length}',
-                                            style: TextStyle(
-                                                fontWeight:FontWeight.w400,
-                                                fontSize: 10,
-                                                color: Colors.black),
-                                          )
-                                        ],
-                                      ),
-                                    ),
-                                    SizedBox(width: 2),
-                                    //time send
-                                    Text(
-                                        '${message.status == 2 ? AppLocalizations.of(context)!.edited : ''} ${DateFormat("HH:mm").format(time.toLocal())}',
-                                        style: TextStyle(
-                                            color: Get.isDarkMode
-                                                ? Colors.white70
-                                                : const Color.fromRGBO(
-                                                115, 121, 135, 1),
-                                            fontSize: 12,fontWeight: FontWeight.w400),
-                                        textAlign: TextAlign.right),
-                                  ])
-                                  :
-                              ///read message
-                              (isShowEnd != null && isShowEnd) &&
-                                  !(message.contentType == 3)
-                                  ? Container(
-                                padding: EdgeInsets.all(message.contentType == 6|| message.contentType == 8? 4 :0),
-                                decoration: message.contentType == 6|| message.contentType == 8? BoxDecoration(
-                                    color: Color(controller.backgroundColor),
-                                    borderRadius: BorderRadius.circular(15)
-                                ) : null,
-                                child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.end,
-                                    children: [
-                                      Text(
-                                        '${message.status == 2 ? AppLocalizations.of(context)!.edited : ''} ${DateFormat("HH:mm").format(time.toLocal())}',
-                                        style: TextStyle(
-                                            color: Get.isDarkMode
-                                                ? message.contentType == 6|| message.contentType == 8? ColorValue.textColor: Colors.white70
-                                                : const Color.fromRGBO(
-                                                115, 121, 135, 1),
-                                            fontSize: 12,fontWeight: FontWeight.w400),
-                                        textAlign: TextAlign.right,
-                                      ),
-                                      if (isMe) ...[
-                                        SizedBox(width: 5),
-                                        Icon(
-                                          message.readState != 0
-                                              ? Icons.done_all_rounded
-                                              : Icons.done_rounded,
-                                          size: 16,
-                                          color: Color(controller.textColor),
                                         )
-                                      ]
-                                    ]),
-                              )
-                                  : const SizedBox()
+                                      : Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.end,
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                              Container(
+                                                decoration: BoxDecoration(
+                                                    color: const Color.fromRGBO(
+                                                        240, 243, 251, 1),
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            16),
+                                                    border: Border.all(
+                                                        width: 2,
+                                                        color: Colors.white)),
+                                                child: Row(
+                                                  mainAxisSize:
+                                                      MainAxisSize.min,
+                                                  children: [
+                                                    Row(
+                                                      mainAxisSize:
+                                                          MainAxisSize.min,
+                                                      children: List.generate(
+                                                        getListReaction.length >
+                                                                3
+                                                            ? 3
+                                                            : getListReaction
+                                                                .length,
+                                                        (index) =>
+                                                            GestureDetector(
+                                                          onTap: () async {},
+                                                          child: Row(
+                                                            mainAxisSize:
+                                                                MainAxisSize
+                                                                    .min,
+                                                            children: [
+                                                              SvgPicture.asset(
+                                                                listReaction[
+                                                                    getListReaction
+                                                                            .keys
+                                                                            .toList()[
+                                                                        index]],
+                                                                width: 14,
+                                                                fit: BoxFit
+                                                                    .fitWidth,
+                                                              ),
+                                                              SizedBox(
+                                                                  width: 3),
+                                                            ],
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    ),
+                                                    Text(
+                                                      '${message.emojis!.length}',
+                                                      style: TextStyle(
+                                                          fontWeight:
+                                                              FontWeight.w400,
+                                                          fontSize: 10,
+                                                          color: Colors.black),
+                                                    )
+                                                  ],
+                                                ),
+                                              ),
+                                              SizedBox(width: 2),
+                                              //time send
+                                              Text(
+                                                  '${message.status == 2 ? AppLocalizations.of(context)!.edited : ''} ${DateFormat("HH:mm").format(time.toLocal())}',
+                                                  style: TextStyle(
+                                                      color: Get.isDarkMode
+                                                          ? Colors.white70
+                                                          : const Color
+                                                              .fromRGBO(
+                                                              115, 121, 135, 1),
+                                                      fontSize: 12,
+                                                      fontWeight:
+                                                          FontWeight.w400),
+                                                  textAlign: TextAlign.right),
+                                            ])
+                                  :
+
+                                  ///read message
+                                  (isShowEnd != null && isShowEnd) &&
+                                          !(message.contentType == 3)
+                                      ? Container(
+                                          padding: EdgeInsets.all(
+                                              message.contentType == 6 ||
+                                                      message.contentType == 8
+                                                  ? 4
+                                                  : 0),
+                                          decoration: message.contentType ==
+                                                      6 ||
+                                                  message.contentType == 8
+                                              ? BoxDecoration(
+                                                  color: Color(controller
+                                                      .backgroundColor),
+                                                  borderRadius:
+                                                      BorderRadius.circular(15))
+                                              : null,
+                                          child: Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.end,
+                                              children: [
+                                                Text(
+                                                  '${message.status == 2 ? AppLocalizations.of(context)!.edited : ''} ${DateFormat("HH:mm").format(time.toLocal())}',
+                                                  style: TextStyle(
+                                                      color: Get.isDarkMode
+                                                          ? message.contentType ==
+                                                                      6 ||
+                                                                  message.contentType ==
+                                                                      8
+                                                              ? ColorValue
+                                                                  .textColor
+                                                              : Colors.white70
+                                                          : const Color
+                                                              .fromRGBO(
+                                                              115, 121, 135, 1),
+                                                      fontSize: 12,
+                                                      fontWeight:
+                                                          FontWeight.w400),
+                                                  textAlign: TextAlign.right,
+                                                ),
+                                                if (isMe) ...[
+                                                  SizedBox(width: 5),
+                                                  Icon(
+                                                    message.readState != 0
+                                                        ? Icons.done_all_rounded
+                                                        : Icons.done_rounded,
+                                                    size: 16,
+                                                    color: Color(
+                                                        controller.textColor),
+                                                  )
+                                                ]
+                                              ]),
+                                        )
+                                      : const SizedBox()
                             ],
                           )
                         ]),
                   ),
                 )
               : Positioned(
-            left: 8,
-            bottom: 0,
-            child: GestureDetector(
-              onTap: () {
-              },
-              child: Column(
-                  crossAxisAlignment:
-                  CrossAxisAlignment.end,
-                  children: [
-                    SizedBox(height: 2),
-                    Row(
-                      mainAxisSize: MainAxisSize.max,
-                      children: [
-                        message.emojis != null && message.emojis!.isNotEmpty
-                            ? isMe
-                            ? Container(
-                          padding: const EdgeInsets.all(4),
-                          decoration: BoxDecoration(
-                              color: Color(controller.backgroundColor),
-                              borderRadius: BorderRadius.circular(15)
-                          ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.end,
-                            mainAxisSize: MainAxisSize.min,
+                  left: 8,
+                  bottom: 0,
+                  child: GestureDetector(
+                    onTap: () {},
+                    child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          SizedBox(height: 2),
+                          Row(
+                            mainAxisSize: MainAxisSize.max,
                             children: [
-                              Container(
-                                decoration: BoxDecoration(
-                                    color: const Color.fromRGBO(
-                                        240, 243, 251, 1),
-                                    borderRadius:
-                                    BorderRadius.circular(16),
-                                    border: Border.all(
-                                        width: 2, color: Colors.white)),
-
-                                ///column check
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: List.generate(
-                                          getListReaction.length > 3
-                                              ? 3
-                                              : getListReaction.length,
-                                              (index) {
-                                            return GestureDetector(
-                                              onTap: () async {
-                                                // String uuidUser = await Utils
-                                                //     .getStringValueWithKey(
-                                                //     Constant.UUID_USER);
-                                                // controller.likeMessage(uuid: message.uuid!,
-                                                //     type: 0,
-                                                //     status: 0,
-                                                //     uuidUser: uuidUser);
-                                              },
-
-                                              ///column check
-                                              child: Row(
-                                                mainAxisSize:
-                                                MainAxisSize.min,
-                                                children: [
-                                                  SvgPicture.asset(
-                                                    listReaction[
-                                                    getListReaction.keys
-                                                        .toList()[index]],
-                                                    width: 14,
-                                                    fit: BoxFit.fitWidth,
-                                                  ),
-                                                  // Text('${e.value.length}',
-                                                  //   style: const TextStyle(
-                                                  //       fontSize: 10,
-                                                  //       fontWeight: FontWeight.w400,
-                                                  //       color: Colors.black),
-                                                  // )
-                                                ],
-                                              ),
-                                            );
-                                          }),
-                                    ),
-                                    Text(
-                                      '${message.emojis!.length}',
-                                      style: TextStyle(
-                                          fontSize: 10,
-                                          color: Colors.black,
-                                          fontWeight: FontWeight.w400),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              Text(
-                                '${message.status == 2 ? AppLocalizations.of(context)!.edited : ''} ${DateFormat("HH:mm").format(time.toLocal())}',
-                                style: TextStyle(
-                                    color: Get.isDarkMode
-                                        ? Colors.white70
-                                        : const Color.fromRGBO(
-                                        115, 121, 135, 1),
-                                    fontSize: 12),
-                                textAlign: TextAlign.right,
-                              ),
-                            ],
-                          ),
-                        )
-                            :
-                        Row(
-                            mainAxisAlignment: MainAxisAlignment.end,
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Container(
-                                decoration: BoxDecoration(
-                                    color: const Color.fromRGBO(
-                                        240, 243, 251, 1),
-                                    borderRadius:
-                                    BorderRadius.circular(16),
-                                    border: Border.all(
-                                        width: 2,
-                                        color: Colors.white)),
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: List.generate(
-                                        getListReaction.length > 3
-                                            ? 3
-                                            : getListReaction.length,
-                                            (index) => GestureDetector(
-                                          onTap: () async {},
+                              message.emojis != null &&
+                                      message.emojis!.isNotEmpty
+                                  ? isMe
+                                      ? Container(
+                                          padding: const EdgeInsets.all(4),
+                                          decoration: BoxDecoration(
+                                              color: Color(
+                                                  controller.backgroundColor),
+                                              borderRadius:
+                                                  BorderRadius.circular(15)),
                                           child: Row(
-                                            mainAxisSize:
-                                            MainAxisSize.min,
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.end,
+                                            mainAxisSize: MainAxisSize.min,
                                             children: [
-                                              SvgPicture.asset(
-                                                listReaction[
-                                                getListReaction.keys
-                                                    .toList()[
-                                                index]],
-                                                width: 14,
-                                                fit: BoxFit.fitWidth,
+                                              Container(
+                                                decoration: BoxDecoration(
+                                                    color: const Color.fromRGBO(
+                                                        240, 243, 251, 1),
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            16),
+                                                    border: Border.all(
+                                                        width: 2,
+                                                        color: Colors.white)),
+
+                                                ///column check
+                                                child: Row(
+                                                  mainAxisSize:
+                                                      MainAxisSize.min,
+                                                  children: [
+                                                    Row(
+                                                      mainAxisSize:
+                                                          MainAxisSize.min,
+                                                      children: List.generate(
+                                                          getListReaction
+                                                                      .length >
+                                                                  3
+                                                              ? 3
+                                                              : getListReaction
+                                                                  .length,
+                                                          (index) {
+                                                        return GestureDetector(
+                                                          onTap: () async {
+                                                            // String uuidUser = await Utils
+                                                            //     .getStringValueWithKey(
+                                                            //     Constant.UUID_USER);
+                                                            // controller.likeMessage(uuid: message.uuid!,
+                                                            //     type: 0,
+                                                            //     status: 0,
+                                                            //     uuidUser: uuidUser);
+                                                          },
+
+                                                          ///column check
+                                                          child: Row(
+                                                            mainAxisSize:
+                                                                MainAxisSize
+                                                                    .min,
+                                                            children: [
+                                                              SvgPicture.asset(
+                                                                listReaction[
+                                                                    getListReaction
+                                                                            .keys
+                                                                            .toList()[
+                                                                        index]],
+                                                                width: 14,
+                                                                fit: BoxFit
+                                                                    .fitWidth,
+                                                              ),
+                                                              // Text('${e.value.length}',
+                                                              //   style: const TextStyle(
+                                                              //       fontSize: 10,
+                                                              //       fontWeight: FontWeight.w400,
+                                                              //       color: Colors.black),
+                                                              // )
+                                                            ],
+                                                          ),
+                                                        );
+                                                      }),
+                                                    ),
+                                                    Text(
+                                                      '${message.emojis!.length}',
+                                                      style: TextStyle(
+                                                          fontSize: 10,
+                                                          color: Colors.black,
+                                                          fontWeight:
+                                                              FontWeight.w400),
+                                                    ),
+                                                  ],
+                                                ),
                                               ),
-                                              SizedBox(width: 3),
+                                              Text(
+                                                '${message.status == 2 ? AppLocalizations.of(context)!.edited : ''} ${DateFormat("HH:mm").format(time.toLocal())}',
+                                                style: TextStyle(
+                                                    color: Get.isDarkMode
+                                                        ? Colors.white70
+                                                        : const Color.fromRGBO(
+                                                            115, 121, 135, 1),
+                                                    fontSize: 12),
+                                                textAlign: TextAlign.right,
+                                              ),
                                             ],
                                           ),
-                                        ),
-                                      ),
-                                    ),
-                                    Text(
-                                      '${message.emojis!.length}',
-                                      style: TextStyle(
-                                          fontWeight:FontWeight.w400,
-                                          fontSize: 10,
-                                          color: Colors.black),
-                                    )
-                                  ],
-                                ),
-                              ),
-                              SizedBox(width: 2),
-                              //time send
-                              Text(
-                                  '${message.status == 2 ? AppLocalizations.of(context)!.edited : ''} ${DateFormat("HH:mm").format(time.toLocal())}',
-                                  style: TextStyle(
-                                      color: Get.isDarkMode
-                                          ? Colors.white70
-                                          : const Color.fromRGBO(
-                                          115, 121, 135, 1),
-                                      fontSize: 12,fontWeight: FontWeight.w400),
-                                  textAlign: TextAlign.right),
-                            ])
-                            :
-                        ///read message
-                        (isShowEnd != null && isShowEnd) &&
-                            !(message.contentType == 3)
-                            ? Container(
-                          padding: EdgeInsets.all(message.contentType == 6|| message.contentType == 8? 4 :0),
-                          decoration: message.contentType == 6|| message.contentType == 8? BoxDecoration(
-                              color: Color(controller.backgroundColor),
-                              borderRadius: BorderRadius.circular(15)
-                          ) : null,
-                          child: Row(
-                              mainAxisAlignment: MainAxisAlignment.end,
-                              children: [
-                                Text(
-                                  '${message.status == 2 ? AppLocalizations.of(context)!.edited : ''} ${DateFormat("HH:mm").format(time.toLocal())}',
-                                  style: TextStyle(
-                                      color: Get.isDarkMode
-                                          ? message.contentType == 6|| message.contentType == 8? ColorValue.textColor: Colors.white70
-                                          : const Color.fromRGBO(
-                                          115, 121, 135, 1),
-                                      fontSize: 12,fontWeight: FontWeight.w400),
-                                  textAlign: TextAlign.right,
-                                ),
-                                if (isMe) ...[
-                                  SizedBox(width: 5),
-                                  Icon(
-                                    message.readState != 0
-                                        ? Icons.done_all_rounded
-                                        : Icons.done_rounded,
-                                    size: 16,
-                                    color: Color(controller.textColor),
-                                  )
-                                ]
-                              ]),
-                        )
-                            : const SizedBox()
-                      ],
-                    )
-                  ]),
-            ),
-          ),
+                                        )
+                                      : Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.end,
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                              Container(
+                                                decoration: BoxDecoration(
+                                                    color: const Color.fromRGBO(
+                                                        240, 243, 251, 1),
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            16),
+                                                    border: Border.all(
+                                                        width: 2,
+                                                        color: Colors.white)),
+                                                child: Row(
+                                                  mainAxisSize:
+                                                      MainAxisSize.min,
+                                                  children: [
+                                                    Row(
+                                                      mainAxisSize:
+                                                          MainAxisSize.min,
+                                                      children: List.generate(
+                                                        getListReaction.length >
+                                                                3
+                                                            ? 3
+                                                            : getListReaction
+                                                                .length,
+                                                        (index) =>
+                                                            GestureDetector(
+                                                          onTap: () async {},
+                                                          child: Row(
+                                                            mainAxisSize:
+                                                                MainAxisSize
+                                                                    .min,
+                                                            children: [
+                                                              SvgPicture.asset(
+                                                                listReaction[
+                                                                    getListReaction
+                                                                            .keys
+                                                                            .toList()[
+                                                                        index]],
+                                                                width: 14,
+                                                                fit: BoxFit
+                                                                    .fitWidth,
+                                                              ),
+                                                              SizedBox(
+                                                                  width: 3),
+                                                            ],
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    ),
+                                                    Text(
+                                                      '${message.emojis!.length}',
+                                                      style: TextStyle(
+                                                          fontWeight:
+                                                              FontWeight.w400,
+                                                          fontSize: 10,
+                                                          color: Colors.black),
+                                                    )
+                                                  ],
+                                                ),
+                                              ),
+                                              SizedBox(width: 2),
+                                              //time send
+                                              Text(
+                                                  '${message.status == 2 ? AppLocalizations.of(context)!.edited : ''} ${DateFormat("HH:mm").format(time.toLocal())}',
+                                                  style: TextStyle(
+                                                      color: Get.isDarkMode
+                                                          ? Colors.white70
+                                                          : const Color
+                                                              .fromRGBO(
+                                                              115, 121, 135, 1),
+                                                      fontSize: 12,
+                                                      fontWeight:
+                                                          FontWeight.w400),
+                                                  textAlign: TextAlign.right),
+                                            ])
+                                  :
+
+                                  ///read message
+                                  (isShowEnd != null && isShowEnd) &&
+                                          !(message.contentType == 3)
+                                      ? Container(
+                                          padding: EdgeInsets.all(
+                                              message.contentType == 6 ||
+                                                      message.contentType == 8
+                                                  ? 4
+                                                  : 0),
+                                          decoration: message.contentType ==
+                                                      6 ||
+                                                  message.contentType == 8
+                                              ? BoxDecoration(
+                                                  color: Color(controller
+                                                      .backgroundColor),
+                                                  borderRadius:
+                                                      BorderRadius.circular(15))
+                                              : null,
+                                          child: Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.end,
+                                              children: [
+                                                Text(
+                                                  '${message.status == 2 ? AppLocalizations.of(context)!.edited : ''} ${DateFormat("HH:mm").format(time.toLocal())}',
+                                                  style: TextStyle(
+                                                      color: Get.isDarkMode
+                                                          ? message.contentType ==
+                                                                      6 ||
+                                                                  message.contentType ==
+                                                                      8
+                                                              ? ColorValue
+                                                                  .textColor
+                                                              : Colors.white70
+                                                          : const Color
+                                                              .fromRGBO(
+                                                              115, 121, 135, 1),
+                                                      fontSize: 12,
+                                                      fontWeight:
+                                                          FontWeight.w400),
+                                                  textAlign: TextAlign.right,
+                                                ),
+                                                if (isMe) ...[
+                                                  SizedBox(width: 5),
+                                                  Icon(
+                                                    message.readState != 0
+                                                        ? Icons.done_all_rounded
+                                                        : Icons.done_rounded,
+                                                    size: 16,
+                                                    color: Color(
+                                                        controller.textColor),
+                                                  )
+                                                ]
+                                              ]),
+                                        )
+                                      : const SizedBox()
+                            ],
+                          )
+                        ]),
+                  ),
+                ),
         ]
       ]),
     );
@@ -2050,7 +2397,7 @@ class ChatBoxDetail extends StatelessWidget {
                                   imageFormat: _format,
                                   maxHeight: (Get.height).toInt(),
                                   maxWidth: (Get.width).toInt(),
-                                  timeMs: _timeMs,
+                                  timeMs: 1000,
                                   quality: _quality,
                                   attachHeaders: _attachHeaders,
                                 ),
@@ -2198,6 +2545,24 @@ class ChatBoxDetail extends StatelessWidget {
         default:
           return Container();
       }
+    } else if (message.contentType == 8) {
+      return pinType == 1
+          ? Row(
+              children: [
+                SvgPicture.asset('asset/icons/image.svg'),
+                SizedBox(width: 5),
+                Text(
+                  'GIF',
+                  style: TextStyle(
+                      fontSize: controller.sizeText.toDouble(),
+                      color: !reply && Get.isDarkMode ? Colors.black : null),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                )
+              ],
+            )
+          : showImage(
+              url: decoded, width: Get.width * 0.15, height: Get.height * 0.28);
     } else if (message.contentType == 5) {
       return pinType == 1
           ? Row(
@@ -2281,7 +2646,29 @@ class ChatBoxDetail extends StatelessWidget {
                 ]
               ],
             );
+    } else if (message.contentType == 6) {
+      var index = int.tryParse(decoded.split('_')[1]) ?? -1;
+      var indexSticker = int.tryParse(decoded.split('_')[2]) ?? -1;
+      String stickerString = (stickerPacks[index - 1]['stickers']
+          as List)[indexSticker - 1]['image_file'];
+      return pinType == 1
+          ? Row(
+              children: [
+                SvgPicture.asset('asset/icons/image.svg'),
+                SizedBox(width: 5),
+                Text(
+                  'Sticker',
+                  style: TextStyle(
+                      fontSize: controller.sizeText.toDouble(),
+                      color: !reply && Get.isDarkMode ? Colors.black : null),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                )
+              ],
+            )
+          : Image.asset(stickerString);
     }
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -2311,6 +2698,7 @@ class ChatBoxDetail extends StatelessWidget {
                       style: TextStyle(
                         fontWeight: FontWeight.w500,
                         color: Color(controller.textColor),
+                        fontFamily: 'NotoColorEmoji',
                       ),
                     ),
                     SizedBox(
@@ -2333,9 +2721,11 @@ class ChatBoxDetail extends StatelessWidget {
         Text(
           '${decoded}',
           style: TextStyle(
-              fontWeight: FontWeight.w400,
-              fontSize: controller.sizeText.toDouble(),
-              color: !reply && Get.isDarkMode ? Colors.black : null),
+            fontWeight: FontWeight.w400,
+            fontSize: controller.sizeText.toDouble(),
+            color: !reply && Get.isDarkMode ? Colors.black : null,
+            fontFamily: 'NotoColorEmoji',
+          ),
           overflow: replyShow || pinType == 1 ? TextOverflow.ellipsis : null,
           maxLines: replyShow
               ? 4
@@ -2376,17 +2766,6 @@ class ChatBoxDetail extends StatelessWidget {
             ),
           )
         ],
-        // GetBuilder<ChatDetailController>(
-        //   builder: (controller) => RichText(
-        //       text: TextSpan(
-        //         style: TextStyle(
-        //             fontWeight: FontWeight.w400,
-        //             fontSize: controller.sizeText.toDouble(),
-        //             color: !reply && Get.isDarkMode ? Colors.black : Get.isDarkMode ? Colors.white : Colors.black
-        //         ),
-        //         children: controller.searchText(message.content!),
-        //       )),
-        // ),
       ],
     );
   }
@@ -2413,20 +2792,6 @@ class ChatBoxDetail extends StatelessWidget {
   }
 
   // Widget _videoThumbnail(String videoUrl) {
-  //   return GenThumbnailImage(
-  //     thumbnailRequest: ThumbnailRequest(
-  //       video: videoUrl,
-  //       thumbnailPath: null,
-  //       imageFormat: _format,
-  //       maxHeight: _sizeH,
-  //       maxWidth: _sizeW,
-  //       timeMs: _timeMs,
-  //       quality: _quality,
-  //       attachHeaders: _attachHeaders,
-  //     ),
-  //   );
-  // }
-
   Widget _buildThumbnailImage(Uint8List thumbnailData) {
     return Stack(children: [
       Image.memory(
@@ -2462,14 +2827,6 @@ class ChatBoxDetail extends StatelessWidget {
   }
 
   // Future<Uint8List?> _generateThumbnail(String videoUrl) async {
-  //   final thumbnail = await VideoThumbnail.thumbnailData(
-  //     video: videoUrl,
-  //     imageFormat: ImageFormat.JPEG,
-  //     quality: 100,
-  //   );
-  //   return thumbnail;
-  // }
-
   _timeVideo({required String url}) {
     if (controller.timeVideoCache.containsKey(url)) {
       // Sử dụng cache nếu có.
@@ -3234,5 +3591,45 @@ class ChatBoxDetail extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  Widget showImage(
+      {required String url,
+      double? height,
+      double? width,
+      BoxFit? fit,
+      Widget? errorWidget}) {
+    return CachedNetworkImage(
+      imageUrl: url,
+      width: width,
+      height: height,
+      fit: fit ?? BoxFit.cover,
+      cacheKey: url,
+      placeholder: (context, url) => Shimmer.fromColors(
+        baseColor: Colors.grey.shade300,
+        highlightColor: Colors.grey.shade100,
+        child: Container(
+          width: width,
+          height: height,
+          color: Colors.white,
+        ),
+      ),
+      errorWidget: (context, url, error) {
+        return errorWidget ??
+            SvgPicture.asset(
+              'asset/images/default.svg',
+              key: UniqueKey(),
+              fit: BoxFit.cover,
+              width: width,
+              height: height,
+            );
+      },
+    );
+  }
+
+  @override
+  void dispose() {
+    _overlayTimer?.cancel();
+    super.dispose();
   }
 }

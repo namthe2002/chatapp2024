@@ -95,17 +95,15 @@ dependencies:
   hive_flutter: ^1.1.0
   json_annotation: ^4.9.0
   hive_generator: ^2.0.1
-  #  permission_handler: ^10.4.0
-
-
-  #  file_picker: ^7.0.2
-#  file_picker_pro: ^1.8.0
   responsive_framework: ^0.2.0
   file_picker: ^8.0.6
   flutter_audio_waveforms: ^1.2.1+8
   http_parser: ^4.0.2
   just_audio: ^0.9.40
   record: ^5.1.2
+  extended_image: ^8.2.2
+  shimmer: ^3.0.0
+  emoji_picker_flutter: ^3.0.0
 
 
 dev_dependencies:
@@ -125,11 +123,12 @@ dev_dependencies:
 
 # The following section is specific to Flutter packages.
 flutter:
-  # The following line ensures that the Material Icons font is
-  # included with your application, so that you can use the icons in
-  # the material Icons class.
   generate: true
   uses-material-design: true
+  fonts:
+    - family: NotoColorEmoji
+      fonts:
+        - asset: asset/fonts/NotoColorEmoji.ttf
   # To add assets to your application, add an assets section, like this:
   # assets:
   #   - images/a_dot_burr.jpeg
@@ -138,6 +137,13 @@ flutter:
     - asset/icons/
     - asset/images/
     - asset/json/
+    - asset/stickers/1/
+    - asset/stickers/2/
+    - asset/stickers/3/
+    - asset/stickers/4/
+    - asset/stickers/5/
+    - asset/stickers/6/
+    - asset/stickers/7/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware
@@ -150,12 +156,6 @@ flutter:
   # "family" key with the font family name, and a "fonts" key with a
   # list giving the asset and other descriptors for the font. For
   # example:
-  # fonts:
-  #   - family: Schyler
-  #     fonts:
-  #       - asset: fonts/Schyler-Regular.ttf
-  #       - asset: fonts/Schyler-Italic.ttf
-  #         style: italic
   #   - family: Trajan Pro
   #     fonts:
   #       - asset: fonts/TrajanPro.ttf
