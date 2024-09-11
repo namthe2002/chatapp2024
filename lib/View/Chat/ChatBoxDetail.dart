@@ -5,6 +5,7 @@ import 'package:any_link_preview/any_link_preview.dart';
 import 'package:audio_waveforms/audio_waveforms.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
+import 'package:emoji_regex/emoji_regex.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
@@ -34,11 +35,13 @@ import '../../Models/Chat/Chat.dart';
 import '../../Models/Chat/emoji/emoji_model.dart';
 import '../../Service/SocketManager.dart';
 import '../../Service/giphy_get/screen/giphy_detail.dart';
+import '../../Utils/TextWithEmoji.dart';
 import '../../Utils/thumnail_generator.dart';
 import '../../core/constant/sticker/sticker.dart';
 import '../../main.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
+import '../../widget/text_field_widget.dart';
 import '../../widget/utils_widget.dart';
 
 class ChatBoxDetail extends StatefulWidget {
@@ -224,13 +227,15 @@ class _ChatBoxDetailState extends State<ChatBoxDetail>
                                                       crossAxisCount: 4,
                                                       crossAxisSpacing: 10,
                                                       mainAxisSpacing: 10),
-                                              itemBuilder: (context, indexStic) =>
+                                              itemBuilder: (context,
+                                                      indexStic) =>
                                                   InkWell(
                                                     onTap: () {
                                                       controller.sendMessage(
                                                           content: (stickerPacks[
                                                                           index]
-                                                                      ['stickers']
+                                                                      [
+                                                                      'stickers']
                                                                   as List)[
                                                               indexStic]['text'],
                                                           type: 6);
@@ -954,7 +959,87 @@ class _ChatBoxDetailState extends State<ChatBoxDetail>
                                                 )
                                               ] else ...[
                                                 Expanded(
-                                                  child: TextField(
+                                                  child:
+
+                                                      // TextFieldWidget(
+                                                      //   controller: controller
+                                                      //       .textMessageController,
+                                                      //   focusNode:
+                                                      //       controller.focusNode,
+                                                      //   onSubmitted: (value) async {
+                                                      //     if (value!
+                                                      //         .trim()
+                                                      //         .isNotEmpty) {
+                                                      //       FocusScope.of(context)
+                                                      //           .requestFocus(
+                                                      //               controller
+                                                      //                   .focusNode);
+                                                      //       controller
+                                                      //           .isTextFieldFocused
+                                                      //           .value = false;
+                                                      //       Future.delayed(
+                                                      //           Duration(
+                                                      //               milliseconds:
+                                                      //                   300), () {
+                                                      //         controller.isVisible
+                                                      //             .value = true;
+                                                      //         Get.put(ChatController())
+                                                      //             .selectedChatIndex
+                                                      //             .value = 0;
+                                                      //       });
+                                                      //       if (controller
+                                                      //               .isEdit.value ==
+                                                      //           1) {
+                                                      //         await controller
+                                                      //             .editMessage();
+                                                      //       } else {
+                                                      //         await controller
+                                                      //             .sendMessage(
+                                                      //           content: controller
+                                                      //               .textMessageController
+                                                      //               .text,
+                                                      //           type: controller.isImageLink(
+                                                      //                   controller
+                                                      //                       .textMessageController
+                                                      //                       .text)
+                                                      //               ? 7
+                                                      //               : controller.isLink(
+                                                      //                       controller
+                                                      //                           .textMessageController
+                                                      //                           .text)
+                                                      //                   ? 2
+                                                      //                   : 1,
+                                                      //         );
+                                                      //       }
+                                                      //     }
+                                                      //   },
+                                                      //   hintText:
+                                                      //       '${TextByNation.getStringByKey('type_a_message')}',
+                                                      //   hintStyle: TextStyle(
+                                                      //     color: Get.isDarkMode
+                                                      //         ? Colors.white70
+                                                      //         : Colors.grey,
+                                                      //     fontSize: 14,
+                                                      //   ),
+                                                      //   labelStyle: TextStyle(
+                                                      //     color: Get.isDarkMode
+                                                      //         ? Colors.white
+                                                      //         : Colors.black,
+                                                      //   ),
+                                                      //   border: OutlineInputBorder(
+                                                      //       borderSide:
+                                                      //           BorderSide.none),
+                                                      //   contentPadding:
+                                                      //       EdgeInsets.only(
+                                                      //           left: 15),
+                                                      //   style: TextStyle(
+                                                      //     fontSize: 14,
+                                                      //     fontWeight:
+                                                      //         FontWeight.w400,
+                                                      //   ),
+                                                      // ),
+
+                                                      TextField(
                                                     controller: controller
                                                         .textMessageController,
                                                     focusNode:
@@ -1013,7 +1098,7 @@ class _ChatBoxDetailState extends State<ChatBoxDetail>
                                                         color: Get.isDarkMode
                                                             ? Colors.white70
                                                             : Colors.grey,
-                                                        fontSize: 14, //
+                                                        fontSize: 14,
                                                       ),
                                                       labelStyle: TextStyle(
                                                         color: Get.isDarkMode
@@ -1029,8 +1114,6 @@ class _ChatBoxDetailState extends State<ChatBoxDetail>
                                                       fontSize: 14,
                                                       fontWeight:
                                                           FontWeight.w400,
-                                                      fontFamily:
-                                                          'NotoColorEmoji',
                                                     ),
                                                   ),
                                                 ),
@@ -2666,107 +2749,142 @@ class _ChatBoxDetailState extends State<ChatBoxDetail>
                 )
               ],
             )
-          : Image.asset(stickerString);
+          : Image.asset(
+
+         width:  Get.width * 0.11, height: Get.height * 0.23,stickerString);
     }
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        if (message.replyMsgUu != null && reply && pinType != 1) ...[
-          GestureDetector(
-            onTap: () {
-              int index = controller.chatList.indexWhere(
-                  (element) => element.uuid! == message.replyMsgUu!.uuid!);
-              index = index != -1 ? index : 0;
-              controller.itemScrollController.scrollTo(
-                  index: index, duration: Duration(seconds: 1), alignment: 0.5);
-            },
-            child: AbsorbPointer(
-              absorbing: true,
-              child: Container(
-                padding: EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                    color: Colors.white,
-                    border: Border(
-                        left: BorderSide(
-                            color: Color(controller.textColor), width: 2))),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      '${decodedFullName ?? message.replyMsgUu!.userSent}',
-                      style: TextStyle(
+    return Container(
+      constraints: BoxConstraints(
+        maxWidth: Get.width / 2.5,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.max,
+        children: [
+          if (message.replyMsgUu != null && reply && pinType != 1) ...[
+            GestureDetector(
+              onTap: () {
+                int index = controller.chatList.indexWhere(
+                    (element) => element.uuid! == message.replyMsgUu!.uuid!);
+                index = index != -1 ? index : 0;
+                controller.itemScrollController.scrollTo(
+                    index: index,
+                    duration: Duration(seconds: 1),
+                    alignment: 0.5);
+              },
+              child: AbsorbPointer(
+                absorbing: true,
+                child: Container(
+                  padding: EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                      color: Colors.white,
+                      border: Border(
+                          left: BorderSide(
+                              color: Color(controller.textColor), width: 2))),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Text(
+                      //   '${decodedFullName ?? message.replyMsgUu!.userSent}',
+                      //   style: TextStyle(
+                      //     fontWeight: FontWeight.w500,
+                      //     color: Color(controller.textColor),
+                      //     fontFamily: 'NotoColorEmoji',
+                      //   ),
+                      // ),
+
+                      TextWithEmoji(
+                        text:
+                            '${decodedFullName ?? message.replyMsgUu!.userSent}',
                         fontWeight: FontWeight.w500,
-                        color: Color(controller.textColor),
-                        fontFamily: 'NotoColorEmoji',
+                        fontSize: 14,
+                        color: Colors.white,
+                        height: 24 / 14,
                       ),
-                    ),
-                    SizedBox(
-                      height: 10,
-                    ),
-                    _chatContentType(
-                        message: message,
-                        time: time,
-                        reply: false,
-                        pinType: pinType == 2 ? 2 : 0)
-                  ],
+
+                      SizedBox(
+                        height: 10,
+                      ),
+                      _chatContentType(
+                          message: message,
+                          time: time,
+                          reply: false,
+                          pinType: pinType == 2 ? 2 : 0)
+                    ],
+                  ),
                 ),
               ),
             ),
-          ),
-          SizedBox(
-            height: 10,
-          )
-        ],
-        Text(
-          '${decoded}',
-          style: TextStyle(
+            SizedBox(
+              height: 10,
+            )
+          ],
+          // Text(
+          //   '${decoded}',
+          //   style: TextStyle(
+          //     fontWeight: FontWeight.w400,
+          //     fontSize: controller.sizeText.toDouble(),
+          //     color: !reply && Get.isDarkMode ? Colors.black : null,
+          //     fontFamily: 'NotoColorEmoji',
+          //   ),
+          //       overflow: replyShow || pinType == 1 ? TextOverflow.ellipsis : null,
+          //   maxLines: replyShow
+          //       ? 4
+          //       : pinType == 1
+          //           ? 1
+          //           : null,
+          // ),
+
+          TextWithEmoji(
+            text: '${decoded}',
             fontWeight: FontWeight.w400,
             fontSize: controller.sizeText.toDouble(),
-            color: !reply && Get.isDarkMode ? Colors.black : null,
-            fontFamily: 'NotoColorEmoji',
+            color: (!reply && Get.isDarkMode) ? Colors.black : null,
+            height: 24 / 14,
+            overflow: replyShow || pinType == 1 ? TextOverflow.ellipsis : null,
+            maxLines: replyShow
+                ? 4
+                : pinType == 1
+                    ? 1
+                    : null,
           ),
-          overflow: replyShow || pinType == 1 ? TextOverflow.ellipsis : null,
-          maxLines: replyShow
-              ? 4
-              : pinType == 1
-                  ? 1
-                  : null,
-        ),
-        if (controller.countryCode != message.countryCode &&
-            reply &&
-            pinType != 1) ...[
-          SizedBox(
-            height: 8,
-          ),
-          GestureDetector(
-            onTap: () async {
-              String value = await controller.translator.translate(decoded);
-              if (indexMessage != -1) {
-                if (controller.chatList[indexMessage].translateOrigin.isEmpty) {
-                  controller.chatList[indexMessage].translateOrigin = decoded;
-                }
-                controller.chatList[indexMessage].content =
-                    controller.chatList[indexMessage].isTranslate
-                        ? controller.chatList[indexMessage].translateOrigin
-                        : value;
-                controller.chatList[indexMessage].isTranslate =
-                    !controller.chatList[indexMessage].isTranslate;
-                controller.chatList.refresh();
-              }
-            },
-            child: Container(
-              padding: EdgeInsets.all(6),
-              decoration: BoxDecoration(
-                  color: Get.isDarkMode
-                      ? Color.fromRGBO(152, 152, 152, 1.0)
-                      : Color.fromRGBO(228, 230, 236, 1),
-                  borderRadius: BorderRadius.circular(6)),
-              child: Icon(Icons.translate_rounded, size: 13),
+          if (controller.countryCode != message.countryCode &&
+              reply &&
+              pinType != 1) ...[
+            SizedBox(
+              height: 8,
             ),
-          )
+            GestureDetector(
+              onTap: () async {
+                String value = await controller.translator.translate(decoded);
+                if (indexMessage != -1) {
+                  if (controller
+                      .chatList[indexMessage].translateOrigin.isEmpty) {
+                    controller.chatList[indexMessage].translateOrigin = decoded;
+                  }
+                  controller.chatList[indexMessage].content =
+                      controller.chatList[indexMessage].isTranslate
+                          ? controller.chatList[indexMessage].translateOrigin
+                          : value;
+                  controller.chatList[indexMessage].isTranslate =
+                      !controller.chatList[indexMessage].isTranslate;
+                  controller.chatList.refresh();
+                }
+              },
+              child: Container(
+                padding: EdgeInsets.all(6),
+                decoration: BoxDecoration(
+                    color: Get.isDarkMode
+                        ? Color.fromRGBO(152, 152, 152, 1.0)
+                        : Color.fromRGBO(228, 230, 236, 1),
+                    borderRadius: BorderRadius.circular(6)),
+                child: Icon(Icons.translate_rounded, size: 13),
+              ),
+            )
+          ],
         ],
-      ],
+      ),
     );
   }
 
@@ -2792,71 +2910,71 @@ class _ChatBoxDetailState extends State<ChatBoxDetail>
   }
 
   // Widget _videoThumbnail(String videoUrl) {
-  Widget _buildThumbnailImage(Uint8List thumbnailData) {
-    return Stack(children: [
-      Image.memory(
-        key: UniqueKey(),
-        thumbnailData,
-        fit: BoxFit.cover,
-        errorBuilder:
-            (BuildContext context, Object exception, StackTrace? stackTrace) {
-          return SvgPicture.asset(
-            'asset/images/default.svg',
-            key: UniqueKey(),
-            fit: BoxFit.cover,
-          );
-        },
-      ),
-      Positioned(
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        child: Center(
-          child: Container(
-            padding: EdgeInsets.all(10),
-            decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: Color.fromRGBO(255, 255, 255, 0.3)),
-            child: Icon(Icons.play_arrow_rounded,
-                color: Color.fromRGBO(255, 255, 255, 0.8)),
-          ),
-        ),
-      )
-    ]);
-  }
-
-  // Future<Uint8List?> _generateThumbnail(String videoUrl) async {
-  _timeVideo({required String url}) {
-    if (controller.timeVideoCache.containsKey(url)) {
-      // Sử dụng cache nếu có.
-      return Text(
-        '${controller.formatDuration(controller.timeVideoCache[url]!)}',
-        style: TextStyle(
-            fontSize: 12, fontWeight: FontWeight.w400, color: Colors.white),
-      );
-    }
-    return FutureBuilder<Duration>(
-      future: controller.timePlayer(url),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.done &&
-            snapshot.hasData) {
-          controller.timeVideoCache[url] = snapshot.data!;
-          return Text(
-            '${controller.formatDuration(snapshot.data!)}',
-            style: TextStyle(
-                fontSize: 12, fontWeight: FontWeight.w400, color: Colors.white),
-          );
-        } else {
-          return Text(
-            '00:00',
-            style: TextStyle(
-                fontSize: 12, fontWeight: FontWeight.w400, color: Colors.white),
-          );
-        }
-      },
-    );
-  }
+  // Widget _buildThumbnailImage(Uint8List thumbnailData) {
+  //   return Stack(children: [
+  //     Image.memory(
+  //       key: UniqueKey(),
+  //       thumbnailData,
+  //       fit: BoxFit.cover,
+  //       errorBuilder:
+  //           (BuildContext context, Object exception, StackTrace? stackTrace) {
+  //         return SvgPicture.asset(
+  //           'asset/images/default.svg',
+  //           key: UniqueKey(),
+  //           fit: BoxFit.cover,
+  //         );
+  //       },
+  //     ),
+  //     Positioned(
+  //       top: 0,
+  //       left: 0,
+  //       right: 0,
+  //       bottom: 0,
+  //       child: Center(
+  //         child: Container(
+  //           padding: EdgeInsets.all(10),
+  //           decoration: BoxDecoration(
+  //               shape: BoxShape.circle,
+  //               color: Color.fromRGBO(255, 255, 255, 0.3)),
+  //           child: Icon(Icons.play_arrow_rounded,
+  //               color: Color.fromRGBO(255, 255, 255, 0.8)),
+  //         ),
+  //       ),
+  //     )
+  //   ]);
+  // }
+  //
+  // // Future<Uint8List?> _generateThumbnail(String videoUrl) async {
+  // _timeVideo({required String url}) {
+  //   if (controller.timeVideoCache.containsKey(url)) {
+  //     // Sử dụng cache nếu có.
+  //     return Text(
+  //       '${controller.formatDuration(controller.timeVideoCache[url]!)}',
+  //       style: TextStyle(
+  //           fontSize: 12, fontWeight: FontWeight.w400, color: Colors.white),
+  //     );
+  //   }
+  //   return FutureBuilder<Duration>(
+  //     future: controller.timePlayer(url),
+  //     builder: (context, snapshot) {
+  //       if (snapshot.connectionState == ConnectionState.done &&
+  //           snapshot.hasData) {
+  //         controller.timeVideoCache[url] = snapshot.data!;
+  //         return Text(
+  //           '${controller.formatDuration(snapshot.data!)}',
+  //           style: TextStyle(
+  //               fontSize: 12, fontWeight: FontWeight.w400, color: Colors.white),
+  //         );
+  //       } else {
+  //         return Text(
+  //           '00:00',
+  //           style: TextStyle(
+  //               fontSize: 12, fontWeight: FontWeight.w400, color: Colors.white),
+  //         );
+  //       }
+  //     },
+  //   );
+  // }
 
   bottomSheetChatItem(
       {required cd.ChatDetail message,

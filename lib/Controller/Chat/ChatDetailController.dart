@@ -11,7 +11,6 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_downloader/flutter_downloader.dart';
 import 'package:get/get.dart';
 import 'package:image_gallery_saver/image_gallery_saver.dart';
 import 'package:image_picker_web/image_picker_web.dart';
@@ -219,8 +218,8 @@ class ChatDetailController extends GetxController {
     super.onClose();
     itemPositionsListener.itemPositions.removeListener(loadMoreItems);
     await readMessage();
-    FlutterDownloader.cancelAll();
-    FlutterDownloader.remove(taskId: nameChanelDownload);
+    // FlutterDownloader.cancelAll();
+    // FlutterDownloader.remove(taskId: nameChanelDownload);
     receivePort.close();
     IsolateNameServer.removePortNameMapping(nameChanelDownload);
     recorder.dispose();
@@ -247,11 +246,11 @@ class ChatDetailController extends GetxController {
       }
     }
   }
-
-  static downloadCallback(id, status, progress) {
-    SendPort? sendPort = IsolateNameServer.lookupPortByName(nameChanelDownload);
-    sendPort!.send(progress);
-  }
+  //
+  // static downloadCallback(id, status, progress) {
+  //   SendPort? sendPort = IsolateNameServer.lookupPortByName(nameChanelDownload);
+  //   sendPort!.send(progress);
+  // }
 
   Future<Duration> timePlayer(String url) async {
     Completer<Duration> completer = Completer<Duration>();

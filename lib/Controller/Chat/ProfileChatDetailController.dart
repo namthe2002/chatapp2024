@@ -2,12 +2,9 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
-
-// import 'package:any_link_preview/any_link_preview.dart';
 import 'package:any_link_preview/any_link_preview.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter_downloader/flutter_downloader.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
@@ -196,13 +193,13 @@ class ProfileChatDetailController extends GetxController {
     Directory pathIos = await getApplicationDocumentsDirectory();
     if (status.isGranted) {
       try {
-        final id = await FlutterDownloader.enqueue(
-          url: url,
-          savedDir: Platform.isAndroid
-              ? '/storage/emulated/0/Download/'
-              : pathIos.path,
-          fileName: fileName.replaceAll(' ', '_'),
-        );
+        // // final id = await FlutterDownloader.enqueue(
+        //   url: url,
+        //   savedDir: Platform.isAndroid
+        //       ? '/storage/emulated/0/Download/'
+        //       : pathIos.path,
+        //   fileName: fileName.replaceAll(' ', '_'),
+        // );
       } catch (e) {
         print('$e');
       }

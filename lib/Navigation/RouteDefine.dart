@@ -6,6 +6,7 @@ import 'package:live_yoko/View/Account/ChangePassword.dart';
 import 'package:live_yoko/View/Account/ChatSetting.dart';
 import 'package:live_yoko/View/Account/Friend.dart';
 import 'package:live_yoko/View/Account/LanguageSettings.dart';
+import 'package:live_yoko/View/Chat/home_chat_2.dart';
 import 'package:live_yoko/View/Login/Login.dart';
 import 'package:live_yoko/View/Account/ManageFriends.dart';
 import 'package:live_yoko/View/Account/NotificationSetting.dart';

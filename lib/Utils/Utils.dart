@@ -12,6 +12,7 @@ import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:live_yoko/Controller/Chat/ChatController.dart';
+import 'package:live_yoko/Controller/Chat/ChatDetailController.dart';
 import 'package:live_yoko/Global/GlobalValue.dart';
 import 'package:live_yoko/Global/TextByNation.dart';
 import 'package:live_yoko/Models/Chat/Chat.dart';
@@ -364,6 +365,9 @@ class Utils {
     GlobalValue.getInstance().setUuid('');
     if (Get.isRegistered<ChatController>()) {
       Get.delete<ChatController>();
+      if(Get.isRegistered<ChatDetailController>()){
+        Get.delete<ChatDetailController>();
+      }
       SocketManager().closeSocket();
     }
 

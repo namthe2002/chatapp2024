@@ -25,19 +25,18 @@ import 'package:lottie/lottie.dart';
 import '../../Controller/Account/UpdateProfileController.dart';
 import '../../Controller/Chat/ChatDetailController.dart';
 import '../../Navigation/Navigation.dart';
-import '../../Utils/TextWithEmoji.dart';
 import '../../Utils/thumnail_generator.dart';
 import '../../core/constant/sticker/sticker.dart';
 import '../../widget/my_entry.dart';
 import '../Account/Friend.dart';
 import '../Account/NotificationSetting.dart';
 
-class HomeChatWebsite extends StatefulWidget {
+class HomeChatWebsite2 extends StatefulWidget {
   @override
-  State<HomeChatWebsite> createState() => _HomeChatWebsiteState();
+  State<HomeChatWebsite2> createState() => _HomeChatWebsite2State();
 }
 
-class _HomeChatWebsiteState extends State<HomeChatWebsite> {
+class _HomeChatWebsite2State extends State<HomeChatWebsite2> {
   final _homeController = Get.put(ChatController());
   var delete = Get.delete<ChatController>();
 
@@ -56,9 +55,10 @@ class _HomeChatWebsiteState extends State<HomeChatWebsite> {
 
   @override
   Widget build(BuildContext context) {
-    return Obx(() => Scaffold(
+    return Obx(() =>
+        Scaffold(
           drawer:
-              _homeController.forward.uuid != null ? null : drawerChat(context),
+          _homeController.forward.uuid != null ? null : drawerChat(context),
           drawerEnableOpenDragGesture: true,
           body: SafeArea(
             child: Container(
@@ -67,10 +67,10 @@ class _HomeChatWebsiteState extends State<HomeChatWebsite> {
               color: Get.isDarkMode ? ColorValue.neutralColor : Colors.white,
               child: _homeController.isLoading.value == true
                   ? Center(
-                      child: CircularProgressIndicator(),
-                    )
+                child: CircularProgressIndicator(),
+              )
                   : chat(
-                      _homeController.widgetFeature.value ?? homeChatWidget()),
+                  _homeController.widgetFeature.value ?? homeChatWidget()),
             ),
           ),
         ));
@@ -81,252 +81,255 @@ class _HomeChatWebsiteState extends State<HomeChatWebsite> {
       backgroundColor: Get.isDarkMode ? ColorValue.neutralColor : Colors.white,
       child: SingleChildScrollView(
           child: Padding(
-        padding: EdgeInsets.symmetric(horizontal: 16),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            SizedBox(
-              height: 46,
-            ),
-            Center(
-              child: Column(
-                children: [
-                  Stack(
+            padding: EdgeInsets.symmetric(horizontal: 16),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SizedBox(
+                  height: 46,
+                ),
+                Center(
+                  child: Column(
                     children: [
-                      _homeController.avatarUser == ''
-                          ? Container(
+                      Stack(
+                        children: [
+                          _homeController.avatarUser == ''
+                              ? Container(
+                            height: 50,
+                            width: 50,
+                            decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                gradient: Utils.getGradientForLetter(
+                                    _homeController.userName.toString())),
+                            child: Center(
+                                child: Text(
+                                  Utils.getInitialsName(
+                                      _homeController.userName.toString())
+                                      .toUpperCase(),
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                      fontSize: 30,
+                                      fontWeight: FontWeight.w600,
+                                      color: Colors.white),
+                                )),
+                          )
+                              : ClipOval(
+                            child: Container(
                               height: 50,
                               width: 50,
-                              decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  gradient: Utils.getGradientForLetter(
-                                      _homeController.userName.toString())),
-                              child: Center(
-                                  child: Text(
-                                Utils.getInitialsName(
-                                        _homeController.userName.toString())
-                                    .toUpperCase(),
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                    fontSize: 30,
-                                    fontWeight: FontWeight.w600,
-                                    color: Colors.white),
-                              )),
-                            )
-                          : ClipOval(
-                              child: Container(
-                                height: 50,
-                                width: 50,
-                                decoration: BoxDecoration(),
-                                child: Image.network(
-                                  Constant.BASE_URL_IMAGE +
-                                      _homeController.avatarUser.value,
-                                  fit: BoxFit.cover,
-                                  errorBuilder: (BuildContext context,
-                                      Object exception,
-                                      StackTrace? stackTrace) {
-                                    return Container(
-                                      decoration: BoxDecoration(
-                                          shape: BoxShape.circle,
-                                          color: ColorValue.colorBorder),
-                                      width: 48,
-                                      height: 48,
-                                    );
-                                  },
-                                ),
+                              decoration: BoxDecoration(),
+                              child: Image.network(
+                                Constant.BASE_URL_IMAGE +
+                                    _homeController.avatarUser.value,
+                                fit: BoxFit.cover,
+                                errorBuilder: (BuildContext context,
+                                    Object exception,
+                                    StackTrace? stackTrace) {
+                                  return Container(
+                                    decoration: BoxDecoration(
+                                        shape: BoxShape.circle,
+                                        color: ColorValue.colorBorder),
+                                    width: 48,
+                                    height: 48,
+                                  );
+                                },
                               ),
                             ),
+                          ),
+                        ],
+                      ),
+                      SizedBox(
+                        height: 16,
+                      ),
+                      Text(
+                        _homeController.userName.value.toString(),
+                        style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.w500,
+                            color: Get.isDarkMode
+                                ? ColorValue.colorPrimary
+                                : ColorValue.neutralColor),
+                      ),
                     ],
                   ),
-                  SizedBox(
-                    height: 16,
-                  ),
-                  Text(
-                    _homeController.userName.value.toString(),
-                    style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w500,
-                        color: Get.isDarkMode
-                            ? ColorValue.colorPrimary
-                            : ColorValue.neutralColor),
-                  ),
-                ],
-              ),
-            ),
-            SizedBox(
-              height: 22,
-            ),
-            Text(
-              '${TextByNation.getStringByKey('account').toUpperCase()} ${AppLocalizations.of(context)!.account}',
-              style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                  color: ColorValue.colorBorder),
-            ),
-            SizedBox(
-              height: 3,
-            ),
-            options(TextByNation.getStringByKey('update_profile'), () {
-              Navigation.navigateTo(page: 'UpdateProfile');
-            }, 'asset/icons/draw_1.svg'),
-            SizedBox(
-              height: 20,
-            ),
-            Text(
-              TextByNation.getStringByKey('friend').toUpperCase(),
-              style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                  color: ColorValue.colorBorder),
-            ),
-            SizedBox(
-              height: 8,
-            ),
-            options(TextByNation.getStringByKey('friend'), () {
-              Navigation.navigateTo(page: 'Friend');
-            }, 'asset/icons/draw_2.svg'),
-            SizedBox(
-              height: 2,
-            ),
-            options(TextByNation.getStringByKey('Invite_friend'), () {
-              Navigation.navigateTo(page: 'ManageFriends');
-            }, 'asset/icons/draw_3.svg'),
-            SizedBox(
-              height: 20,
-            ),
-            Text(
-              TextByNation.getStringByKey('settings').toUpperCase(),
-              style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                  color: ColorValue.colorBorder),
-            ),
-            SizedBox(
-              height: 8,
-            ),
-            options(TextByNation.getStringByKey('night_mode'), () {
-              // showSelectBrightnessMode(context);
-            }, 'asset/icons/draw_4.svg'),
-            SizedBox(
-              height: 2,
-            ),
-            options(TextByNation.getStringByKey('chat_setting'), () {
-              Navigation.navigateTo(page: 'ChatSetting');
-            }, 'asset/icons/draw_5.svg'),
-            SizedBox(
-              height: 2,
-            ),
-            options(TextByNation.getStringByKey('notification'), () {
-              Navigation.navigateTo(page: 'NotificationSetting');
-            }, 'asset/icons/draw_6.svg'),
-            SizedBox(
-              height: 2,
-            ),
-            options(TextByNation.getStringByKey('language'), () {
-              Navigation.navigateTo(page: 'LanguageSettings');
-            }, 'asset/icons/draw_7.svg'),
-            SizedBox(
-              height: 2,
-            ),
-            SizedBox(
-              height: 100,
-            ),
-            options(TextByNation.getStringByKey('log_out'), () async {
-              showDialog(
-                  context: context,
-                  builder: (context) {
-                    return AlertDialog(
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12.0)),
-                      content: Wrap(
-                        crossAxisAlignment: WrapCrossAlignment.center,
-                        children: [
-                          Column(
-                            // mainAxisAlignment: ,
-                            mainAxisSize: MainAxisSize.min,
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                ),
+                SizedBox(
+                  height: 22,
+                ),
+                Text(
+                  '${TextByNation.getStringByKey('account')
+                      .toUpperCase()} ${AppLocalizations.of(context)!.account}',
+                  style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      color: ColorValue.colorBorder),
+                ),
+                SizedBox(
+                  height: 3,
+                ),
+                options(TextByNation.getStringByKey('update_profile'), () {
+                  Navigation.navigateTo(page: 'UpdateProfile');
+                }, 'asset/icons/draw_1.svg'),
+                SizedBox(
+                  height: 20,
+                ),
+                Text(
+                  TextByNation.getStringByKey('friend').toUpperCase(),
+                  style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      color: ColorValue.colorBorder),
+                ),
+                SizedBox(
+                  height: 8,
+                ),
+                options(TextByNation.getStringByKey('friend'), () {
+                  Navigation.navigateTo(page: 'Friend');
+                }, 'asset/icons/draw_2.svg'),
+                SizedBox(
+                  height: 2,
+                ),
+                options(TextByNation.getStringByKey('Invite_friend'), () {
+                  Navigation.navigateTo(page: 'ManageFriends');
+                }, 'asset/icons/draw_3.svg'),
+                SizedBox(
+                  height: 20,
+                ),
+                Text(
+                  TextByNation.getStringByKey('settings').toUpperCase(),
+                  style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      color: ColorValue.colorBorder),
+                ),
+                SizedBox(
+                  height: 8,
+                ),
+                options(TextByNation.getStringByKey('night_mode'), () {
+                  // showSelectBrightnessMode(context);
+                }, 'asset/icons/draw_4.svg'),
+                SizedBox(
+                  height: 2,
+                ),
+                options(TextByNation.getStringByKey('chat_setting'), () {
+                  Navigation.navigateTo(page: 'ChatSetting');
+                }, 'asset/icons/draw_5.svg'),
+                SizedBox(
+                  height: 2,
+                ),
+                options(TextByNation.getStringByKey('notification'), () {
+                  Navigation.navigateTo(page: 'NotificationSetting');
+                }, 'asset/icons/draw_6.svg'),
+                SizedBox(
+                  height: 2,
+                ),
+                options(TextByNation.getStringByKey('language'), () {
+                  Navigation.navigateTo(page: 'LanguageSettings');
+                }, 'asset/icons/draw_7.svg'),
+                SizedBox(
+                  height: 2,
+                ),
+                SizedBox(
+                  height: 100,
+                ),
+                options(TextByNation.getStringByKey('log_out'), () async {
+                  showDialog(
+                      context: context,
+                      builder: (context) {
+                        return AlertDialog(
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12.0)),
+                          content: Wrap(
+                            crossAxisAlignment: WrapCrossAlignment.center,
                             children: [
-                              Row(
+                              Column(
+                                // mainAxisAlignment: ,
+                                mainAxisSize: MainAxisSize.min,
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
+                                  Row(
+                                    children: [
+                                      Text(
+                                        TextByNation.getStringByKey(
+                                            'log_out'), // chat or ground
+                                        style: TextStyle(
+                                            fontSize: 20,
+                                            fontWeight: FontWeight.w500,
+                                            color: Get.isDarkMode
+                                                ? ColorValue.colorTextDark
+                                                : ColorValue.neutralColor),
+                                      ),
+                                    ],
+                                  ),
+                                  SizedBox(
+                                    height: 12,
+                                  ),
                                   Text(
                                     TextByNation.getStringByKey(
-                                        'log_out'), // chat or ground
+                                        'you_sure_loguot'),
                                     style: TextStyle(
-                                        fontSize: 20,
-                                        fontWeight: FontWeight.w500,
-                                        color: Get.isDarkMode
-                                            ? ColorValue.colorTextDark
-                                            : ColorValue.neutralColor),
-                                  ),
-                                ],
-                              ),
-                              SizedBox(
-                                height: 12,
-                              ),
-                              Text(
-                                TextByNation.getStringByKey('you_sure_loguot'),
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w400,
-                                  color: Get.isDarkMode
-                                      ? ColorValue.colorTextDark
-                                      : ColorValue.neutralColor,
-                                ),
-                              ),
-                              SizedBox(
-                                height: 10,
-                              ),
-                              SizedBox(
-                                height: 24,
-                              ),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.end,
-                                children: [
-                                  InkWell(
-                                    onTap: () {
-                                      Get.close(1);
-                                    },
-                                    child: Text(
-                                      TextByNation.getStringByKey('cancel'),
-                                      style: TextStyle(
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.w600,
-                                          color: Get.isDarkMode
-                                              ? ColorValue.colorTextDark
-                                              : ColorValue.textColor),
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w400,
+                                      color: Get.isDarkMode
+                                          ? ColorValue.colorTextDark
+                                          : ColorValue.neutralColor,
                                     ),
                                   ),
                                   SizedBox(
-                                    width: 12,
+                                    height: 10,
                                   ),
-                                  InkWell(
-                                    onTap: () async {
-                                      await Utils.backLogin(true);
-                                    },
-                                    child: Text(
-                                      TextByNation.getStringByKey('log_out'),
-                                      style: TextStyle(
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.w600,
-                                          color: ColorValue.colorPrimary),
-                                    ),
+                                  SizedBox(
+                                    height: 24,
                                   ),
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.end,
+                                    children: [
+                                      InkWell(
+                                        onTap: () {
+                                          Get.close(1);
+                                        },
+                                        child: Text(
+                                          TextByNation.getStringByKey('cancel'),
+                                          style: TextStyle(
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.w600,
+                                              color: Get.isDarkMode
+                                                  ? ColorValue.colorTextDark
+                                                  : ColorValue.textColor),
+                                        ),
+                                      ),
+                                      SizedBox(
+                                        width: 12,
+                                      ),
+                                      InkWell(
+                                        onTap: () async {
+                                          await Utils.backLogin(true);
+                                        },
+                                        child: Text(
+                                          TextByNation.getStringByKey(
+                                              'log_out'),
+                                          style: TextStyle(
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.w600,
+                                              color: ColorValue.colorPrimary),
+                                        ),
+                                      ),
+                                    ],
+                                  )
                                 ],
                               )
                             ],
-                          )
-                        ],
-                      ),
-                    );
-                  });
-            }, 'asset/icons/draw_8.svg'),
-            SizedBox(
-              height: 20,
-            )
-          ],
-        ),
-      )),
+                          ),
+                        );
+                      });
+                }, 'asset/icons/draw_8.svg'),
+                SizedBox(
+                  height: 20,
+                )
+              ],
+            ),
+          )),
     );
   }
 
@@ -336,46 +339,51 @@ class _HomeChatWebsiteState extends State<HomeChatWebsite> {
           color: Get.isDarkMode
               ? ColorValue.neutralColor
               : ColorValue.colorBrSearch),
-      height: MediaQuery.of(context).size.height,
+      height: MediaQuery
+          .of(context)
+          .size
+          .height,
       // alignment: Alignment.center,
       child: Column(
         mainAxisSize: MainAxisSize.max,
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Obx(() => _homeController.avatarUser.isNotEmpty
+          Obx(() =>
+          _homeController.avatarUser.isNotEmpty
               ? Padding(
-                  padding: EdgeInsets.only(top: 6),
-                  child: Tooltip(
-                    message: _homeController.fullNameUser.value,
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(40),
-                      child: Image.network(
-                        Constant.BASE_URL_IMAGE +
-                            _homeController.avatarUser.value,
-                        fit: BoxFit.cover,
-                        width: 36,
-                        height: 36,
-                      ),
-                    ),
-                  ),
-                )
+            padding: EdgeInsets.only(top: 6),
+            child: Tooltip(
+              message: _homeController.fullNameUser.value,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(40),
+                child: Image.network(
+                  Constant.BASE_URL_IMAGE +
+                      _homeController.avatarUser.value,
+                  fit: BoxFit.cover,
+                  width: 36,
+                  height: 36,
+                ),
+              ),
+            ),
+          )
               : iconToolBar(
-                  image: 'asset/images/ic_account_avatar.png',
-                  size: 36,
-                  borderRadius: 40,
-                  message: _homeController.fullNameUser.value,
-                  buttonColor: _homeController.selectedChatItemIndex.value == 0
-                      ? ColorValue.white
-                      : null,
-                  iconButton: _homeController.selectedChatItemIndex.value == 0
-                      ? ColorValue.colorPrimary
-                      : null,
-                  onTap: () {
-                    // _homeController.selectIcon(0);
-                  },
-                )),
-          Obx(() => iconToolBar(
+            image: 'asset/images/ic_account_avatar.png',
+            size: 36,
+            borderRadius: 40,
+            message: _homeController.fullNameUser.value,
+            buttonColor: _homeController.selectedChatItemIndex.value == 0
+                ? ColorValue.white
+                : null,
+            iconButton: _homeController.selectedChatItemIndex.value == 0
+                ? ColorValue.colorPrimary
+                : null,
+            onTap: () {
+              // _homeController.selectIcon(0);
+            },
+          )),
+          Obx(() =>
+              iconToolBar(
                 image: 'asset/images/ic_home_chat.png',
                 buttonColor: _homeController.selectedChatItemIndex.value == 1
                     ? ColorValue.white
@@ -391,7 +399,8 @@ class _HomeChatWebsiteState extends State<HomeChatWebsite> {
                   _homeController.selectIcon(1);
                 },
               )),
-          Obx(() => iconToolBar(
+          Obx(() =>
+              iconToolBar(
                 image: 'asset/images/ic_contact.png',
                 buttonColor: _homeController.selectedChatItemIndex.value == 2
                     ? ColorValue.white
@@ -406,7 +415,8 @@ class _HomeChatWebsiteState extends State<HomeChatWebsite> {
                   _homeController.selectIcon(2);
                 },
               )),
-          Obx(() => iconToolBar(
+          Obx(() =>
+              iconToolBar(
                 image: 'asset/images/ic_friend_request.png',
                 buttonColor: _homeController.selectedChatItemIndex.value == 3
                     ? ColorValue.white
@@ -428,16 +438,17 @@ class _HomeChatWebsiteState extends State<HomeChatWebsite> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Obx(() => iconToolBar(
+                    Obx(() =>
+                        iconToolBar(
                           image: 'asset/images/ic_ud_profile.png',
                           buttonColor:
-                              _homeController.selectedChatItemIndex.value == 4
-                                  ? ColorValue.white
-                                  : null,
+                          _homeController.selectedChatItemIndex.value == 4
+                              ? ColorValue.white
+                              : null,
                           iconButton:
-                              _homeController.selectedChatItemIndex.value == 4
-                                  ? ColorValue.colorPrimary
-                                  : null,
+                          _homeController.selectedChatItemIndex.value == 4
+                              ? ColorValue.colorPrimary
+                              : null,
                           message: AppLocalizations.of(context)!.update_profile,
                           onTap: () {
                             Get.delete<UpdateProfileController>();
@@ -446,16 +457,17 @@ class _HomeChatWebsiteState extends State<HomeChatWebsite> {
                             _homeController.selectIcon(4);
                           },
                         )),
-                    Obx(() => iconToolBar(
+                    Obx(() =>
+                        iconToolBar(
                           image: 'asset/images/ic_night_mode.png',
                           buttonColor:
-                              _homeController.selectedChatItemIndex.value == 5
-                                  ? ColorValue.white
-                                  : null,
+                          _homeController.selectedChatItemIndex.value == 5
+                              ? ColorValue.white
+                              : null,
                           iconButton:
-                              _homeController.selectedChatItemIndex.value == 5
-                                  ? ColorValue.colorPrimary
-                                  : null,
+                          _homeController.selectedChatItemIndex.value == 5
+                              ? ColorValue.colorPrimary
+                              : null,
                           message: AppLocalizations.of(context)!.night_mode,
                           onTap: () {
                             _homeController.updateFeature(
@@ -463,16 +475,17 @@ class _HomeChatWebsiteState extends State<HomeChatWebsite> {
                             _homeController.selectIcon(5);
                           },
                         )),
-                    Obx(() => iconToolBar(
+                    Obx(() =>
+                        iconToolBar(
                           image: 'asset/images/ic_chat_setting.png',
                           buttonColor:
-                              _homeController.selectedChatItemIndex.value == 6
-                                  ? ColorValue.white
-                                  : null,
+                          _homeController.selectedChatItemIndex.value == 6
+                              ? ColorValue.white
+                              : null,
                           iconButton:
-                              _homeController.selectedChatItemIndex.value == 6
-                                  ? ColorValue.colorPrimary
-                                  : null,
+                          _homeController.selectedChatItemIndex.value == 6
+                              ? ColorValue.colorPrimary
+                              : null,
                           message: AppLocalizations.of(context)!.chat_setting,
                           onTap: () {
                             _homeController.updateFeature(
@@ -480,32 +493,34 @@ class _HomeChatWebsiteState extends State<HomeChatWebsite> {
                             _homeController.selectIcon(6);
                           },
                         )),
-                    Obx(() => iconToolBar(
+                    Obx(() =>
+                        iconToolBar(
                           image: 'asset/images/ic_active_session.png',
                           buttonColor:
-                              _homeController.selectedChatItemIndex.value == 7
-                                  ? ColorValue.white
-                                  : null,
+                          _homeController.selectedChatItemIndex.value == 7
+                              ? ColorValue.white
+                              : null,
                           iconButton:
-                              _homeController.selectedChatItemIndex.value == 7
-                                  ? ColorValue.colorPrimary
-                                  : null,
+                          _homeController.selectedChatItemIndex.value == 7
+                              ? ColorValue.colorPrimary
+                              : null,
                           message: AppLocalizations.of(context)!.status_active,
                           onTap: () {
                             // _buildFeatureHomeChat(context);
                             _homeController.selectIcon(7);
                           },
                         )),
-                    Obx(() => iconToolBar(
+                    Obx(() =>
+                        iconToolBar(
                           image: 'asset/images/ic_notification.png',
                           buttonColor:
-                              _homeController.selectedChatItemIndex.value == 8
-                                  ? ColorValue.white
-                                  : null,
+                          _homeController.selectedChatItemIndex.value == 8
+                              ? ColorValue.white
+                              : null,
                           iconButton:
-                              _homeController.selectedChatItemIndex.value == 8
-                                  ? ColorValue.colorPrimary
-                                  : null,
+                          _homeController.selectedChatItemIndex.value == 8
+                              ? ColorValue.colorPrimary
+                              : null,
                           message: AppLocalizations.of(context)!.notification,
                           onTap: () {
                             _homeController.updateFeature(
@@ -513,16 +528,17 @@ class _HomeChatWebsiteState extends State<HomeChatWebsite> {
                             _homeController.selectIcon(8);
                           },
                         )),
-                    Obx(() => iconToolBar(
+                    Obx(() =>
+                        iconToolBar(
                           image: 'asset/images/ic_language.png',
                           buttonColor:
-                              _homeController.selectedChatItemIndex.value == 9
-                                  ? ColorValue.white
-                                  : null,
+                          _homeController.selectedChatItemIndex.value == 9
+                              ? ColorValue.white
+                              : null,
                           iconButton:
-                              _homeController.selectedChatItemIndex.value == 9
-                                  ? ColorValue.colorPrimary
-                                  : null,
+                          _homeController.selectedChatItemIndex.value == 9
+                              ? ColorValue.colorPrimary
+                              : null,
                           message: AppLocalizations.of(context)!.language,
                           onTap: () {
                             _homeController.updateFeature(
@@ -530,16 +546,17 @@ class _HomeChatWebsiteState extends State<HomeChatWebsite> {
                             _homeController.selectIcon(9);
                           },
                         )),
-                    Obx(() => iconToolBar(
+                    Obx(() =>
+                        iconToolBar(
                           image: 'asset/images/ic_log_out.png',
                           buttonColor:
-                              _homeController.selectedChatItemIndex.value == 10
-                                  ? ColorValue.white
-                                  : null,
+                          _homeController.selectedChatItemIndex.value == 10
+                              ? ColorValue.white
+                              : null,
                           iconButton:
-                              _homeController.selectedChatItemIndex.value == 10
-                                  ? ColorValue.colorPrimary
-                                  : null,
+                          _homeController.selectedChatItemIndex.value == 10
+                              ? ColorValue.colorPrimary
+                              : null,
                           message: AppLocalizations.of(context)!.log_out,
                           onTap: () async {
                             showDialog(
@@ -548,17 +565,17 @@ class _HomeChatWebsiteState extends State<HomeChatWebsite> {
                                   return AlertDialog(
                                     shape: RoundedRectangleBorder(
                                         borderRadius:
-                                            BorderRadius.circular(24)),
+                                        BorderRadius.circular(24)),
                                     contentPadding: EdgeInsets.all(32),
                                     content: Container(
                                       decoration: BoxDecoration(),
                                       child: Wrap(
                                         crossAxisAlignment:
-                                            WrapCrossAlignment.center,
+                                        WrapCrossAlignment.center,
                                         children: [
                                           Column(
                                             crossAxisAlignment:
-                                                CrossAxisAlignment.start,
+                                            CrossAxisAlignment.start,
                                             children: [
                                               Row(
                                                 children: [
@@ -568,15 +585,15 @@ class _HomeChatWebsiteState extends State<HomeChatWebsite> {
                                                     style: TextStyle(
                                                         fontSize: 24,
                                                         fontWeight:
-                                                            FontWeight.w500,
+                                                        FontWeight.w500,
                                                         color: Get.isDarkMode
                                                             ? ColorValue
-                                                                .colorTextDark
+                                                            .colorTextDark
                                                             : ColorValue
-                                                                .neutralColor,
+                                                            .neutralColor,
                                                         height: 32 / 24,
                                                         fontStyle:
-                                                            FontStyle.normal),
+                                                        FontStyle.normal),
                                                   ),
                                                 ],
                                               ),
@@ -591,19 +608,19 @@ class _HomeChatWebsiteState extends State<HomeChatWebsite> {
                                                     fontWeight: FontWeight.w400,
                                                     color: Get.isDarkMode
                                                         ? ColorValue
-                                                            .colorTextDark
+                                                        .colorTextDark
                                                         : ColorValue
-                                                            .neutralColor,
+                                                        .neutralColor,
                                                     height: 24 / 14,
                                                     fontStyle:
-                                                        FontStyle.normal),
+                                                    FontStyle.normal),
                                               ),
                                               SizedBox(
                                                 height: 24,
                                               ),
                                               Row(
                                                 mainAxisAlignment:
-                                                    MainAxisAlignment.end,
+                                                MainAxisAlignment.end,
                                                 children: [
                                                   InkWell(
                                                     onTap: () {
@@ -611,21 +628,21 @@ class _HomeChatWebsiteState extends State<HomeChatWebsite> {
                                                     },
                                                     child: Text(
                                                       TextByNation
-                                                              .getStringByKey(
-                                                                  'cancel')
+                                                          .getStringByKey(
+                                                          'cancel')
                                                           .toUpperCase(),
                                                       style: TextStyle(
                                                           fontSize: 16,
                                                           fontWeight:
-                                                              FontWeight.w600,
+                                                          FontWeight.w600,
                                                           color: Get.isDarkMode
                                                               ? ColorValue
-                                                                  .colorTextDark
+                                                              .colorTextDark
                                                               : ColorValue
-                                                                  .textColor,
+                                                              .textColor,
                                                           height: 24 / 16,
                                                           fontStyle:
-                                                              FontStyle.normal),
+                                                          FontStyle.normal),
                                                     ),
                                                   ),
                                                   SizedBox(
@@ -638,18 +655,18 @@ class _HomeChatWebsiteState extends State<HomeChatWebsite> {
                                                     },
                                                     child: Text(
                                                       TextByNation
-                                                              .getStringByKey(
-                                                                  'log_out')
+                                                          .getStringByKey(
+                                                          'log_out')
                                                           .toUpperCase(),
                                                       style: TextStyle(
                                                           fontSize: 16,
                                                           fontWeight:
-                                                              FontWeight.w600,
+                                                          FontWeight.w600,
                                                           color: ColorValue
                                                               .colorPrimary,
                                                           height: 24 / 16,
                                                           fontStyle:
-                                                              FontStyle.normal),
+                                                          FontStyle.normal),
                                                     ),
                                                   ),
                                                 ],
@@ -674,14 +691,13 @@ class _HomeChatWebsiteState extends State<HomeChatWebsite> {
     );
   }
 
-  Widget iconToolBar(
-      {double? size,
-      Color? buttonColor,
-      Color? iconButton,
-      double? borderRadius,
-      required String image,
-      required VoidCallback onTap,
-      String? message}) {
+  Widget iconToolBar({double? size,
+    Color? buttonColor,
+    Color? iconButton,
+    double? borderRadius,
+    required String image,
+    required VoidCallback onTap,
+    String? message}) {
     return Center(
       child: Tooltip(
         message: message ?? '',
@@ -732,8 +748,8 @@ class _HomeChatWebsiteState extends State<HomeChatWebsite> {
                     height: 24,
                     color: 'asset/icons/draw_8.svg' == imgScr
                         ? Get.isDarkMode
-                            ? Colors.white
-                            : Color(0xff32363E)
+                        ? Colors.white
+                        : Color(0xff32363E)
                         : null),
                 SizedBox(
                   width: 12,
@@ -870,37 +886,40 @@ class _HomeChatWebsiteState extends State<HomeChatWebsite> {
   // }
 
   Obx chat(Widget widget) {
-    return Obx(() => Row(
+    return Obx(() =>
+        Row(
           mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             (Utils.isDesktopWeb(context)) ? toolBar(context) : SizedBox(),
             (Utils.isDesktopWeb(context))
                 ? Expanded(
-                    flex: 3,
-                    child: _homeController.isLoading.value == true
-                        ? Center(
-                            child: const CircularProgressIndicator(),
-                          )
-                        : widget)
+                flex: 3,
+                child: _homeController.isLoading.value == true
+                    ? Center(
+                  child: const CircularProgressIndicator(),
+                )
+                    : widget)
                 : SizedBox(),
             Expanded(
-                flex: 8,
-                child:
-                    //
-                    // Obx(() {
-                    //   if (_homeController.selectedChatItem.value != null) {
-                    //     Get.delete<ChatDetailController>();
-                    //   }
-                    //
-                    //
+              flex: 8,
+              child:
+              //
+              // Obx(() {
+              //   if (_homeController.selectedChatItem.value != null) {
+              //     Get.delete<ChatDetailController>();
+              //   }
+              //
+              //
 
-                    ChatBoxDetail(
-                  key: ValueKey(
-                    _homeController.selectedChatItem.value?.uuid ?? 1,
-                  ),
-                  chatDetail: _homeController.selectedChatItem.value,
-                )),
+              _homeController.selectedChatItem.value != null
+                  ? ChatBoxDetail(
+                key: ValueKey(
+                    _homeController.selectedChatItem.value!.uuid),
+                chatDetail: _homeController.selectedChatItem.value,
+              )
+                  : emptyChat(),
+            ),
           ],
         ));
   }
@@ -979,7 +998,10 @@ class _HomeChatWebsiteState extends State<HomeChatWebsite> {
     return Stack(
       children: [
         SizedBox(
-          height: MediaQuery.of(context).size.height,
+          height: MediaQuery
+              .of(context)
+              .size
+              .height,
           child: Column(
             mainAxisSize: MainAxisSize.min,
             mainAxisAlignment: MainAxisAlignment.start,
@@ -1016,13 +1038,13 @@ class _HomeChatWebsiteState extends State<HomeChatWebsite> {
                   decoration: InputDecoration(
                     labelText: AppLocalizations.of(context)!.search,
                     floatingLabelStyle:
-                        TextStyle(color: Color.fromRGBO(17, 185, 145, 1)),
+                    TextStyle(color: Color.fromRGBO(17, 185, 145, 1)),
                     labelStyle: TextStyle(
                         color: Get.isDarkMode
                             ? ColorValue.colorTextDark
                             : Colors.black),
                     contentPadding:
-                        EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                    EdgeInsets.symmetric(horizontal: 12, vertical: 12),
                     border: InputBorder.none,
                   ),
                   style: TextStyle(fontSize: 14, fontWeight: FontWeight.w400),
@@ -1059,10 +1081,10 @@ class _HomeChatWebsiteState extends State<HomeChatWebsite> {
         _homeController.forward.uuid != null
             ? SizedBox()
             : Positioned(
-                right: 24,
-                bottom: 24,
-                child: buttonAddChat(),
-              ),
+          right: 24,
+          bottom: 24,
+          child: buttonAddChat(),
+        ),
       ],
     );
   }
@@ -1080,8 +1102,8 @@ class _HomeChatWebsiteState extends State<HomeChatWebsite> {
             gradient: _homeController.isSelected.value == true
                 ? null
                 : LinearGradient(
-                    colors: [Colors.blue, Colors.green],
-                  ),
+              colors: [Colors.blue, Colors.green],
+            ),
           ),
           // child: FloatingActionButton(
           //   elevation: 0,
@@ -1113,148 +1135,149 @@ class _HomeChatWebsiteState extends State<HomeChatWebsite> {
   }
 
   Obx chatItem(BuildContext context, int index) {
-    return Obx(() => (InkWell(
-          onTap: () async {
-            if (_homeController.forward.uuid == null) {
-              if (_homeController.isSelected.value == false) {
-                _homeController.listChat[index].unreadCount = 0;
-                _homeController.listChat.refresh();
-                Get.delete<ProfileChatDetailController>();
-                Get.delete<ChatDetailController>();
-                _homeController.selectItem(index);
-                _homeController.selectChatItem(_homeController.listChat[index]);
-              } else {
-                if (_homeController.listChatSelect
-                    .contains(_homeController.listChat[index].uuid)) {
-                  _homeController.listChatSelect
-                      .remove(_homeController.listChat[index].uuid!);
-                } else {
-                  _homeController.listChatSelect
-                      .add(_homeController.listChat[index].uuid!);
-                }
-                _homeController.listChatSelect.refresh();
-                _homeController.listChat.refresh();
-              }
+    return Obx(() =>
+    (InkWell(
+      onTap: () async {
+        if (_homeController.forward.uuid == null) {
+          if (_homeController.isSelected.value == false) {
+            _homeController.listChat[index].unreadCount = 0;
+            _homeController.listChat.refresh();
+            Get.delete<ProfileChatDetailController>();
+            Get.delete<ChatDetailController>();
+            _homeController.selectItem(index);
+            _homeController.selectChatItem(_homeController.listChat[index]);
+          } else {
+            if (_homeController.listChatSelect
+                .contains(_homeController.listChat[index].uuid)) {
+              _homeController.listChatSelect
+                  .remove(_homeController.listChat[index].uuid!);
+            } else {
+              _homeController.listChatSelect
+                  .add(_homeController.listChat[index].uuid!);
             }
-          },
-          onSecondaryTap: () {
-            html.window.document.onContextMenu.listen((event) {
-              event.preventDefault();
-            });
-            if (_homeController.forward.uuid == null) {
-              showPopupselect(context, index);
-            }
-          },
-          child: Container(
-            padding: EdgeInsets.symmetric(vertical: 8, horizontal: 20),
-            decoration: BoxDecoration(
-                color: _homeController.selectedChatIndex.value == index
-                    ? ColorValue.colorFilledBox
-                    : Get.isDarkMode
-                        ? ColorValue.neutralColor
-                        : Colors.white),
-            child: Row(
+            _homeController.listChatSelect.refresh();
+            _homeController.listChat.refresh();
+          }
+        }
+      },
+      onSecondaryTap: () {
+        html.window.document.onContextMenu.listen((event) {
+          event.preventDefault();
+        });
+        if (_homeController.forward.uuid == null) {
+          showPopupselect(context, index);
+        }
+      },
+      child: Container(
+        padding: EdgeInsets.symmetric(vertical: 8, horizontal: 20),
+        decoration: BoxDecoration(
+            color: _homeController.selectedChatIndex.value == index
+                ? ColorValue.colorFilledBox
+                : Get.isDarkMode
+                ? ColorValue.neutralColor
+                : Colors.white),
+        child: Row(
+          children: [
+            Stack(
               children: [
-                Stack(
-                  children: [
-                    _homeController.listChat[index].avatar != null &&
-                            _homeController.listChat[index].avatar!.isNotEmpty
-                        ? ClipOval(
-                            child: Container(
-                              width: Utils.isDesktopWeb(context) ? 50 : 50,
-                              height: Utils.isDesktopWeb(context) ? 50 : 50,
-                              decoration: BoxDecoration(),
-                              child: Image.network(
-                                Constant.BASE_URL_IMAGE +
-                                    _homeController.listChat[index].avatar
-                                        .toString(),
-                                fit: BoxFit.cover,
-                                errorBuilder: (BuildContext context,
-                                    Object exception, StackTrace? stackTrace) {
-                                  return Container(
-                                    decoration: BoxDecoration(
-                                        shape: BoxShape.circle,
-                                        color: ColorValue.colorBorder),
-                                    width: 48,
-                                    height: 48,
-                                  );
-                                },
-                              ),
-                            ),
-                          )
-                        : Container(
-                            width: 48,
-                            height: 48,
-                            decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                gradient: Utils.getGradientForLetter(
-                                    _homeController.listChat[index].ownerName!
-                                        .toString())),
-                            child: Center(
-                                child: Text(
-                              Utils.getInitialsName(_homeController
-                                      .listChat[index].ownerName!
-                                      .toString())
-                                  .toUpperCase(),
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                  // fontSize: 32.sp 18.sp,
-                                  fontSize: 32,
-                                  fontWeight: FontWeight.w600,
-                                  color: Colors.white),
-                            )),
-                          ),
-                    _homeController.listChatSelect
-                            .contains(_homeController.listChat[index].uuid)
-                        ? Positioned(
-                            right: 0,
-                            bottom: 0,
-                            child: Container(
-                              width: 14,
-                              height: 14,
-                              decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  color: ColorValue.colorPrimary,
-                                  border: Border.all(
-                                      width: 1, color: Colors.white)),
-                              child: Center(
-                                child: Icon(
-                                  Icons.check,
-                                  size: 10,
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ),
-                          )
-                        : _homeController.listChat[index].isActive == true
-                            ? Positioned(
-                                right: 0,
-                                bottom: 0,
-                                child: Container(
-                                    width: 15,
-                                    height: 15,
-                                    decoration: BoxDecoration(
-                                      border: Border.all(
-                                        color: Get.isDarkMode
-                                            ? ColorValue.neutralColor
-                                            : Colors.white, // Màu của viền
-                                        width: 2, // Độ dày của viền
-                                      ),
-                                      shape: BoxShape.circle,
-                                      // gradient: LinearGradient(colors: [
-                                      //   Color(0xff39EFA2),
-                                      //   Color(0xff39EFA2),
-                                      //   // Color(0xff48C6D7)
-                                      // ]
-                                      color: Color(0xff39EFA2),
-                                    )),
-                              )
-                            : SizedBox()
-                  ],
+                _homeController.listChat[index].avatar != null &&
+                    _homeController.listChat[index].avatar!.isNotEmpty
+                    ? ClipOval(
+                  child: Container(
+                    width: Utils.isDesktopWeb(context) ? 50 : 50,
+                    height: Utils.isDesktopWeb(context) ? 50 : 50,
+                    decoration: BoxDecoration(),
+                    child: Image.network(
+                      Constant.BASE_URL_IMAGE +
+                          _homeController.listChat[index].avatar
+                              .toString(),
+                      fit: BoxFit.cover,
+                      errorBuilder: (BuildContext context,
+                          Object exception, StackTrace? stackTrace) {
+                        return Container(
+                          decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: ColorValue.colorBorder),
+                          width: 48,
+                          height: 48,
+                        );
+                      },
+                    ),
+                  ),
+                )
+                    : Container(
+                  width: 48,
+                  height: 48,
+                  decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      gradient: Utils.getGradientForLetter(
+                          _homeController.listChat[index].ownerName!
+                              .toString())),
+                  child: Center(
+                      child: Text(
+                        Utils.getInitialsName(_homeController
+                            .listChat[index].ownerName!
+                            .toString())
+                            .toUpperCase(),
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          // fontSize: 32.sp 18.sp,
+                            fontSize: 32,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.white),
+                      )),
                 ),
-                SizedBox(width: 12),
-                Expanded(
-                    child: Column(
+                _homeController.listChatSelect
+                    .contains(_homeController.listChat[index].uuid)
+                    ? Positioned(
+                  right: 0,
+                  bottom: 0,
+                  child: Container(
+                    width: 14,
+                    height: 14,
+                    decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: ColorValue.colorPrimary,
+                        border: Border.all(
+                            width: 1, color: Colors.white)),
+                    child: Center(
+                      child: Icon(
+                        Icons.check,
+                        size: 10,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                )
+                    : _homeController.listChat[index].isActive == true
+                    ? Positioned(
+                  right: 0,
+                  bottom: 0,
+                  child: Container(
+                      width: 15,
+                      height: 15,
+                      decoration: BoxDecoration(
+                        border: Border.all(
+                          color: Get.isDarkMode
+                              ? ColorValue.neutralColor
+                              : Colors.white, // Màu của viền
+                          width: 2, // Độ dày của viền
+                        ),
+                        shape: BoxShape.circle,
+                        // gradient: LinearGradient(colors: [
+                        //   Color(0xff39EFA2),
+                        //   Color(0xff39EFA2),
+                        //   // Color(0xff48C6D7)
+                        // ]
+                        color: Color(0xff39EFA2),
+                      )),
+                )
+                    : SizedBox()
+              ],
+            ),
+            SizedBox(width: 12),
+            Expanded(
+                child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
@@ -1273,218 +1296,220 @@ class _HomeChatWebsiteState extends State<HomeChatWebsite> {
                     ),
                     _homeController.listChat[index].userTyping.isNotEmpty
                         ? Row(
-                            children: [
-                              Expanded(
-                                child: Text(
-                                  '${_homeController.listChat[index].userTyping} ${TextByNation.getStringByKey('is_typing')}',
-                                  style: TextStyle(
-                                      fontWeight: FontWeight.w400,
-                                      fontSize: 14,
-                                      overflow: TextOverflow.ellipsis,
-                                      color: ColorValue.colorPrimary,
-                                      fontStyle: FontStyle.italic),
-                                ),
-                              ),
-                              Lottie.asset(
-                                'asset/json/importing.json',
-                                width: 30,
-                                height: 15,
-                              )
-                            ],
-                          )
-                        : Row(
-                            children: [
-                              if (_homeController.listChat[index].forwardFrom !=
-                                  null)
-                                Container(
-                                  margin: EdgeInsets.only(
-                                      right: _homeController
-                                                  .listChat[index].type ==
-                                              2
-                                          ? 3
-                                          : 0),
-                                  child: SvgPicture.asset(
-                                    'asset/icons/forward_chat.svg',
-                                    width: 20,
-                                    height: 20,
-                                    fit: BoxFit.scaleDown,
-                                  ),
-                                ),
-                              _homeController.listChat[index].status ==
-                                      4 // nội dung tin nhắn bị xóa
-                                  ? Flexible(
-                                      child: RichText(
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                        text: TextSpan(
-                                          style: TextStyle(),
-                                          children: <TextSpan>[
-                                            if (_homeController
-                                                    .listChat[index].type ==
-                                                2)
-                                              TextSpan(
-                                                text: _homeController
-                                                            .listChat[index]
-                                                            .userSent
-                                                            .toString() ==
-                                                        'admin'
-                                                    ? _homeController
-                                                            .listChat[index]
-                                                            .content
-                                                            .toString() +
-                                                        ' '
-                                                    : _homeController
-                                                            .listChat[index]
-                                                            .fullName
-                                                            .toString() +
-                                                        ':' +
-                                                        ' ',
-                                                style: TextStyle(
-                                                    fontSize: 14,
-                                                    fontWeight: FontWeight.w400,
-                                                    color: Get.isDarkMode
-                                                        ? ColorValue
-                                                            .colorTextDark
-                                                        : ColorValue.textColor,
-                                                    fontFamily:
-                                                        'NotoColorEmoji'),
-                                              ),
-                                            TextSpan(
-                                              text: TextByNation.getStringByKey(
-                                                  'message_been_deleted'), // name chat
-                                              style: TextStyle(
-                                                fontSize: 14,
-                                                fontWeight: FontWeight.w400,
-                                                color: _homeController
-                                                            .listChat[index]
-                                                            .unreadCount! >
-                                                        0
-                                                    ? Get.isDarkMode
-                                                        ? ColorValue
-                                                            .colorTextDark
-                                                        : ColorValue
-                                                            .neutralColor
-                                                    : Get.isDarkMode
-                                                        ? ColorValue
-                                                            .colorTextDark_2
-                                                        : ColorValue
-                                                            .colorBorder,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    )
-                                  : Expanded(
-                                      child: getTypeContent(
-                                          _homeController.listChat[index]
-                                                  .contentType ??
-                                              0,
-                                          index),
-                                    )
-                            ],
-                          )
-                  ],
-                )),
-                _homeController.forward.uuid != null
-                    ? GestureDetector(
-                        onTap: () async {
-                          await _homeController.forwardMessage(
-                              uuid: _homeController.listChat[index].uuid!);
-                          Navigator.pop(context);
-                        },
-                        child: Container(
-                          margin: EdgeInsets.only(top: 5),
-                          padding:
-                              EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                          decoration: BoxDecoration(
-                              color: Get.isDarkMode
-                                  ? Colors.white70
-                                  : Colors.black26,
-                              borderRadius: BorderRadius.circular(20)),
+                      children: [
+                        Expanded(
                           child: Text(
-                            TextByNation.getStringByKey('send'),
-                            overflow: TextOverflow.ellipsis,
+                            '${_homeController.listChat[index]
+                                .userTyping} ${TextByNation.getStringByKey(
+                                'is_typing')}',
                             style: TextStyle(
+                                fontWeight: FontWeight.w400,
                                 fontSize: 14,
-                                fontWeight: FontWeight.w600,
-                                color: ColorValue.textColor),
+                                overflow: TextOverflow.ellipsis,
+                                color: ColorValue.colorPrimary,
+                                fontStyle: FontStyle.italic),
                           ),
                         ),
-                      )
-                    : Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          Row(
-                            children: [
-                              if (_homeController.listChat[index].fullName ==
-                                      _homeController.fullNameUser.value &&
-                                  _homeController.listChat[index].unreadCount ==
-                                      0)
-                                Icon(
-                                  _homeController.listChat[index].readCounter ==
-                                          0
-                                      ? Icons.done
-                                      : Icons.done_all,
-                                  size: 13,
-                                  color: ColorValue.colorPrimary,
-                                ),
-                              SizedBox(
-                                width: 4,
-                              ),
-                              Text(
-                                _homeController.getTimeMessage(_homeController
-                                    .listChat[index].lastUpdated!),
-                                style: TextStyle(
-                                    fontWeight: FontWeight.w400,
-                                    fontSize: 12,
-                                    color: Get.isDarkMode
-                                        ? ColorValue.colorTextDark
-                                        : ColorValue.colorBorder),
-                              ),
-                            ],
-                          ),
-                          if (_homeController.listChat[index].pinned == true &&
-                              _homeController.listChat[index].unreadCount! == 0)
-                            Container(
-                              margin: EdgeInsets.only(top: 8),
-                              child: SvgPicture.asset(
-                                'asset/icons/pin.svg',
-                                width: 15,
-                                height: 15,
-                                color:
-                                    Get.isDarkMode ? Color(0xff737373) : null,
-                              ),
-                            ),
-                          if (_homeController.listChat[index].unreadCount! >
-                                  0 &&
-                              _homeController.listChat[index].fullName !=
-                                  _homeController.userNameAcount.value)
-                            Container(
-                              margin: EdgeInsets.only(top: 6),
+                        Lottie.asset(
+                          'asset/json/importing.json',
+                          width: 30,
+                          height: 15,
+                        )
+                      ],
+                    )
+                        : Row(
+                      children: [
+                        if (_homeController.listChat[index].forwardFrom !=
+                            null)
+                          Container(
+                            margin: EdgeInsets.only(
+                                right: _homeController
+                                    .listChat[index].type ==
+                                    2
+                                    ? 3
+                                    : 0),
+                            child: SvgPicture.asset(
+                              'asset/icons/forward_chat.svg',
+                              width: 20,
                               height: 20,
-                              padding: EdgeInsets.symmetric(horizontal: 6),
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(10),
-                                color: ColorValue.colorPrimary,
-                              ),
-                              child: Center(
-                                child: Text(
-                                  _homeController.listChat[index].unreadCount!
-                                      .toString(),
+                              fit: BoxFit.scaleDown,
+                            ),
+                          ),
+                        _homeController.listChat[index].status ==
+                            4 // nội dung tin nhắn bị xóa
+                            ? Flexible(
+                          child: RichText(
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            text: TextSpan(
+                              style: TextStyle(),
+                              children: <TextSpan>[
+                                if (_homeController
+                                    .listChat[index].type ==
+                                    2)
+                                  TextSpan(
+                                    text: _homeController
+                                        .listChat[index]
+                                        .userSent
+                                        .toString() ==
+                                        'admin'
+                                        ? _homeController
+                                        .listChat[index]
+                                        .content
+                                        .toString() +
+                                        ' '
+                                        : _homeController
+                                        .listChat[index]
+                                        .fullName
+                                        .toString() +
+                                        ':' +
+                                        ' ',
+                                    style: TextStyle(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w400,
+                                        color: Get.isDarkMode
+                                            ? ColorValue
+                                            .colorTextDark
+                                            : ColorValue.textColor,
+                                        fontFamily:
+                                        'NotoColorEmoji'),
+                                  ),
+                                TextSpan(
+                                  text: TextByNation.getStringByKey(
+                                      'message_been_deleted'), // name chat
                                   style: TextStyle(
-                                      fontSize: 10,
-                                      fontWeight: FontWeight.w600,
-                                      color: Colors.white),
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w400,
+                                    color: _homeController
+                                        .listChat[index]
+                                        .unreadCount! >
+                                        0
+                                        ? Get.isDarkMode
+                                        ? ColorValue
+                                        .colorTextDark
+                                        : ColorValue
+                                        .neutralColor
+                                        : Get.isDarkMode
+                                        ? ColorValue
+                                        .colorTextDark_2
+                                        : ColorValue
+                                        .colorBorder,
+                                  ),
                                 ),
-                              ),
-                            )
-                        ],
-                      )
+                              ],
+                            ),
+                          ),
+                        )
+                            : Expanded(
+                          child: getTypeContent(
+                              _homeController.listChat[index]
+                                  .contentType ??
+                                  0,
+                              index),
+                        )
+                      ],
+                    )
+                  ],
+                )),
+            _homeController.forward.uuid != null
+                ? GestureDetector(
+              onTap: () async {
+                await _homeController.forwardMessage(
+                    uuid: _homeController.listChat[index].uuid!);
+                Navigator.pop(context);
+              },
+              child: Container(
+                margin: EdgeInsets.only(top: 5),
+                padding:
+                EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                    color: Get.isDarkMode
+                        ? Colors.white70
+                        : Colors.black26,
+                    borderRadius: BorderRadius.circular(20)),
+                child: Text(
+                  TextByNation.getStringByKey('send'),
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: ColorValue.textColor),
+                ),
+              ),
+            )
+                : Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Row(
+                  children: [
+                    if (_homeController.listChat[index].fullName ==
+                        _homeController.fullNameUser.value &&
+                        _homeController.listChat[index].unreadCount ==
+                            0)
+                      Icon(
+                        _homeController.listChat[index].readCounter ==
+                            0
+                            ? Icons.done
+                            : Icons.done_all,
+                        size: 13,
+                        color: ColorValue.colorPrimary,
+                      ),
+                    SizedBox(
+                      width: 4,
+                    ),
+                    Text(
+                      _homeController.getTimeMessage(_homeController
+                          .listChat[index].lastUpdated!),
+                      style: TextStyle(
+                          fontWeight: FontWeight.w400,
+                          fontSize: 12,
+                          color: Get.isDarkMode
+                              ? ColorValue.colorTextDark
+                              : ColorValue.colorBorder),
+                    ),
+                  ],
+                ),
+                if (_homeController.listChat[index].pinned == true &&
+                    _homeController.listChat[index].unreadCount! == 0)
+                  Container(
+                    margin: EdgeInsets.only(top: 8),
+                    child: SvgPicture.asset(
+                      'asset/icons/pin.svg',
+                      width: 15,
+                      height: 15,
+                      color:
+                      Get.isDarkMode ? Color(0xff737373) : null,
+                    ),
+                  ),
+                if (_homeController.listChat[index].unreadCount! >
+                    0 &&
+                    _homeController.listChat[index].fullName !=
+                        _homeController.userNameAcount.value)
+                  Container(
+                    margin: EdgeInsets.only(top: 6),
+                    height: 20,
+                    padding: EdgeInsets.symmetric(horizontal: 6),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(10),
+                      color: ColorValue.colorPrimary,
+                    ),
+                    child: Center(
+                      child: Text(
+                        _homeController.listChat[index].unreadCount!
+                            .toString(),
+                        style: TextStyle(
+                            fontSize: 10,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.white),
+                      ),
+                    ),
+                  )
               ],
-            ),
-          ),
-        )));
+            )
+          ],
+        ),
+      ),
+    )));
   }
 
   Future<dynamic> showPopupselect(BuildContext context, int index) {
@@ -1503,51 +1528,51 @@ class _HomeChatWebsiteState extends State<HomeChatWebsite> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   _homeController.listChat[index].avatar != null &&
-                          _homeController.listChat[index].avatar!.isNotEmpty
+                      _homeController.listChat[index].avatar!.isNotEmpty
                       ? ClipOval(
-                          child: Container(
+                    child: Container(
+                      width: 48,
+                      height: 48,
+                      decoration: BoxDecoration(),
+                      child: Image.network(
+                        Constant.BASE_URL_IMAGE +
+                            _homeController.listChat[index].avatar
+                                .toString(),
+                        fit: BoxFit.cover,
+                        errorBuilder: (BuildContext context,
+                            Object exception, StackTrace? stackTrace) {
+                          return Container(
+                            decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: ColorValue.colorBorder),
                             width: 48,
                             height: 48,
-                            decoration: BoxDecoration(),
-                            child: Image.network(
-                              Constant.BASE_URL_IMAGE +
-                                  _homeController.listChat[index].avatar
-                                      .toString(),
-                              fit: BoxFit.cover,
-                              errorBuilder: (BuildContext context,
-                                  Object exception, StackTrace? stackTrace) {
-                                return Container(
-                                  decoration: BoxDecoration(
-                                      shape: BoxShape.circle,
-                                      color: ColorValue.colorBorder),
-                                  width: 48,
-                                  height: 48,
-                                );
-                              },
-                            ),
-                          ),
-                        )
+                          );
+                        },
+                      ),
+                    ),
+                  )
                       : Container(
-                          width: 48,
-                          height: 48,
-                          decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              gradient: Utils.getGradientForLetter(
-                                  _homeController.listChat[index].ownerName!
-                                      .toString())),
-                          child: Center(
-                              child: Text(
-                            Utils.getInitialsName(_homeController
-                                    .listChat[index].ownerName!
-                                    .toString())
-                                .toUpperCase(),
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.w600,
-                                color: Colors.white),
-                          )),
-                        ),
+                    width: 48,
+                    height: 48,
+                    decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        gradient: Utils.getGradientForLetter(
+                            _homeController.listChat[index].ownerName!
+                                .toString())),
+                    child: Center(
+                        child: Text(
+                          Utils.getInitialsName(_homeController
+                              .listChat[index].ownerName!
+                              .toString())
+                              .toUpperCase(),
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.white),
+                        )),
+                  ),
                   SizedBox(
                     width: 10,
                   ),
@@ -1629,59 +1654,59 @@ class _HomeChatWebsiteState extends State<HomeChatWebsite> {
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 _homeController.listChat[index].avatar !=
-                                            null &&
-                                        _homeController
-                                            .listChat[index].avatar!.isNotEmpty
+                                    null &&
+                                    _homeController
+                                        .listChat[index].avatar!.isNotEmpty
                                     ? ClipOval(
-                                        child: Container(
+                                  child: Container(
+                                    width: 48,
+                                    height: 48,
+                                    decoration: BoxDecoration(),
+                                    child: Image.network(
+                                      Constant.BASE_URL_IMAGE +
+                                          _homeController
+                                              .listChat[index].avatar
+                                              .toString(),
+                                      fit: BoxFit.cover,
+                                      errorBuilder: (BuildContext context,
+                                          Object exception,
+                                          StackTrace? stackTrace) {
+                                        return Container(
+                                          decoration: BoxDecoration(
+                                              shape: BoxShape.circle,
+                                              color:
+                                              ColorValue.colorBorder),
                                           width: 48,
                                           height: 48,
-                                          decoration: BoxDecoration(),
-                                          child: Image.network(
-                                            Constant.BASE_URL_IMAGE +
-                                                _homeController
-                                                    .listChat[index].avatar
-                                                    .toString(),
-                                            fit: BoxFit.cover,
-                                            errorBuilder: (BuildContext context,
-                                                Object exception,
-                                                StackTrace? stackTrace) {
-                                              return Container(
-                                                decoration: BoxDecoration(
-                                                    shape: BoxShape.circle,
-                                                    color:
-                                                        ColorValue.colorBorder),
-                                                width: 48,
-                                                height: 48,
-                                              );
-                                            },
-                                          ),
-                                        ),
-                                      )
+                                        );
+                                      },
+                                    ),
+                                  ),
+                                )
                                     : Container(
-                                        width: 48,
-                                        height: 48,
-                                        decoration: BoxDecoration(
-                                            shape: BoxShape.circle,
-                                            gradient:
-                                                Utils.getGradientForLetter(
-                                                    _homeController
-                                                        .listChat[index]
-                                                        .ownerName!
-                                                        .toString())),
-                                        child: Center(
-                                            child: Text(
-                                          Utils.getInitialsName(_homeController
-                                                  .listChat[index].ownerName!
-                                                  .toString())
-                                              .toUpperCase(),
-                                          textAlign: TextAlign.center,
-                                          style: TextStyle(
-                                              fontSize: 18,
-                                              fontWeight: FontWeight.w600,
-                                              color: Colors.white),
-                                        )),
-                                      ),
+                                  width: 48,
+                                  height: 48,
+                                  decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      gradient:
+                                      Utils.getGradientForLetter(
+                                          _homeController
+                                              .listChat[index]
+                                              .ownerName!
+                                              .toString())),
+                                  child: Center(
+                                      child: Text(
+                                        Utils.getInitialsName(_homeController
+                                            .listChat[index].ownerName!
+                                            .toString())
+                                            .toUpperCase(),
+                                        textAlign: TextAlign.center,
+                                        style: TextStyle(
+                                            fontSize: 18,
+                                            fontWeight: FontWeight.w600,
+                                            color: Colors.white),
+                                      )),
+                                ),
                                 SizedBox(
                                   width: 10,
                                 ),
@@ -1705,7 +1730,7 @@ class _HomeChatWebsiteState extends State<HomeChatWebsite> {
                                 children: <TextSpan>[
                                   TextSpan(
                                     text: TextByNation.getStringByKey(
-                                            'chat_delete') +
+                                        'chat_delete') +
                                         ' ',
                                     style: TextStyle(
                                       fontSize: 14,
@@ -1952,14 +1977,14 @@ class _HomeChatWebsiteState extends State<HomeChatWebsite> {
     var indexSticker;
     String stickerString = '';
     if (typeContent == 6) {
-      indexs = int.tryParse(
-              _homeController.listChat[index].content!.split('_')[1]) ??
-          -1;
-      indexSticker = int.tryParse(
-              _homeController.listChat[index].content!.split('_')[2]) ??
-          -1;
+      indexs =
+          int.tryParse(
+              _homeController.listChat[index].content!.split('_')[1]) ?? -1;
+      indexSticker =
+          int.tryParse(
+              _homeController.listChat[index].content!.split('_')[2]) ?? -1;
       stickerString = (stickerPacks[indexs - 1]['stickers']
-          as List)[indexSticker - 1]['emojis'];
+      as List)[indexSticker - 1]['emojis'];
     }
 
     switch (typeContent) {
@@ -1979,60 +2004,51 @@ class _HomeChatWebsiteState extends State<HomeChatWebsite> {
       //                   ? ColorValue.colorTextDark_2
       //                   : ColorValue.colorBorder));
       case 2:
-        return Row(
-            children: [
-              RichText(
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                text: TextSpan(
-                  children: <TextSpan>[
-                    if (_homeController.listChat[index].type == 2)
-                      TextSpan(
-                        text: _homeController.listChat[index].userSent
-                                    .toString() ==
-                                'admin'
-                            ? _homeController.listChat[index].content.toString() +
-                                ' '
-                            : _homeController.listChat[index].fullName
-                                    .toString() +
-                                ':' +
-                                ' ',
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w400,
-                          color: Get.isDarkMode
-                              ? ColorValue.colorTextDark
-                              : ColorValue.textColor,
-                          // fontFamily: 'NotoColorEmoji',
-                        ),
-                      ),
-                  ],
-                ),
-              ),
-              SizedBox(
-                width: 2,
-              ),
-              Expanded(
-                child: TextWithEmoji(
-                    text:
-                        _homeController.listChat[index].userSent.toString() == 'admin'
-                            ? TextByNation.getStringByKey('admin_create')
-                            : _homeController.listChat[index].content
-                                .toString(), // name chat
+        return RichText(
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          text: TextSpan(
+
+            children: <TextSpan>[
+              if (_homeController.listChat[index].type == 2)
+                TextSpan(
+                  text: _homeController.listChat[index].userSent.toString() ==
+                      'admin'
+                      ? _homeController.listChat[index].content.toString() +
+                      ' '
+                      : _homeController.listChat[index].fullName.toString() +
+                      ':' +
+                      ' ',
+                  style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w400,
-                    color: _homeController.listChat[index].unreadCount! > 0
-                        ? Get.isDarkMode
-                            ? ColorValue.colorTextDark
-                            : ColorValue.neutralColor
-                        : Get.isDarkMode
-                            ? ColorValue.colorTextDark_2
-                            : ColorValue.colorBorder,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
+                    color: Get.isDarkMode
+                        ? ColorValue.colorTextDark
+                        : ColorValue.textColor,
+                    // fontFamily: 'NotoColorEmoji',
                   ),
+                ),
+              TextSpan(
+                text: _homeController.listChat[index].userSent.toString() ==
+                    'admin'
+                    ? TextByNation.getStringByKey('admin_create')
+                    : _homeController.listChat[index].content
+                    .toString(), // name chat
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w400,
+                  color: _homeController.listChat[index].unreadCount! > 0
+                      ? Get.isDarkMode
+                      ? ColorValue.colorTextDark
+                      : ColorValue.neutralColor
+                      : Get.isDarkMode
+                      ? ColorValue.colorTextDark_2
+                      : ColorValue.colorBorder,
+                  // fontFamily: 'NotoColorEmoji',
+                ),
               ),
             ],
+          ),
         );
       case 3: //image
         return Row(
@@ -2062,38 +2078,38 @@ class _HomeChatWebsiteState extends State<HomeChatWebsite> {
                   height: 24,
                   width: 24,
                   child: Utils.getFileType(Constant.BASE_URL_IMAGE +
-                              jsonDecode(_homeController.listChat[index].content
-                                  .toString())[0]) ==
-                          "Video"
+                      jsonDecode(_homeController.listChat[index].content
+                          .toString())[0]) ==
+                      "Video"
                       ? GenThumbnailImage(
-                          thumbnailRequest: ThumbnailRequest(
-                            video: Constant.BASE_URL_IMAGE +
-                                jsonDecode(_homeController
-                                    .listChat[index].content
-                                    .toString())[0],
-                            thumbnailPath: null,
-                            imageFormat: ImageFormat.JPEG,
-                            maxHeight: 24,
-                            // Set maxHeight và maxWidth theo kích thước của Container cha
-                            maxWidth: 24,
-                            timeMs: 20,
-                            quality: 100,
-                            attachHeaders: false,
-                          ),
-                        )
+                    thumbnailRequest: ThumbnailRequest(
+                      video: Constant.BASE_URL_IMAGE +
+                          jsonDecode(_homeController
+                              .listChat[index].content
+                              .toString())[0],
+                      thumbnailPath: null,
+                      imageFormat: ImageFormat.JPEG,
+                      maxHeight: 24,
+                      // Set maxHeight và maxWidth theo kích thước của Container cha
+                      maxWidth: 24,
+                      timeMs: 20,
+                      quality: 100,
+                      attachHeaders: false,
+                    ),
+                  )
                       : Image.network(
-                          Constant.BASE_URL_IMAGE +
-                              jsonDecode(_homeController.listChat[index].content
-                                  .toString())[0],
-                          fit: BoxFit.cover,
-                          // Đảm bảo hình ảnh cover toàn bộ kích thước
-                          errorBuilder: (BuildContext context, Object exception,
-                              StackTrace? stackTrace) {
-                            return Container(
-                              color: Colors.grey,
-                            );
-                          },
-                        ),
+                    Constant.BASE_URL_IMAGE +
+                        jsonDecode(_homeController.listChat[index].content
+                            .toString())[0],
+                    fit: BoxFit.cover,
+                    // Đảm bảo hình ảnh cover toàn bộ kích thước
+                    errorBuilder: (BuildContext context, Object exception,
+                        StackTrace? stackTrace) {
+                      return Container(
+                        color: Colors.grey,
+                      );
+                    },
+                  ),
                 ),
               ),
             ),
@@ -2103,9 +2119,9 @@ class _HomeChatWebsiteState extends State<HomeChatWebsite> {
             Expanded(
               child: Text(
                 Utils.getFileType(Constant.BASE_URL_IMAGE +
-                            jsonDecode(_homeController.listChat[index].content
-                                .toString())[0]) ==
-                        "Image"
+                    jsonDecode(_homeController.listChat[index].content
+                        .toString())[0]) ==
+                    "Image"
                     ? "Photo"
                     : 'Video',
                 maxLines: 1,
@@ -2115,11 +2131,11 @@ class _HomeChatWebsiteState extends State<HomeChatWebsite> {
                     fontWeight: FontWeight.w400,
                     color: _homeController.listChat[index].unreadCount! > 0
                         ? Get.isDarkMode
-                            ? ColorValue.colorTextDark
-                            : ColorValue.neutralColor
+                        ? ColorValue.colorTextDark
+                        : ColorValue.neutralColor
                         : Get.isDarkMode
-                            ? ColorValue.colorTextDark_2
-                            : ColorValue.colorBorder),
+                        ? ColorValue.colorTextDark_2
+                        : ColorValue.colorBorder),
               ),
             ),
           ],
@@ -2127,7 +2143,8 @@ class _HomeChatWebsiteState extends State<HomeChatWebsite> {
       case 4: //file
         String typeThumbnail = '';
         String type = Utils.getFileType(Constant.BASE_URL_IMAGE +
-            jsonDecode(_homeController.listChat[index].content.toString())[0]);
+            jsonDecode(
+                _homeController.listChat[index].content.toString())[0]);
         switch (type) {
           case 'Microsoft Word':
             typeThumbnail = 'asset/icons/docx.svg';
@@ -2153,7 +2170,8 @@ class _HomeChatWebsiteState extends State<HomeChatWebsite> {
               Text(
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                _homeController.listChat[index].fullName.toString() + ':' + ' ',
+                _homeController.listChat[index].fullName.toString() + ':' +
+                    ' ',
                 style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w400,
@@ -2173,9 +2191,9 @@ class _HomeChatWebsiteState extends State<HomeChatWebsite> {
             ),
             Expanded(
               child: Text(
-                  // Uri.parse(controller.listChat[index].content.toString())
-                  //     .pathSegments
-                  //     .last,
+                // Uri.parse(controller.listChat[index].content.toString())
+                //     .pathSegments
+                //     .last,
                   TextByNation.getStringByKey('file'),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
@@ -2184,11 +2202,11 @@ class _HomeChatWebsiteState extends State<HomeChatWebsite> {
                       fontWeight: FontWeight.w400,
                       color: _homeController.listChat[index].unreadCount! > 0
                           ? Get.isDarkMode
-                              ? ColorValue.colorTextDark
-                              : ColorValue.neutralColor
+                          ? ColorValue.colorTextDark
+                          : ColorValue.neutralColor
                           : Get.isDarkMode
-                              ? ColorValue.colorTextDark_2
-                              : ColorValue.colorBorder)),
+                          ? ColorValue.colorTextDark_2
+                          : ColorValue.colorBorder)),
             ),
           ],
         );
@@ -2199,7 +2217,8 @@ class _HomeChatWebsiteState extends State<HomeChatWebsite> {
               Text(
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                _homeController.listChat[index].fullName.toString() + ':' + ' ',
+                _homeController.listChat[index].fullName.toString() + ':' +
+                    ' ',
                 style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w400,
@@ -2224,11 +2243,11 @@ class _HomeChatWebsiteState extends State<HomeChatWebsite> {
                     fontWeight: FontWeight.w400,
                     color: _homeController.listChat[index].unreadCount! > 0
                         ? Get.isDarkMode
-                            ? ColorValue.colorTextDark
-                            : ColorValue.neutralColor
+                        ? ColorValue.colorTextDark
+                        : ColorValue.neutralColor
                         : Get.isDarkMode
-                            ? ColorValue.colorTextDark_2
-                            : ColorValue.colorBorder)),
+                        ? ColorValue.colorTextDark_2
+                        : ColorValue.colorBorder)),
           ],
         );
       case 6:
@@ -2239,8 +2258,9 @@ class _HomeChatWebsiteState extends State<HomeChatWebsite> {
             children: <TextSpan>[
               if (_homeController.listChat[index].type == 2)
                 TextSpan(
-                  text: _homeController.listChat[index].userSent.toString() ==
-                          'admin'
+                  text:
+                  _homeController.listChat[index].userSent.toString() ==
+                      'admin'
                       ? '$stickerString Sticker'
                       : '${_homeController.listChat[index].fullName}: ',
                   style: TextStyle(
@@ -2254,20 +2274,20 @@ class _HomeChatWebsiteState extends State<HomeChatWebsite> {
                 ),
               TextSpan(
                 text: _homeController.listChat[index].userSent.toString() ==
-                        'admin'
+                    'admin'
                     ? AppLocalizations.of(context)!.admin_create
                     : '$stickerString Sticker', // name chat
                 style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w400,
-                    color:
-                        (_homeController.listChat[index].unreadCount ?? 0) > 0
-                            ? Get.isDarkMode
-                                ? ColorValue.colorTextDark
-                                : ColorValue.neutralColor
-                            : Get.isDarkMode
-                                ? ColorValue.colorTextDark_2
-                                : ColorValue.colorBorder),
+                    color: (_homeController.listChat[index].unreadCount ??
+                        0) > 0
+                        ? Get.isDarkMode
+                        ? ColorValue.colorTextDark
+                        : ColorValue.neutralColor
+                        : Get.isDarkMode
+                        ? ColorValue.colorTextDark_2
+                        : ColorValue.colorBorder),
               ),
             ],
           ),
@@ -2275,7 +2295,8 @@ class _HomeChatWebsiteState extends State<HomeChatWebsite> {
       case 7:
         return Row(
           children: [
-            if (_homeController.listChat[index].userSent.toString() != 'admin')
+            if (_homeController.listChat[index].userSent.toString() !=
+                'admin')
               Text('${_homeController.listChat[index].fullName}: ',
                   style: TextStyle(
                     fontSize: 14,
@@ -2283,7 +2304,8 @@ class _HomeChatWebsiteState extends State<HomeChatWebsite> {
                         ? ColorValue.colorTextDark
                         : ColorValue.textColor,
                     fontWeight: FontWeight.w400,
-                  )),
+                  )
+              ),
             CachedNetworkImage(
                 imageUrl: _homeController.listChat[index].content!,
                 height: 22,
@@ -2302,7 +2324,8 @@ class _HomeChatWebsiteState extends State<HomeChatWebsite> {
       case 8:
         return Row(
           children: [
-            if (_homeController.listChat[index].userSent.toString() != 'admin')
+            if (_homeController.listChat[index].userSent.toString() !=
+                'admin')
               Text('${_homeController.listChat[index].fullName}: ',
                   style: TextStyle(
                     fontSize: 14,
@@ -2310,7 +2333,8 @@ class _HomeChatWebsiteState extends State<HomeChatWebsite> {
                         ? ColorValue.colorTextDark
                         : ColorValue.textColor,
                     fontWeight: FontWeight.w400,
-                  )),
+                  )
+              ),
             CachedNetworkImage(
                 imageUrl: _homeController.listChat[index].content!,
                 height: 22,
@@ -2332,7 +2356,8 @@ class _HomeChatWebsiteState extends State<HomeChatWebsite> {
   }
 
   Widget selectThemeMode() {
-    return Obx(() => Column(
+    return Obx(() =>
+        Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.max,
           children: [
@@ -2376,7 +2401,7 @@ class _HomeChatWebsiteState extends State<HomeChatWebsite> {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children:
-                      List.generate(_homeController.listNode.length, (index) {
+                  List.generate(_homeController.listNode.length, (index) {
                     return GestureDetector(
                       onTap: () {
                         if (index !=
@@ -2405,7 +2430,7 @@ class _HomeChatWebsiteState extends State<HomeChatWebsite> {
                             ),
                             Radio(
                               groupValue:
-                                  _homeController.selectBrightnessMode.value,
+                              _homeController.selectBrightnessMode.value,
                               value: index,
                               onChanged: ((value) {
                                 if (index !=
@@ -2515,8 +2540,8 @@ class _HomeChatWebsiteState extends State<HomeChatWebsite> {
           gradient: _homeController.isSelected.value == true
               ? null
               : LinearGradient(
-                  colors: [Colors.blue, Colors.green],
-                ),
+            colors: [Colors.blue, Colors.green],
+          ),
         ),
         child: PopupMenuButton(
             offset: Offset(50, -60),
@@ -2530,7 +2555,7 @@ class _HomeChatWebsiteState extends State<HomeChatWebsite> {
               fit: BoxFit.cover,
             ),
             shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             itemBuilder: (context) {
               return [
                 MyEntry(

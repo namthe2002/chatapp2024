@@ -55,8 +55,8 @@ class LoginController extends GetxController {
     String accessToken =
     await Utils.getStringValueWithKey(Constant.ACCESS_TOKEN);
     print('Access Token: $accessToken');
-    if (accessToken.isNotEmpty) {
-      await Utils.login();}
+    // if (accessToken.isNotEmpty) {
+    //   await Utils.login();}
   }
 
   Future forgotpass() async {

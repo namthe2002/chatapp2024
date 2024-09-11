@@ -60,6 +60,86 @@ class ChatController extends GetxController {
 
   @override
   void onInit() async {
+    // ever(appController.appState, (state) async {
+    //   if (state == AppLifecycleState.resumed) {
+    //     // await SocketManager().connect();
+    //   } else {
+    //     readMessage(uuidRoomnew, uuidLastMessageNew);
+    //   }
+    // });
+    // if (await Utils.getIntValueWithKey(Constant.NOTIFICATION) == 0) {
+    //   Utils.toggleNotification(1);
+    // }
+    // avatarUser.value = await Utils.getStringValueWithKey(Constant.AVATAR_USER);
+    // avatarUser.value = await Utils.getStringValueWithKey(Constant.AVATAR_USER);
+    // avatarUser.value = await Utils.getStringValueWithKey(Constant.AVATAR_USER);
+    // userName.value = await Utils.getStringValueWithKey(Constant.FULL_NAME);
+    // fullNameUser.value = await Utils.getStringValueWithKey(Constant.FULL_NAME);
+    // fullNameUser.value = await Utils.getStringValueWithKey(Constant.FULL_NAME);
+    // String checkName = await Utils.getStringValueWithKey(Constant.FULL_NAME);
+    //
+    // if (checkName.isEmpty) {
+    //   userName.value = await Utils.getStringValueWithKey(Constant.USERNAME);
+    // }
+    // userNameAcount.value = await Utils.getStringValueWithKey(Constant.USERNAME);
+    //
+    // if (await Utils.getBoolValueWithKey(Constant.AUTO_MODE) == true) {
+    //   selectBrightnessMode.value = 2;
+    // } else {
+    //   if (await Utils.getBoolValueWithKey(Constant.DARK_MODE) == false) {
+    //     selectBrightnessMode.value = 0;
+    //   } else {
+    //     selectBrightnessMode.value = 1;
+    //   }
+    // }
+    // // previousBrightness = MediaQuery.platformBrightnessOf(Get.context!);
+    // // WidgetsBinding.instance.addPostFrameCallback((_) {
+    // //   checkBrightnessChange();
+    // // });
+    // await getChat();
+    // await sendListOnline();
+    // scrollController.addListener(() {
+    //   if (scrollController.position.userScrollDirection ==
+    //       ScrollDirection.reverse) {
+    //     if (isVisible == true) {
+    //       isVisible.value = false;
+    //     }
+    //   } else {
+    //     if (scrollController.position.userScrollDirection ==
+    //         ScrollDirection.forward) {
+    //       if (isVisible == false) {
+    //         isVisible.value = true;
+    //       }
+    //     }
+    //   }
+    //
+    //   // if (scrollController.position.pixels ==
+    //   //     scrollController.position.maxScrollExtent) {
+    //   //   // Thực hiện hành động khi đến cuối danh sách
+    //   //   // Ví dụ: Hiển thị một widget
+    //   //   isVisible.value = true;
+    //   // }
+    // });
+    //
+    // scrollController.addListener(() {
+    //   if (scrollController.position.maxScrollExtent ==
+    //       scrollController.offset) {
+    //     if (hasMore.value) {
+    //       page++;
+    //       getChat();
+    //     } else {
+    //       isVisible.value = true; // hiển thị nút khi vuốt tới cuối cùng
+    //     }
+    //   }
+    // });
+    //
+    // timer = await Timer.periodic(Duration(seconds: 10),
+    //     (timer) => sendListOnline()); // gọi hàm sendState
+    super.onInit();
+  }
+
+
+  void onInitData() async {
     ever(appController.appState, (state) async {
       if (state == AppLifecycleState.resumed) {
         // await SocketManager().connect();
@@ -113,12 +193,6 @@ class ChatController extends GetxController {
         }
       }
 
-      // if (scrollController.position.pixels ==
-      //     scrollController.position.maxScrollExtent) {
-      //   // Thực hiện hành động khi đến cuối danh sách
-      //   // Ví dụ: Hiển thị một widget
-      //   isVisible.value = true;
-      // }
     });
 
     scrollController.addListener(() {
@@ -134,8 +208,8 @@ class ChatController extends GetxController {
     });
 
     timer = await Timer.periodic(Duration(seconds: 10),
-        (timer) => sendListOnline()); // gọi hàm sendState
-    super.onInit();
+            (timer) => sendListOnline());
+
   }
 
   @override
@@ -408,9 +482,7 @@ class ChatController extends GetxController {
       listChat.refresh();
     } else {
       isLoading.value = true;
-
       listChat.clear();
-
       getChat();
     }
   }
@@ -469,6 +541,7 @@ class ChatController extends GetxController {
 
       var response =
           await APICaller.getInstance().post('v1/Chat/message-room', param);
+      print('response is: ${response}');
       if (response != null) {
         List<dynamic> list = response['items'];
         var listItem = list.map((dynamic json) => Chat.fromJson(json)).toList();
@@ -485,6 +558,7 @@ class ChatController extends GetxController {
     } catch (e) {
       Utils.showSnackBar(
           title: TextByNation.getStringByKey('notification'), message: '$e');
+      isLoading.value = false;
     } finally {
       isLoading.value = false;
       isUnPin.value = await false;
