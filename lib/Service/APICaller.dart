@@ -14,7 +14,8 @@ import '../Utils/Utils.dart';
 class APICaller {
   static APICaller _apiCaller = APICaller();
 
-  // final String BASE_URL = "https://tw-apimaster.anbeteam.io.vn/api/";
+
+
   final String BASE_URL = "https://tw-apimaster-v2.anbeteam.io.vn/api/";
   final String BASE_URL_MEDIA = "https://livestreammedia.funcasino.vip/";
   Translator translator = Translator();

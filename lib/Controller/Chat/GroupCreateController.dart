@@ -128,7 +128,7 @@ class GroupCreateController extends GetxController {
         var response =
             await APICaller.getInstance().post('v1/Group/create-group', param);
         if (response != null) {
-          Get.close(3);
+          // Get.close(3);
 
           // await Navigation.navigateTo(page: 'ChatDetail', arguments: {
           //   'uuid': response['data']
@@ -142,15 +142,13 @@ class GroupCreateController extends GetxController {
           //   'lastMsgLineUuid': ''
           // });
           //
-
+          Get.find<ChatController>().update();
           Get.offAll(() => HomeChatWebsite());
-
           if (Get.isRegistered<ChatController>()) {
             var controller = await Get.find<ChatController>();
             controller.isUnPin.value = await true;
             await controller.refreshListChat();
           }
-
           // goto new group
         }
       } catch (e) {

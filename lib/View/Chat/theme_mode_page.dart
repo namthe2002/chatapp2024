@@ -12,16 +12,10 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:live_yoko/widget/single_tap_detector.dart';
 import '../../Models/Chat/Chat.dart';
 
-class SelectThemeMode extends StatefulWidget {
+class SelectThemeMode extends StatelessWidget {
   final Chat? chatDetail;
 
   SelectThemeMode({Key? key, this.chatDetail}) : super(key: key);
-
-  @override
-  State<SelectThemeMode> createState() => _SelectThemeModeState();
-}
-
-class _SelectThemeModeState extends State<SelectThemeMode> {
   final _homeController = Get.put(ThemeControler());
 
   @override
@@ -108,7 +102,6 @@ class _SelectThemeModeState extends State<SelectThemeMode> {
                               if (index != _homeController.selectBrightnessMode.value) {
                                 _homeController.selectBrightnessMode.value = index;
                                 _homeController.changeTheme(index, context);
-                                setState(() {});
                               }
                             },
                           ),
@@ -127,7 +120,7 @@ class _SelectThemeModeState extends State<SelectThemeMode> {
             padding: const EdgeInsets.symmetric(horizontal: 20),
             child: SingleTapDetector(
                 onTap: () {
-                  Get.appUpdate();
+                  Get.forceAppUpdate();
                 },
                 child: Container(
                   width: Get.width,
@@ -140,7 +133,9 @@ class _SelectThemeModeState extends State<SelectThemeMode> {
                           colors: [
                             Color(0xFF0CBE8C).withOpacity(1),
                             Color(0xFF5B72DE).withOpacity(1),
-                          ])),
+                          ]
+                      )
+                  ),
                   alignment: Alignment.center,
                   child: Text(
                     AppLocalizations.of(context)!.label_apply,

@@ -4,12 +4,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
+import 'package:live_yoko/Controller/Chat/ChatController.dart';
 import 'package:live_yoko/Controller/Chat/GroupCreateController.dart';
 import 'package:live_yoko/Global/ColorValue.dart';
 import 'package:live_yoko/Global/Constant.dart';
 import 'package:live_yoko/Global/TextByNation.dart';
 import 'package:live_yoko/Navigation/Navigation.dart';
 import 'package:live_yoko/Utils/Utils.dart';
+import 'package:live_yoko/View/Chat/GroupCreateStep2.dart';
 
 class GroupCreate extends StatelessWidget {
   var delete = Get.delete<GroupCreateController>();
@@ -20,11 +22,11 @@ class GroupCreate extends StatelessWidget {
     return Obx(() => (Scaffold(
           // backgroundColor: Colors.white,
           appBar: appBar(),
-          body: body(),
+          body: body(context),
         )));
   }
 
-  SafeArea body() {
+  SafeArea body(BuildContext context) {
     return SafeArea(
       child: Container(
         width: Get.width,
@@ -239,9 +241,10 @@ class GroupCreate extends StatelessWidget {
                       focusColor: Colors.transparent,
                       backgroundColor: Colors.transparent,
                       onPressed: () {
-                        controller.createGroundStep2();
+                        ChatController homeController = Get.find<ChatController>();
+                        homeController.updateFeature(widget: GroupCreateStep2());
                       },
-                      tooltip: 'CreateGroup',
+                      tooltip: 'Create Group',
                       child: Icon(
                         Icons.arrow_forward_outlined,
                         size: 24.sp,

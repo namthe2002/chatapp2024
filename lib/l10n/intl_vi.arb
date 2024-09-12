@@ -218,6 +218,7 @@
   "label_register": "Đăng ký",
   "label_login_phone_number": "Đăng nhập bằng số điện thoại",
   "label_preview_chat_setting": "Chọn chế độ giao diện phù hợp với bạn",
-  "label_apply": "Áp dụng"
+  "label_apply": "Áp dụng",
+  "label_no_dialog": "Bạn chưa có cuộc hội thoại nào!"
 }
 

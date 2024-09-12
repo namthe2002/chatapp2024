@@ -92,8 +92,9 @@ class _ChatBoxDetailState extends State<ChatBoxDetail>
     // TODO: implement initState
     super.initState();
     controller.initChatData();
+    controller.selectedChatDetail.value = widget.chatDetail;
     _tabEmojiController = TabController(length: 3, vsync: this);
-    _tabEmojiController.addListener(_updateTabHeight);
+    // _tabEmojiController.addListener(_updateTabHeight);
   }
 
   void _hideOverlay() {
@@ -106,7 +107,7 @@ class _ChatBoxDetailState extends State<ChatBoxDetail>
   void _showOverlay(BuildContext context) {
     if (_overlayEntry == null) {
       _overlayEntry = _createOverlayEntry(context);
-      Overlay.of(context)!.insert(_overlayEntry!);
+      Overlay.of(context).insert(_overlayEntry!);
 
       // Start the initial 2-second timer
       _overlayTimer = Timer(Duration(seconds: 2), () {
@@ -278,35 +279,34 @@ class _ChatBoxDetailState extends State<ChatBoxDetail>
     );
   }
 
-  void _updateTabHeight() {
-    if (controller.isExtendShowEmoji.value) {
-      if (_tabEmojiController.indexIsChanging) {
-        if (_tabEmojiController.index == 0) {
-          controller.isExtendShowEmoji.value =
-              !controller.isExtendShowEmoji.value;
-          controller.tabHeight = (256.0).obs;
-        } else {
-          controller.tabHeight = (Get.height * .796).obs;
-        }
-      } else {
-        if (_tabEmojiController.index == 0) {
-          controller.tabHeight = (256.0).obs;
-          controller.isExtendShowEmoji.value =
-              !controller.isExtendShowEmoji.value;
-        } else {
-          controller.tabHeight = (Get.height * .796).obs;
-        }
-      }
-    } else {
-      controller.tabHeight = 256.0.obs;
-    }
-
-    FocusScope.of(context).unfocus();
-  }
+  // void _updateTabHeight() {
+  //   if (controller.isExtendShowEmoji.value) {
+  //     if (_tabEmojiController.indexIsChanging) {
+  //       if (_tabEmojiController.index == 0) {
+  //         controller.isExtendShowEmoji.value =
+  //             !controller.isExtendShowEmoji.value;
+  //         controller.tabHeight = (256.0).obs;
+  //       } else {
+  //         controller.tabHeight = (Get.height * .796).obs;
+  //       }
+  //     } else {
+  //       if (_tabEmojiController.index == 0) {
+  //         controller.tabHeight = (256.0).obs;
+  //         controller.isExtendShowEmoji.value =
+  //             !controller.isExtendShowEmoji.value;
+  //       } else {
+  //         controller.tabHeight = (Get.height * .796).obs;
+  //       }
+  //     }
+  //   } else {
+  //     controller.tabHeight = 256.0.obs;
+  //   }
+  //
+  //   FocusScope.of(context).unfocus();
+  // }
 
   @override
   Widget build(BuildContext context) {
-    controller.selectedChatDetail.value = widget.chatDetail;
     size = MediaQuery.of(context).size;
     return Obx(
       () => controller.selectedChatDetail.value == null
@@ -503,14 +503,21 @@ class _ChatBoxDetailState extends State<ChatBoxDetail>
                     flex: 2,
                     child: Container(
                       decoration: BoxDecoration(
-                          image: DecorationImage(
-                              image: AssetImage(Get.isDarkMode
-                                  ? 'asset/images/bg_dark.png'
-                                  : 'asset/images/bg_light.png'),
-                              fit: BoxFit.cover)),
+                          image: Get.isDarkMode
+                              ? DecorationImage(
+                                  image: AssetImage('asset/images/bg_dark.png'),
+                                  fit: BoxFit.cover,
+                                  opacity: 0.2)
+                              : DecorationImage(
+                                  image:
+                                      AssetImage('asset/images/bg_light.png'),
+                                  fit: BoxFit.cover,
+                                )),
                       child: Obx(() => Padding(
                             padding: EdgeInsets.symmetric(
-                                horizontal: Get.width * 0.08),
+                                horizontal: controller.isShowGroupInfo == true
+                                    ? Get.width * 0.045
+                                    : Get.width * 0.08),
                             child: Column(
                               children: [
                                 Expanded(
@@ -2750,13 +2757,17 @@ class _ChatBoxDetailState extends State<ChatBoxDetail>
               ],
             )
           : Image.asset(
-
-         width:  Get.width * 0.11, height: Get.height * 0.23,stickerString);
+              width: Get.width * 0.11,
+              height: Get.height * 0.23,
+              stickerString);
     }
 
     return Container(
       constraints: BoxConstraints(
-        maxWidth: Get.width / 2.5,
+        maxWidth: controller.isShowGroupInfo == true
+            ? Get.width / 3.5
+            : Get.width / 2.3,
+        minWidth: Get.width / 5,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -2820,22 +2831,6 @@ class _ChatBoxDetailState extends State<ChatBoxDetail>
               height: 10,
             )
           ],
-          // Text(
-          //   '${decoded}',
-          //   style: TextStyle(
-          //     fontWeight: FontWeight.w400,
-          //     fontSize: controller.sizeText.toDouble(),
-          //     color: !reply && Get.isDarkMode ? Colors.black : null,
-          //     fontFamily: 'NotoColorEmoji',
-          //   ),
-          //       overflow: replyShow || pinType == 1 ? TextOverflow.ellipsis : null,
-          //   maxLines: replyShow
-          //       ? 4
-          //       : pinType == 1
-          //           ? 1
-          //           : null,
-          // ),
-
           TextWithEmoji(
             text: '${decoded}',
             fontWeight: FontWeight.w400,

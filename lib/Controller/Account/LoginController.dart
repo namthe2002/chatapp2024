@@ -54,7 +54,8 @@ class LoginController extends GetxController {
   void _init() async {
     String accessToken =
     await Utils.getStringValueWithKey(Constant.ACCESS_TOKEN);
-    print('Access Token: $accessToken');
+    textUserName.text = '0123456788';
+    textPass.text = '12345678';
     // if (accessToken.isNotEmpty) {
     //   await Utils.login();}
   }

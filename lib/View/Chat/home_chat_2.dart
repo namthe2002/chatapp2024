@@ -395,7 +395,7 @@ class _HomeChatWebsite2State extends State<HomeChatWebsite2> {
                 onTap: () async {
                   _homeController.listChat.refresh();
                   await _homeController.refreshListChat;
-                  _homeController.updateFeature(context, homeChatWidget());
+                  _homeController.updateFeature(context: context, widget: homeChatWidget());
                   _homeController.selectIcon(1);
                 },
               )),
@@ -411,7 +411,7 @@ class _HomeChatWebsite2State extends State<HomeChatWebsite2> {
                 message: AppLocalizations.of(context)!.friend,
                 onTap: () {
                   // _buildFeatureHomeChat(context, C);
-                  _homeController.updateFeature(context, Friend());
+                  _homeController.updateFeature(context: context,widget: Friend());
                   _homeController.selectIcon(2);
                 },
               )),
@@ -426,7 +426,7 @@ class _HomeChatWebsite2State extends State<HomeChatWebsite2> {
                     : null,
                 message: AppLocalizations.of(context)!.friend_sent,
                 onTap: () {
-                  _homeController.updateFeature(context, ManageFriends());
+                  _homeController.updateFeature(context: context,widget:  ManageFriends());
                   _homeController.selectIcon(3);
                 },
               )),
@@ -452,8 +452,8 @@ class _HomeChatWebsite2State extends State<HomeChatWebsite2> {
                           message: AppLocalizations.of(context)!.update_profile,
                           onTap: () {
                             Get.delete<UpdateProfileController>();
-                            _homeController.updateFeature(
-                                context, UpdateProfile());
+                            _homeController.updateFeature(context:
+                                context, widget: UpdateProfile());
                             _homeController.selectIcon(4);
                           },
                         )),
@@ -471,7 +471,7 @@ class _HomeChatWebsite2State extends State<HomeChatWebsite2> {
                           message: AppLocalizations.of(context)!.night_mode,
                           onTap: () {
                             _homeController.updateFeature(
-                                context, SelectThemeMode());
+                                context: context, widget: SelectThemeMode());
                             _homeController.selectIcon(5);
                           },
                         )),
@@ -489,7 +489,7 @@ class _HomeChatWebsite2State extends State<HomeChatWebsite2> {
                           message: AppLocalizations.of(context)!.chat_setting,
                           onTap: () {
                             _homeController.updateFeature(
-                                context, ChatSetting());
+                                context: context, widget: ChatSetting());
                             _homeController.selectIcon(6);
                           },
                         )),
@@ -524,7 +524,7 @@ class _HomeChatWebsite2State extends State<HomeChatWebsite2> {
                           message: AppLocalizations.of(context)!.notification,
                           onTap: () {
                             _homeController.updateFeature(
-                                context, NotificationSetting());
+                                context: context,widget:  NotificationSetting());
                             _homeController.selectIcon(8);
                           },
                         )),
@@ -541,8 +541,8 @@ class _HomeChatWebsite2State extends State<HomeChatWebsite2> {
                               : null,
                           message: AppLocalizations.of(context)!.language,
                           onTap: () {
-                            _homeController.updateFeature(
-                                context, LanguageSettings());
+                            _homeController.updateFeature(context:
+                                context,widget:  LanguageSettings());
                             _homeController.selectIcon(9);
                           },
                         )),

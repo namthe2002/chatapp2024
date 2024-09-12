@@ -30,7 +30,7 @@ class FriendController extends GetxController {
   String uuidAcount = '';
   bool requestDone = true;
   Rx<int> isSelectedButton = 1.obs;
-  var selectedChatDetail = Rxn<Chat>();
+  var selectedChatDetail = Chat();
 
   @override
   void onInit() async {
@@ -73,17 +73,18 @@ class FriendController extends GetxController {
       var response = await APICaller.getInstance()
           .post('v1/Chat/create-message-room', param);
       if (response != null) {
+
+        selectedChatDetail.uuid = response['data'];
+        selectedChatDetail.ownerUuid =
+            await Utils.getStringValueWithKey(Constant.UUID_USER);
+        selectedChatDetail.ownerName =
+            listContact[index].fullName ?? listContact[index].userName ?? '';
+        selectedChatDetail.type = 1;
+        selectedChatDetail.avatar = listContact[index].avatar ?? '';
         Get.delete<ChatDetailController>();
         Get.delete<ProfileChatDetailController>();
-        selectedChatDetail.value?.uuid = response['data'];
-        selectedChatDetail.value?.ownerUuid =
-            await Utils.getStringValueWithKey(Constant.UUID_USER);
-        selectedChatDetail.value?.ownerName =
-            listContact[index].fullName ?? listContact[index].userName ?? '';
-        selectedChatDetail.value?.type = 1;
-        selectedChatDetail.value?.avatar = listContact[index].avatar ?? '';
-        selectedChatDetail.value?.lastMsgLineUuid ?? '';
-        Get.put(ChatDetailController()).selectedChatDetail = selectedChatDetail;
+        Get.find<ChatController>().selectChatItem(selectedChatDetail);
+        Get.forceAppUpdate();
         // Get.put(ChatController()).selectedChatItem = selectedChatDetail;
       }
     } catch (e) {
@@ -109,10 +110,9 @@ class FriendController extends GetxController {
       };
 
       var response =
-          await APICaller.getInstance().post('v1/Member/find-friend', param);
+          await APICaller.getInstance().post('v1/Member/find-member', param);
 
-      print('checkresponse ${response}'
-      );
+      print('checkresponse ${response}');
       if (response != null) {
         List<dynamic> list = response['items'];
         var listItem =

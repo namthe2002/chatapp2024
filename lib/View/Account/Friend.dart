@@ -27,6 +27,8 @@ class Friend extends StatelessWidget {
     );
   }
 
+
+
   SafeArea body(BuildContext context) {
     return SafeArea(
         child: Container(

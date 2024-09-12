@@ -623,7 +623,7 @@ class ChatController extends GetxController {
     }
   }
 
-  void updateFeature(BuildContext context, Widget widget) {
+  void updateFeature({BuildContext? context,required Widget widget}) {
     widgetFeature.value = widget;
   }
 

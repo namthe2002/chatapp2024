@@ -19,6 +19,8 @@ import 'package:live_yoko/View/Account/LanguageSettings.dart';
 import 'package:live_yoko/View/Account/ManageFriends.dart';
 import 'package:live_yoko/View/Account/UpdateProfile.dart';
 import 'package:live_yoko/View/Chat/ChatBoxDetail.dart';
+import 'package:live_yoko/View/Chat/ChatCreate.dart';
+import 'package:live_yoko/View/Chat/GroupCreate.dart';
 import 'package:live_yoko/View/Chat/theme_mode_page.dart';
 import 'package:live_yoko/widget/single_tap_detector.dart';
 import 'package:lottie/lottie.dart';
@@ -387,7 +389,8 @@ class _HomeChatWebsiteState extends State<HomeChatWebsite> {
                 onTap: () async {
                   _homeController.listChat.refresh();
                   await _homeController.refreshListChat;
-                  _homeController.updateFeature(context, homeChatWidget());
+                  _homeController.updateFeature(
+                      context: context, widget: homeChatWidget());
                   _homeController.selectIcon(1);
                 },
               )),
@@ -402,7 +405,8 @@ class _HomeChatWebsiteState extends State<HomeChatWebsite> {
                 message: AppLocalizations.of(context)!.friend,
                 onTap: () {
                   // _buildFeatureHomeChat(context, C);
-                  _homeController.updateFeature(context, Friend());
+                  _homeController.updateFeature(
+                      context: context, widget: Friend());
                   _homeController.selectIcon(2);
                 },
               )),
@@ -416,7 +420,8 @@ class _HomeChatWebsiteState extends State<HomeChatWebsite> {
                     : null,
                 message: AppLocalizations.of(context)!.friend_sent,
                 onTap: () {
-                  _homeController.updateFeature(context, ManageFriends());
+                  _homeController.updateFeature(
+                      context: context, widget: ManageFriends());
                   _homeController.selectIcon(3);
                 },
               )),
@@ -442,7 +447,7 @@ class _HomeChatWebsiteState extends State<HomeChatWebsite> {
                           onTap: () {
                             Get.delete<UpdateProfileController>();
                             _homeController.updateFeature(
-                                context, UpdateProfile());
+                                context: context, widget: UpdateProfile());
                             _homeController.selectIcon(4);
                           },
                         )),
@@ -459,7 +464,7 @@ class _HomeChatWebsiteState extends State<HomeChatWebsite> {
                           message: AppLocalizations.of(context)!.night_mode,
                           onTap: () {
                             _homeController.updateFeature(
-                                context, SelectThemeMode());
+                                context: context, widget: SelectThemeMode());
                             _homeController.selectIcon(5);
                           },
                         )),
@@ -476,7 +481,7 @@ class _HomeChatWebsiteState extends State<HomeChatWebsite> {
                           message: AppLocalizations.of(context)!.chat_setting,
                           onTap: () {
                             _homeController.updateFeature(
-                                context, ChatSetting());
+                                context: context, widget: ChatSetting());
                             _homeController.selectIcon(6);
                           },
                         )),
@@ -509,7 +514,8 @@ class _HomeChatWebsiteState extends State<HomeChatWebsite> {
                           message: AppLocalizations.of(context)!.notification,
                           onTap: () {
                             _homeController.updateFeature(
-                                context, NotificationSetting());
+                                context: context,
+                                widget: NotificationSetting());
                             _homeController.selectIcon(8);
                           },
                         )),
@@ -526,7 +532,7 @@ class _HomeChatWebsiteState extends State<HomeChatWebsite> {
                           message: AppLocalizations.of(context)!.language,
                           onTap: () {
                             _homeController.updateFeature(
-                                context, LanguageSettings());
+                                context: context, widget: LanguageSettings());
                             _homeController.selectIcon(9);
                           },
                         )),
@@ -886,21 +892,15 @@ class _HomeChatWebsiteState extends State<HomeChatWebsite> {
                 : SizedBox(),
             Expanded(
                 flex: 8,
-                child:
-                    //
-                    // Obx(() {
-                    //   if (_homeController.selectedChatItem.value != null) {
-                    //     Get.delete<ChatDetailController>();
-                    //   }
-                    //
-                    //
-
-                    ChatBoxDetail(
+                child: ChatBoxDetail(
                   key: ValueKey(
                     _homeController.selectedChatItem.value?.uuid ?? 1,
                   ),
                   chatDetail: _homeController.selectedChatItem.value,
-                )),
+                )
+
+
+            ),
           ],
         ));
   }
@@ -1032,26 +1032,59 @@ class _HomeChatWebsiteState extends State<HomeChatWebsite> {
                 height: 12,
               ),
               Expanded(
-                child: RefreshIndicator(
-                  onRefresh: _homeController.refreshListChat,
-                  child: ListView.builder(
-                    controller: _homeController.scrollController,
-                    physics: AlwaysScrollableScrollPhysics(),
-                    itemCount: _homeController.listChat.length + 1,
-                    itemBuilder: (context, index) {
-                      if (index < _homeController.listChat.length) {
-                        return chatItem(context, index);
-                      } else {
-                        return Padding(
-                          padding: EdgeInsets.symmetric(vertical: 30),
-                          child: _homeController.hasMore.value
-                              ? CircularProgressIndicator()
-                              : const SizedBox(),
-                        );
-                      }
-                    },
-                  ),
-                ),
+                child: null == _homeController.listChat.length
+                    ? RefreshIndicator(
+                        onRefresh: _homeController.refreshListChat,
+                        child: Padding(
+                          padding: const EdgeInsets.only(top: 200),
+                          child: Align(
+                            alignment: Alignment.center,
+                            child: Column(
+                              children: [
+                                Image.asset(
+                                  'asset/images/listchat_empty.png',
+                                  width: 160,
+                                  height: 128,
+                                ),
+                                SizedBox(
+                                  height: 15,
+                                ),
+                                Text(
+                                  AppLocalizations.of(context)!.label_no_dialog,
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    color: Color(0xFF101114),
+                                    fontSize: 16,
+                                    fontFamily: 'SF Pro Display',
+                                    fontWeight: FontWeight.w400,
+                                    height: 0.09,
+                                  ),
+                                )
+                              ],
+                            ),
+                          ),
+                        ),
+                      )
+                    : RefreshIndicator(
+                        onRefresh: _homeController.refreshListChat,
+                        child: ListView.builder(
+                          controller: _homeController.scrollController,
+                          physics: AlwaysScrollableScrollPhysics(),
+                          itemCount: _homeController.listChat.length + 1,
+                          itemBuilder: (context, index) {
+                            if (index < _homeController.listChat.length) {
+                              return chatItem(context, index);
+                            } else {
+                              return Padding(
+                                padding: EdgeInsets.symmetric(vertical: 30),
+                                child: _homeController.hasMore.value
+                                    ? CircularProgressIndicator()
+                                    : const SizedBox(),
+                              );
+                            }
+                          },
+                        ),
+                      ),
               ),
             ],
           ),
@@ -1106,7 +1139,7 @@ class _HomeChatWebsiteState extends State<HomeChatWebsite> {
           //     fit: BoxFit.cover,
           //   ),
           // ),
-          child: _buildGetMediaIcon(),
+          child: _createChatButton(),
         ),
       ),
     );
@@ -1980,59 +2013,59 @@ class _HomeChatWebsiteState extends State<HomeChatWebsite> {
       //                   : ColorValue.colorBorder));
       case 2:
         return Row(
-            children: [
-              RichText(
+          children: [
+            RichText(
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              text: TextSpan(
+                children: <TextSpan>[
+                  if (_homeController.listChat[index].type == 2)
+                    TextSpan(
+                      text: _homeController.listChat[index].userSent
+                                  .toString() ==
+                              'admin'
+                          ? _homeController.listChat[index].content.toString() +
+                              ' '
+                          : _homeController.listChat[index].fullName
+                                  .toString() +
+                              ':' +
+                              ' ',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w400,
+                        color: Get.isDarkMode
+                            ? ColorValue.colorTextDark
+                            : ColorValue.textColor,
+                        // fontFamily: 'NotoColorEmoji',
+                      ),
+                    ),
+                ],
+              ),
+            ),
+            SizedBox(
+              width: 2,
+            ),
+            Expanded(
+              child: TextWithEmoji(
+                text: _homeController.listChat[index].userSent.toString() ==
+                        'admin'
+                    ? TextByNation.getStringByKey('admin_create')
+                    : _homeController.listChat[index].content.toString(),
+                // name chat
+                fontSize: 14,
+                fontWeight: FontWeight.w400,
+                color: _homeController.listChat[index].unreadCount! > 0
+                    ? Get.isDarkMode
+                        ? ColorValue.colorTextDark
+                        : ColorValue.neutralColor
+                    : Get.isDarkMode
+                        ? ColorValue.colorTextDark_2
+                        : ColorValue.colorBorder,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                text: TextSpan(
-                  children: <TextSpan>[
-                    if (_homeController.listChat[index].type == 2)
-                      TextSpan(
-                        text: _homeController.listChat[index].userSent
-                                    .toString() ==
-                                'admin'
-                            ? _homeController.listChat[index].content.toString() +
-                                ' '
-                            : _homeController.listChat[index].fullName
-                                    .toString() +
-                                ':' +
-                                ' ',
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w400,
-                          color: Get.isDarkMode
-                              ? ColorValue.colorTextDark
-                              : ColorValue.textColor,
-                          // fontFamily: 'NotoColorEmoji',
-                        ),
-                      ),
-                  ],
-                ),
               ),
-              SizedBox(
-                width: 2,
-              ),
-              Expanded(
-                child: TextWithEmoji(
-                    text:
-                        _homeController.listChat[index].userSent.toString() == 'admin'
-                            ? TextByNation.getStringByKey('admin_create')
-                            : _homeController.listChat[index].content
-                                .toString(), // name chat
-                    fontSize: 14,
-                    fontWeight: FontWeight.w400,
-                    color: _homeController.listChat[index].unreadCount! > 0
-                        ? Get.isDarkMode
-                            ? ColorValue.colorTextDark
-                            : ColorValue.neutralColor
-                        : Get.isDarkMode
-                            ? ColorValue.colorTextDark_2
-                            : ColorValue.colorBorder,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-              ),
-            ],
+            ),
+          ],
         );
       case 3: //image
         return Row(
@@ -2506,7 +2539,7 @@ class _HomeChatWebsiteState extends State<HomeChatWebsite> {
   //   return thumbnail;
   // }
 
-  Widget _buildGetMediaIcon() {
+  Widget _createChatButton() {
     return Container(
         padding: EdgeInsets.symmetric(vertical: 4, horizontal: 4),
         margin: EdgeInsets.symmetric(horizontal: 4),
@@ -2521,10 +2554,13 @@ class _HomeChatWebsiteState extends State<HomeChatWebsite> {
         child: PopupMenuButton(
             offset: Offset(50, -60),
             tooltip: 'Create Chat',
-            color: ColorValue.white,
+            shadowColor: Colors.grey.withOpacity(0.5),
+         color: Get.isDarkMode ? ColorValue.neutralColor : Colors.white,
             padding: EdgeInsets.zero,
             icon: SvgPicture.asset(
               'asset/icons/add_chat.svg',
+              color:
+              Get.isDarkMode ? ColorValue.white : ColorValue.neutralColor,
               width: 32,
               height: 32,
               fit: BoxFit.cover,
@@ -2537,14 +2573,15 @@ class _HomeChatWebsiteState extends State<HomeChatWebsite> {
                     icon: 'asset/icons/ic_new_message.svg',
                     title: 'New Message',
                     onTap: () async {
-                      // await controller.getImageFiles(isCamera: false);
-                      await Navigation.navigateTo(page: 'ChatCreate');
+                      _homeController.updateFeature(
+                          context: context, widget: ChatCreate());
                     }),
                 MyEntry(
                     icon: 'asset/icons/ic_new_group.svg',
                     title: 'New Group',
                     onTap: () async {
-                      await Navigation.navigateTo(page: 'GroupCreate');
+                      _homeController.updateFeature(
+                          context: context, widget: GroupCreate());
                     }),
               ];
             }));

@@ -56,10 +56,9 @@ class PushNotifications {
         false; // khai báo biến check xem thông báo click vào khi app đã kết thúc hay chưa
 
     if (notificationAppLaunchDetails != null &&
-            notificationAppLaunchDetails.didNotificationLaunchApp ??
-        false) {
+            notificationAppLaunchDetails.didNotificationLaunchApp) {
       Map<String, dynamic> data = await jsonDecode(
-          notificationAppLaunchDetails!.notificationResponse!.payload!);
+          notificationAppLaunchDetails.notificationResponse!.payload!);
 
       await onNotificationTap(
           notificationAppLaunchDetails.notificationResponse!);

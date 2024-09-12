@@ -2,13 +2,18 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:live_yoko/Controller/Chat/ChatDetailController.dart';
 import 'package:live_yoko/Global/Constant.dart';
 import 'package:live_yoko/Global/TextByNation.dart';
 import 'package:live_yoko/Models/Account/Contact.dart';
 import 'package:live_yoko/Navigation/Navigation.dart';
 import 'package:live_yoko/Service/APICaller.dart';
 
+import '../../Models/Chat/Chat.dart';
 import '../../Utils/Utils.dart';
+import '../../View/Chat/home_chat.dart';
+import 'ChatController.dart';
+import 'ProfileChatDetailController.dart';
 
 class ChatCreateController extends GetxController {
   Rx<TextEditingController> filterController = TextEditingController().obs;
@@ -23,6 +28,8 @@ class ChatCreateController extends GetxController {
   RxInt roleId = 0.obs;
   RxString keyword = ''.obs;
   String uuidAcount = '';
+  var selectedChatDetail = Chat();
+
   @override
   void onInit() async {
     roleId.value = await Utils.getIntValueWithKey(Constant.ROLE_ID);
@@ -65,15 +72,42 @@ class ChatCreateController extends GetxController {
       var response = await APICaller.getInstance()
           .post('v1/Chat/create-message-room', param);
       if (response != null) {
-        Get.close(1);
-        Navigation.navigateTo(page: 'ChatDetail', arguments: {
-          'uuid': response['data'], // uuid phòng gọi api tạo phòng trước
-          'name': listContact[index].fullName ?? listContact[index].userName,
-          'type': 1,
-          'ownerUuid': await Utils.getStringValueWithKey(
-              Constant.UUID_USER), // uu đăng nhập
-          'avatar': listContact[index].avatar ?? ''
-        });
+        if (Get.isRegistered<ChatController>()) {
+          var controller = await Get.find<ChatController>();
+          controller.isUnPin.value = await true;
+          await controller.refreshListChat();
+        }
+
+
+
+
+        selectedChatDetail.uuid = response['data'];
+        selectedChatDetail.ownerUuid =
+            await Utils.getStringValueWithKey(Constant.UUID_USER);
+        selectedChatDetail.ownerName =
+            listContact[index].fullName ?? listContact[index].userName;
+        selectedChatDetail.type = 1;
+        selectedChatDetail.avatar = listContact[index].avatar ?? '';
+
+
+
+
+
+        Get.delete<ChatDetailController>();
+        Get.delete<ProfileChatDetailController>();
+        Get.find<ChatController>().selectChatItem(selectedChatDetail);
+        Get.forceAppUpdate();
+
+
+
+        // Navigation.navigateTo(page: 'ChatDetail', arguments: {
+        //   'uuid': response['data'], // uuid phòng gọi api tạo phòng trước
+        //   'name': listContact[index].fullName ?? listContact[index].userName,
+        //   'type': 1,
+        //   'ownerUuid': await Utils.getStringValueWithKey(
+        //       Constant.UUID_USER), // uu đăng nhập
+        //   'avatar': listContact[index].avatar ?? ''
+        // });
       }
     } catch (e) {
       Utils.showSnackBar(

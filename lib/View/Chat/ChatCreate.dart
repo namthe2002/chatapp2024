@@ -4,12 +4,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
+import 'package:live_yoko/Controller/Chat/ChatController.dart';
 import 'package:live_yoko/Controller/Chat/ChatCreateController.dart';
 import 'package:live_yoko/Global/ColorValue.dart';
 import 'package:live_yoko/Global/Constant.dart';
 import 'package:live_yoko/Global/TextByNation.dart';
 import 'package:live_yoko/Navigation/Navigation.dart';
 import 'package:live_yoko/Utils/Utils.dart';
+
+import 'GroupCreate.dart';
 
 class ChatCreate extends StatelessWidget {
   var delete = Get.delete<ChatCreateController>();
@@ -37,7 +40,8 @@ class ChatCreate extends StatelessWidget {
               padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 8.h),
               child: InkWell(
                 onTap: () {
-                  Navigation.navigateTo(page: 'GroupCreate');
+
+                  Get.find<ChatController>().updateFeature(widget: GroupCreate());
                 },
                 child: Container(
                   decoration: BoxDecoration(

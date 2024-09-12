@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:get/get.dart';
+import 'package:get/get_core/src/get_main.dart';
 import 'package:live_yoko/widget/single_tap_detector.dart';
+
+import '../Global/ColorValue.dart';
 
 class MyEntry<T> extends StatefulWidget implements PopupMenuEntry<T> {
   MyEntry(
@@ -42,7 +46,9 @@ class _MyEntryState extends State<MyEntry> {
           height: widget.height,
           child: Row(
             children: [
-              SvgPicture.asset(widget.icon),
+              SvgPicture.asset(widget.icon,
+              color:
+                  Get.isDarkMode ? ColorValue.white : ColorValue.neutralColor,),
               SizedBox(width: 12),
               Text(widget.title,
                   style: TextStyle(

@@ -218,5 +218,6 @@
   "label_register": "Register",
   "label_login_phone_number": "Login By Phone Number",
   "label_preview_chat_setting": "Choose the interface mode that suits you",
-  "label_apply": "Apply"
+  "label_apply": "Apply",
+  "label_no_dialog": "You don't have any dialog yet!"
 }

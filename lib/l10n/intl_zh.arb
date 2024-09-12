@@ -218,5 +218,7 @@
   "label_register": "注册",
   "label_login_phone_number": "通过手机号码登录",
   "label_preview_chat_setting": "选择适合你的界面模式",
-  "label_apply": "应用"
+  "label_apply": "应用",
+  "label_no_dialog": "您还没有任何对话！"
+
 }
