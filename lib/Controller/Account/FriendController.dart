@@ -84,7 +84,7 @@ class FriendController extends GetxController {
         Get.delete<ChatDetailController>();
         Get.delete<ProfileChatDetailController>();
         Get.find<ChatController>().selectChatItem(selectedChatDetail);
-        Get.forceAppUpdate();
+        Get.appUpdate();
         // Get.put(ChatController()).selectedChatItem = selectedChatDetail;
       }
     } catch (e) {
@@ -103,10 +103,11 @@ class FriendController extends GetxController {
         "keyCert":
             Utils.generateMd5(Constant.NEXT_PUBLIC_KEY_CERT + formattedTime),
         "time": formattedTime,
-        // "uuid": await Utils.getStringValueWithKey(Constant.UUID_USER),
         "pageSize": pageSize,
         "page": page,
         "keyword": filterController.value.text
+        // "uuid": await Utils.getStringValueWithKey(Constant.UUID_USER),
+
       };
 
       var response =
@@ -151,7 +152,6 @@ class FriendController extends GetxController {
       if (response != null) {
         listContact.removeAt(index);
         listContact.refresh();
-        // xóa bạn
         Utils.showSnackBar(
             title: TextByNation.getStringByKey('notification'),
             message: TextByNation.getStringByKey('cancal_friend_ss'));

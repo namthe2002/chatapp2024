@@ -96,8 +96,7 @@ class ChatCreateController extends GetxController {
         Get.delete<ChatDetailController>();
         Get.delete<ProfileChatDetailController>();
         Get.find<ChatController>().selectChatItem(selectedChatDetail);
-        Get.forceAppUpdate();
-
+        Get.appUpdate();
 
 
         // Navigation.navigateTo(page: 'ChatDetail', arguments: {

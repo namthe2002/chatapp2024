@@ -142,28 +142,6 @@ class Friend extends StatelessWidget {
               fontStyle: FontStyle.normal,
               // color: ColorValue.textColor,
             ))
-        // actions: [
-        //   InkWell(
-        //       onTap: () async {
-        //         if (controller.isSearch.value == false) {
-        //           controller.isSearch.value = true;
-        //         } else {
-        //           controller.filterController.value.text = await '';
-        //
-        //           controller.isSearch.value = !controller.isSearch.value;
-        //           if (controller.keyword.value != '') {
-        //             await controller.resetFriend();
-        //           }
-        //         }
-        //       },
-        //       child: Icon(
-        //         controller.isSearch.value ? Icons.close : Icons.search_outlined,
-        //         size: 24,
-        //       )),
-        //   SizedBox(
-        //     width: 20,
-        //   )
-        // ],
         );
   }
 

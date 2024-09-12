@@ -43,10 +43,23 @@ class _HomeChatWebsiteState extends State<HomeChatWebsite> {
   final _homeController = Get.put(ChatController());
   var delete = Get.delete<ChatController>();
 
+  final ValueNotifier<double> progress =
+      ValueNotifier(0.0); // Initialize progress notifier
+
+  void simulateLoading() {
+    Future.delayed(Duration(milliseconds: 100), () {
+      if (progress.value < 1.0) {
+        progress.value += 0.1; // Increment progress by 10%
+        simulateLoading(); // Continue loading until 100%
+      }
+    });
+  }
+
   @override
   void initState() {
     _homeController.selectedChatItemIndex.value = 1;
     _homeController.onInitData();
+    simulateLoading();
     super.initState();
   }
 
@@ -69,7 +82,43 @@ class _HomeChatWebsiteState extends State<HomeChatWebsite> {
               color: Get.isDarkMode ? ColorValue.neutralColor : Colors.white,
               child: _homeController.isLoading.value == true
                   ? Center(
-                      child: CircularProgressIndicator(),
+                      child: ValueListenableBuilder<double>(
+                        valueListenable: progress,
+                        builder: (context, value, child) {
+                          double cappedValue = value.clamp(0.0, 1.0);
+                          return Container(
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 20, vertical: 10),
+                            constraints: BoxConstraints(
+                              maxWidth: 300,
+                            ),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                ClipRRect(
+                                  borderRadius: BorderRadius.circular(10),
+                                  child: LinearProgressIndicator(
+                                    value: cappedValue,
+                                    minHeight: 10,
+                                    backgroundColor: Colors.grey.shade300,
+                                    valueColor: AlwaysStoppedAnimation<Color>(
+                                        Colors.blue),
+                                  ),
+                                ),
+                                SizedBox(height: 12),
+                                Text(
+                                  '${(cappedValue * 100).toInt()}%',
+                                  style: TextStyle(
+                                      fontSize: 14,
+                                      fontWeight:
+                                          FontWeight.bold), // Style text
+                                ),
+                              ],
+                            ),
+                          );
+                        },
+                      ),
                     )
                   : chat(
                       _homeController.widgetFeature.value ?? homeChatWidget()),
@@ -897,10 +946,7 @@ class _HomeChatWebsiteState extends State<HomeChatWebsite> {
                     _homeController.selectedChatItem.value?.uuid ?? 1,
                   ),
                   chatDetail: _homeController.selectedChatItem.value,
-                )
-
-
-            ),
+                )),
           ],
         ));
   }
@@ -2555,12 +2601,11 @@ class _HomeChatWebsiteState extends State<HomeChatWebsite> {
             offset: Offset(50, -60),
             tooltip: 'Create Chat',
             shadowColor: Colors.grey.withOpacity(0.5),
-         color: Get.isDarkMode ? ColorValue.neutralColor : Colors.white,
+            color: Get.isDarkMode ? ColorValue.neutralColor : Colors.white,
             padding: EdgeInsets.zero,
             icon: SvgPicture.asset(
               'asset/icons/add_chat.svg',
-              color:
-              Get.isDarkMode ? ColorValue.white : ColorValue.neutralColor,
+              color: ColorValue.white,
               width: 32,
               height: 32,
               fit: BoxFit.cover,
