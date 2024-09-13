@@ -69,6 +69,17 @@ class _HomeChatWebsiteState extends State<HomeChatWebsite> {
     super.dispose();
   }
 
+
+  void didChangeDependencies() {
+    // TODO: implement didChangeDependencies
+    // _homeController.updateConstHomeWidget(widget: homeChatWidget());
+    super.didChangeDependencies();
+
+
+  }
+
+
+
   @override
   Widget build(BuildContext context) {
     return Obx(() => Scaffold(
@@ -1146,14 +1157,25 @@ class _HomeChatWebsiteState extends State<HomeChatWebsite> {
     );
   }
 
+  backToHomePage() {
+    _homeController.updateFeature(widget: homeChatWidget());
+  }
+
   Widget buttonAddChat() {
-    return AnimatedSlide(
-      duration: const Duration(microseconds: 300),
-      offset: _homeController.isVisible.value ? Offset.zero : Offset(0, 2),
-      child: AnimatedOpacity(
-        duration: const Duration(microseconds: 300),
-        opacity: _homeController.isVisible.value ? 1 : 0,
-        child: Container(
+    return
+      //
+      // AnimatedSlide(
+      // duration: const Duration(microseconds: 300),
+      // offset: _homeController.isVisible.value ? Offset.zero : Offset(0, 2),
+      // child: AnimatedOpacity(
+      //   duration: const Duration(microseconds: 300),
+      //   opacity: _homeController.isVisible.value ? 1 : 0,
+      //   child:
+      //
+      //
+
+
+        Container(
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             gradient: _homeController.isSelected.value == true
@@ -1162,32 +1184,9 @@ class _HomeChatWebsiteState extends State<HomeChatWebsite> {
                     colors: [Colors.blue, Colors.green],
                   ),
           ),
-          // child: FloatingActionButton(
-          //   elevation: 0,
-          //   // Tắt đổ bóng
-          //   focusElevation: 0,
-          //   // Tắt đổ bóng khi focus
-          //   hoverElevation: 0,
-          //   // Tắt đổ bóng khi hover
-          //   focusColor: Colors.transparent,
-          //   backgroundColor: Colors.transparent,
-          //   onPressed: () async {
-          //     await Navigation.navigateTo(page: 'ChatCreate');
-          //     _homeController.refreshListChat();
-          //   },
-          //   tooltip: 'Creat Chat',
-          //   child:
-          //
-          //   SvgPicture.asset(
-          //     'asset/icons/add_chat.svg',
-          //     width: 32,
-          //     height: 32,
-          //     fit: BoxFit.cover,
-          //   ),
-          // ),
           child: _createChatButton(),
-        ),
-      ),
+      //   ),
+      // ),
     );
   }
 
@@ -2619,14 +2618,22 @@ class _HomeChatWebsiteState extends State<HomeChatWebsite> {
                     title: 'New Message',
                     onTap: () async {
                       _homeController.updateFeature(
-                          context: context, widget: ChatCreate());
+                          context: context,
+                          widget: ChatCreate(
+                            callback: backToHomePage,
+                          ));
                     }),
                 MyEntry(
                     icon: 'asset/icons/ic_new_group.svg',
                     title: 'New Group',
                     onTap: () async {
                       _homeController.updateFeature(
-                          context: context, widget: GroupCreate());
+                          context: context,
+                          widget: GroupCreate(
+                            callback: () {
+                              backToHomePage;
+                            },
+                          ));
                     }),
               ];
             }));

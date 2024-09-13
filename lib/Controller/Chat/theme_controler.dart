@@ -60,6 +60,8 @@ class ThemeControler extends GetxController {
 
   @override
   void onInit() async {
+   // gọi hàm sendState
+
     ever(appController.appState, (state) async {
       if (state == AppLifecycleState.resumed) {
         // await SocketManager().connect();
@@ -134,8 +136,14 @@ class ThemeControler extends GetxController {
     });
 
     timer = await Timer.periodic(Duration(seconds: 10),
-        (timer) => sendListOnline()); // gọi hàm sendState
+            (timer) => sendListOnline());
     super.onInit();
+  }
+
+
+  void initData() async {
+
+
   }
 
   @override

@@ -29,7 +29,7 @@ class ManageFriends extends StatelessWidget {
   AppBar appBar() {
     return AppBar(
       // centerTitle: true,
-      titleSpacing: 24,
+      titleSpacing: 15,
       actions: [
         InkWell(
             onTap: () async {

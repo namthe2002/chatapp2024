@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
+// import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
+import 'package:live_yoko/Controller/Chat/ChatController.dart';
 import 'package:live_yoko/Controller/Chat/GroupCreateController.dart';
 import 'package:live_yoko/Global/ColorValue.dart';
 import 'package:live_yoko/Global/Constant.dart';
@@ -9,6 +10,7 @@ import 'package:live_yoko/Global/TextByNation.dart';
 import 'package:live_yoko/Utils/Utils.dart';
 
 import '../../Controller/Chat/GroupCreateStep2Controller.dart';
+import 'GroupCreate.dart';
 
 class GroupCreateStep2 extends StatelessWidget {
   var delete = Get.delete<GroupCreateStep2Controller>();
@@ -17,7 +19,7 @@ class GroupCreateStep2 extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Obx(() => (Scaffold(
-          appBar: appBar(),
+          // appBar: appBar(),
           body: body(context),
         )));
   }
@@ -30,6 +32,22 @@ class GroupCreateStep2 extends StatelessWidget {
         color: Get.isDarkMode ? ColorValue.neutralColor : Colors.white,
         child: Column(
           children: [
+            Row(
+              children: [
+                Expanded(
+                  child: Padding(padding: EdgeInsets.only(left: 15)
+                    ,child: Text(TextByNation.getStringByKey('new_group'),
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w600,
+                          height: 28/20,
+                        )),),
+                ),
+                IconButton(onPressed: () async{
+                  Get.find<ChatController>().updateFeature(widget: GroupCreate(callback: () {  },));
+                }, icon: Icon(Icons.close))
+              ],
+            ),
             Stack(
               alignment: Alignment.topCenter,
               children: [
@@ -74,13 +92,13 @@ class GroupCreateStep2 extends StatelessWidget {
                         top: 35,
                         child: GestureDetector(
                           onTap: () async {
-                            await controller.getImage();
+                            await controller.getImageFiles(isCamera: false);
                           },
                           child: Center(
                             child: Container(
                               decoration: BoxDecoration(
                                   border: Border.all(
-                                      width: 3.r, color: Colors.white),
+                                      width: 3, color: Colors.white),
                                   gradient: LinearGradient(colors: [
                                     Color(0xff0CBE8C),
                                     Color(0xff5B72DE)
@@ -131,7 +149,7 @@ class GroupCreateStep2 extends StatelessWidget {
                             border: InputBorder.none,
                           ),
                           style: TextStyle(
-                              fontSize: 16.sp,
+                              fontSize: 16,
                               fontWeight: FontWeight.w400,
                               color: Get.isDarkMode
                                   ? ColorValue.colorTextDark
@@ -149,88 +167,7 @@ class GroupCreateStep2 extends StatelessWidget {
             SizedBox(
               height: 20,
             ),
-            // Container(
-            //   decoration: BoxDecoration(
-            //       border: Border(
-            //           top: BorderSide(
-            //               width: 3.h,
-            //               color: Get.isDarkMode
-            //                   ? Color(0xff232323)
-            //                   : ColorValue.colorBrCmr),
-            //           bottom: BorderSide(
-            //               width: 3.h,
-            //               color: Get.isDarkMode
-            //                   ? Color(0xff232323)
-            //                   : ColorValue.colorBrCmr))),
-            //   child: Padding(
-            //     padding: EdgeInsets.all(20.r),
-            //     child: Column(
-            //       crossAxisAlignment: CrossAxisAlignment.start,
-            //       children: [
-            //         Row(
-            //           children: [
-            //             Text(
-            //               TextByNation.getStringByKey('auto_delete_chat'),
-            //               style: TextStyle(
-            //                   fontSize: 14.sp,
-            //                   fontWeight: FontWeight.w600,
-            //                   color: ColorValue.neutralColor),
-            //             ),
-            //             Spacer(),
-            //             InkWell(
-            //               onTap: () {
-            //                 showSelectTimeDeleteMessage(context);
-            //               },
-            //               child: Row(
-            //                 children: [
-            //                   Text(
-            //                     controller.selectTimeDelete.value == 0
-            //                         ? TextByNation.getStringByKey('off')
-            //                         : controller.listTime[controller
-            //                                     .selectTimeDelete.value]
-            //                                 .toString() +
-            //                             (controller.selectTimeDelete.value > 1
-            //                                 ? ' ' +
-            //                                     TextByNation.getStringByKey(
-            //                                         'days')
-            //                                 : ' ' +
-            //                                     TextByNation.getStringByKey(
-            //                                         'day')),
-            //                     style: TextStyle(
-            //                         fontSize: 14.sp,
-            //                         color: ColorValue.colorPrimary,
-            //                         fontWeight: FontWeight.w600),
-            //                   ),
-            //                   SizedBox(
-            //                     width: 4.w,
-            //                   ),
-            //                   Icon(
-            //                     Icons.keyboard_arrow_down,
-            //                     size: 20.sp,
-            //                     color: ColorValue.colorBorder,
-            //                   )
-            //                 ],
-            //               ),
-            //             ),
-            //           ],
-            //         ),
-            //         SizedBox(
-            //           height: 4.h,
-            //         ),
-            //         Text(
-            //           TextByNation.getStringByKey('auto_delete_chat_content'),
-            //           style: TextStyle(
-            //               fontSize: 12.sp,
-            //               fontWeight: FontWeight.w400,
-            //               color: ColorValue.colorBorder),
-            //         ),
-            //       ],
-            //     ),
-            //   ),
-            // ),
-            // SizedBox(
-            //   height: 20.h,
-            // ),
+
             Container(
                 height: 3,
                 color:
@@ -473,12 +410,14 @@ class GroupCreateStep2 extends StatelessWidget {
 
   AppBar appBar() {
     return AppBar(
-      centerTitle: true,
+      centerTitle: false,
       elevation: 0,
+      titleSpacing: 15,
       title: Text(TextByNation.getStringByKey('new_group'),
           style: TextStyle(
-            fontSize: 24.sp,
+            fontSize: 20,
             fontWeight: FontWeight.w600,
+            height: 28/20,
           )),
     );
   }
@@ -501,6 +440,7 @@ class GroupCreateStep2 extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisSize: MainAxisSize.min,
                   children: [
+
                     Center(
                       child: Padding(
                         padding: const EdgeInsets.symmetric(vertical: 8),

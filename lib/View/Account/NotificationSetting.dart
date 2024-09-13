@@ -24,15 +24,6 @@ class NotificationSetting extends StatelessWidget {
         child: Container(
       decoration: BoxDecoration(
         color: Get.isDarkMode ? ColorValue.neutralColor : Colors.white,
-        border: Border(
-          // Thiết lập viền trên
-          top: BorderSide(
-              width: 1.0,
-              color: Get.isDarkMode
-                  ? ColorValue.colorTextDark
-                  : ColorValue.colorBrCmr), // Thiết lập viền dưới
-          // Thiết lập các viền khác nếu cần
-        ),
       ),
       width: Get.width,
       height: Get.height,
@@ -77,12 +68,14 @@ class NotificationSetting extends StatelessWidget {
 
   AppBar appBar() {
     return AppBar(
-      centerTitle: true,
+      centerTitle: false,
+      titleSpacing: 15,
       elevation: 0,
       title: Text(TextByNation.getStringByKey('notification'),
           style: TextStyle(
-            fontSize: 24,
+            fontSize: 20,
             fontWeight: FontWeight.w600,
+            height: 28/20,
           )),
     );
   }

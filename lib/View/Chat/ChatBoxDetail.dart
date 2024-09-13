@@ -23,6 +23,7 @@ import 'package:live_yoko/Navigation/Navigation.dart';
 import 'package:live_yoko/Utils/Speech2Text.dart';
 import 'package:live_yoko/Utils/Translator.dart';
 import 'package:live_yoko/Utils/Utils.dart';
+import 'package:live_yoko/View/Chat/ChatCreate.dart';
 import 'package:live_yoko/View/Chat/ProfileChatDetail.dart';
 import 'package:live_yoko/widget/my_entry.dart';
 import 'package:live_yoko/widget/single_tap_detector.dart';
@@ -533,20 +534,57 @@ class _ChatBoxDetailState extends State<ChatBoxDetail>
                                                   SizedBox(
                                                     width: size.width,
                                                   ),
-                                                  SvgPicture.asset(
-                                                      'asset/images/empty_chat_detail.svg'),
-                                                  SizedBox(
-                                                    height: 20,
+                                                  Container(
+                                                    padding:
+                                                        EdgeInsets.symmetric(
+                                                            horizontal: 32,
+                                                            vertical: 24),
+                                                    decoration: BoxDecoration(
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              24),
+                                                      color: Get.isDarkMode
+                                                          ? Color(0xFF1C1F25)
+                                                          : ColorValue.white
+                                                              .withOpacity(0.2),
+                                                    ),
+                                                    child: Column(
+                                                      mainAxisSize:
+                                                          MainAxisSize.min,
+                                                      mainAxisAlignment:
+                                                          MainAxisAlignment
+                                                              .center,
+                                                      children: [
+                                                        Get.isDarkMode
+                                                            ? Image.asset(
+                                                                'asset/images/img_empty_message.png',
+                                                                width: 148,
+                                                              )
+                                                            : SvgPicture.asset(
+                                                                'asset/images/empty_chat_detail.svg',
+                                                                width: 148,
+                                                              ),
+                                                        SizedBox(
+                                                          height: 20,
+                                                        ),
+                                                        Text(
+                                                          '${TextByNation.getStringByKey('no_message')}',
+                                                          style: TextStyle(
+                                                              color:
+                                                                  Colors.white,
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .w400,
+                                                              fontSize: 14),
+                                                          textAlign:
+                                                              TextAlign.center,
+                                                          maxLines: 3,
+                                                          overflow: TextOverflow
+                                                              .ellipsis,
+                                                        )
+                                                      ],
+                                                    ),
                                                   ),
-                                                  Text(
-                                                    '${TextByNation.getStringByKey('no_message')}',
-                                                    style: TextStyle(
-                                                        color: Colors.white,
-                                                        fontWeight:
-                                                            FontWeight.w400,
-                                                        fontSize: 14),
-                                                    textAlign: TextAlign.center,
-                                                  )
                                                 ],
                                               )
                                             : Stack(
@@ -928,17 +966,23 @@ class _ChatBoxDetailState extends State<ChatBoxDetail>
                                             mainAxisSize: MainAxisSize.max,
                                             children: [
                                               // icon, gif, emoji
-                                              MouseRegion(
-                                                  onEnter: (event) =>
-                                                      _showOverlay(context),
-                                                  onExit: (event) {
-                                                    setState(() =>
-                                                        _isOverIcon = false);
-                                                    _updateOverlayVisibility();
-                                                  },
-                                                  child: Icon(Icons
-                                                      .emoji_emotions_outlined)),
-                                              // I
+                                              if (controller
+                                                      .isRecording.value ==
+                                                  false) ...[
+                                                MouseRegion(
+                                                    onEnter: (event) =>
+                                                        _showOverlay(context),
+                                                    onExit: (event) {
+                                                      setState(() =>
+                                                          _isOverIcon = false);
+                                                      _updateOverlayVisibility();
+                                                    },
+                                                    child: Icon(
+                                                      Icons
+                                                          .emoji_emotions_outlined,
+                                                      size: 24,
+                                                    )),
+                                              ],
                                               if (controller
                                                   .isRecording.value) ...[
                                                 IconButton(
@@ -951,8 +995,11 @@ class _ChatBoxDetailState extends State<ChatBoxDetail>
                                                           .value = false;
                                                     }
                                                   },
-                                                  icon: Icon(Icons
-                                                      .delete_outline_rounded),
+                                                  icon: Icon(
+                                                    Icons
+                                                        .delete_outline_rounded,
+                                                    size: 24,
+                                                  ),
                                                 ),
                                                 Expanded(child: SizedBox()),
                                                 IconButton(
@@ -966,87 +1013,7 @@ class _ChatBoxDetailState extends State<ChatBoxDetail>
                                                 )
                                               ] else ...[
                                                 Expanded(
-                                                  child:
-
-                                                      // TextFieldWidget(
-                                                      //   controller: controller
-                                                      //       .textMessageController,
-                                                      //   focusNode:
-                                                      //       controller.focusNode,
-                                                      //   onSubmitted: (value) async {
-                                                      //     if (value!
-                                                      //         .trim()
-                                                      //         .isNotEmpty) {
-                                                      //       FocusScope.of(context)
-                                                      //           .requestFocus(
-                                                      //               controller
-                                                      //                   .focusNode);
-                                                      //       controller
-                                                      //           .isTextFieldFocused
-                                                      //           .value = false;
-                                                      //       Future.delayed(
-                                                      //           Duration(
-                                                      //               milliseconds:
-                                                      //                   300), () {
-                                                      //         controller.isVisible
-                                                      //             .value = true;
-                                                      //         Get.put(ChatController())
-                                                      //             .selectedChatIndex
-                                                      //             .value = 0;
-                                                      //       });
-                                                      //       if (controller
-                                                      //               .isEdit.value ==
-                                                      //           1) {
-                                                      //         await controller
-                                                      //             .editMessage();
-                                                      //       } else {
-                                                      //         await controller
-                                                      //             .sendMessage(
-                                                      //           content: controller
-                                                      //               .textMessageController
-                                                      //               .text,
-                                                      //           type: controller.isImageLink(
-                                                      //                   controller
-                                                      //                       .textMessageController
-                                                      //                       .text)
-                                                      //               ? 7
-                                                      //               : controller.isLink(
-                                                      //                       controller
-                                                      //                           .textMessageController
-                                                      //                           .text)
-                                                      //                   ? 2
-                                                      //                   : 1,
-                                                      //         );
-                                                      //       }
-                                                      //     }
-                                                      //   },
-                                                      //   hintText:
-                                                      //       '${TextByNation.getStringByKey('type_a_message')}',
-                                                      //   hintStyle: TextStyle(
-                                                      //     color: Get.isDarkMode
-                                                      //         ? Colors.white70
-                                                      //         : Colors.grey,
-                                                      //     fontSize: 14,
-                                                      //   ),
-                                                      //   labelStyle: TextStyle(
-                                                      //     color: Get.isDarkMode
-                                                      //         ? Colors.white
-                                                      //         : Colors.black,
-                                                      //   ),
-                                                      //   border: OutlineInputBorder(
-                                                      //       borderSide:
-                                                      //           BorderSide.none),
-                                                      //   contentPadding:
-                                                      //       EdgeInsets.only(
-                                                      //           left: 15),
-                                                      //   style: TextStyle(
-                                                      //     fontSize: 14,
-                                                      //     fontWeight:
-                                                      //         FontWeight.w400,
-                                                      //   ),
-                                                      // ),
-
-                                                      TextField(
+                                                  child: TextField(
                                                     controller: controller
                                                         .textMessageController,
                                                     focusNode:
@@ -1218,8 +1185,25 @@ class _ChatBoxDetailState extends State<ChatBoxDetail>
         padding: EdgeInsets.symmetric(vertical: 4, horizontal: 4),
         margin: EdgeInsets.symmetric(horizontal: 4),
         decoration: BoxDecoration(
-          color: Get.isDarkMode ? Color(0xff232323) : ColorValue.colorBrSearch,
-          borderRadius: BorderRadius.circular(16),
+          color: Get.isDarkMode
+              ? Color(0xff232323)
+              : ColorValue.colorBrSearch,
+          borderRadius:
+          BorderRadius.circular(16),
+          boxShadow: controller
+              .replyChat.value.uuid !=
+              null
+              ? null
+              : [
+            BoxShadow(
+              color: Colors.grey
+                  .withOpacity(0.5),
+              spreadRadius: .1,
+              blurRadius: 10,
+              offset: Offset(0,
+                  3), // changes position of shadow
+            ),
+          ],
         ),
         child: PopupMenuButton(
             offset: Offset(100, -150),
@@ -3682,8 +3666,11 @@ class _ChatBoxDetailState extends State<ChatBoxDetail>
           ),
           InkWell(
             onTap: () async {
-              await Navigation.navigateTo(page: 'ChatCreate');
-              // _homeController.refreshListChat();
+              Get.find<ChatController>().updateFeature(widget: ChatCreate(
+                callback: () {
+                  Get.find<ChatController>().updateFeature(widget: null);
+                },
+              ));
             },
             child: Container(
               decoration: BoxDecoration(

@@ -20,135 +20,145 @@ class SelectThemeMode extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Obx(
-            () => Scaffold(
-        body:  Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.max,
-        children: [
-          Padding(
-            padding: const EdgeInsets.only(left: 20, top: 18),
-            child: Text(
-              AppLocalizations.of(context)!.night_mode,
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.w600,
-                height: 28 / 20,
-                color: Get.isDarkMode
-                    ? ColorValue.colorTextDark
-                    : ColorValue.neutralColor,
-              ),
-            ),
-          ),
-          SizedBox(
-            height: 8,
-          ),
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: 20),
-            child: Text(
-              AppLocalizations.of(context)!.choose_mode,
-              style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w400,
-                  color: Get.isDarkMode
-                      ? ColorValue.colorTextDark
-                      : ColorValue.neutralColor,
-                  height: 16 / 12),
-            ),
-          ),
-          SizedBox(
-            height: 20,
-          ),
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: 20),
-            child: Row(
-              mainAxisSize: MainAxisSize.max,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: List.generate(_homeController.listNode.length, (index) {
-                return Flexible(
-                  flex:1,
-                  child: GestureDetector(
-                    onTap: () {
-                      if (index != _homeController.selectBrightnessMode.value) {
-                        _homeController.selectBrightnessMode.value = index;
-                        _homeController.changeTheme(index, context);
-                      }
-                    },
-                    child: Container(
-                      margin: EdgeInsets.symmetric(horizontal: 8),
-                      color: Colors.transparent,
-                      child: Column(
-                        mainAxisSize: MainAxisSize.max,
-                        children: [
-                          SvgPicture.asset(
-                            _homeController.listNode[index].src!,
-                            fit: BoxFit.cover,
-                          ),
-                          SizedBox(
-                            height: 5,
-                          ),
-                          Text(
-                            _homeController.listNode[index].title!,
-                            style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w400,
-                            ),
-                          ),
-                          Radio(
-                            groupValue: _homeController.selectBrightnessMode.value,
-                            value: index,
-                            onChanged: (value) {
-                              if (index != _homeController.selectBrightnessMode.value) {
+    return Obx(() => Scaffold(
+      body: Material(
+        child: Container(
+              decoration: BoxDecoration(
+                  color:
+                      Get.isDarkMode ? ColorValue.neutralColor : ColorValue.white),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.max,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(left: 20, top: 18),
+                    child: Text(
+                      AppLocalizations.of(context)!.night_mode,
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w600,
+                        height: 28 / 20,
+                        color: Get.isDarkMode
+                            ? ColorValue.colorTextDark
+                            : ColorValue.neutralColor,
+                      ),
+                    ),
+                  ),
+                  SizedBox(
+                    height: 8,
+                  ),
+                  Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 20),
+                    child: Text(
+                      AppLocalizations.of(context)!.choose_mode,
+                      style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w400,
+                          color: Get.isDarkMode
+                              ? ColorValue.colorTextDark
+                              : ColorValue.neutralColor,
+                          height: 16 / 12),
+                    ),
+                  ),
+                  SizedBox(
+                    height: 20,
+                  ),
+                  Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 20),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.max,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children:
+                          List.generate(_homeController.listNode.length, (index) {
+                        return Flexible(
+                          flex: 1,
+                          child: GestureDetector(
+                            onTap: () {
+                              if (index !=
+                                  _homeController.selectBrightnessMode.value) {
                                 _homeController.selectBrightnessMode.value = index;
                                 _homeController.changeTheme(index, context);
                               }
                             },
+                            child: Container(
+                              margin: EdgeInsets.symmetric(horizontal: 8),
+                              color: Colors.transparent,
+                              child: Column(
+                                mainAxisSize: MainAxisSize.max,
+                                children: [
+                                  SvgPicture.asset(
+                                    _homeController.listNode[index].src!,
+                                    fit: BoxFit.cover,
+                                  ),
+                                  SizedBox(
+                                    height: 5,
+                                  ),
+                                  Text(
+                                    _homeController.listNode[index].title!,
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w400,
+                                    ),
+                                  ),
+                                  Radio(
+                                    groupValue:
+                                        _homeController.selectBrightnessMode.value,
+                                    value: index,
+                                    onChanged: (value) {
+                                      if (index !=
+                                          _homeController
+                                              .selectBrightnessMode.value) {
+                                        _homeController.selectBrightnessMode.value =
+                                            index;
+                                        _homeController.changeTheme(index, context);
+                                      }
+                                    },
+                                  ),
+                                ],
+                              ),
+                            ),
                           ),
-                        ],
-                      ),
+                        );
+                      }),
                     ),
                   ),
-                );
-              }),
+                  SizedBox(
+                    height: 24,
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: SingleTapDetector(
+                        onTap: () {
+                          Get.forceAppUpdate();
+                        },
+                        child: Container(
+                          width: Get.width,
+                          padding: EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(12),
+                              gradient: LinearGradient(
+                                  begin: Alignment.topCenter,
+                                  end: Alignment.bottomCenter,
+                                  colors: [
+                                    Color(0xFF0CBE8C).withOpacity(1),
+                                    Color(0xFF5B72DE).withOpacity(1),
+                                  ])),
+                          alignment: Alignment.center,
+                          child: Text(
+                            AppLocalizations.of(context)!.label_apply,
+                            style: TextStyle(
+                              color: ColorValue.white,
+                              fontWeight: FontWeight.w600,
+                              fontSize: 16,
+                              height: 24 / 16,
+                            ),
+                          ),
+                        )),
+                  )
+                ],
+              ),
             ),
-          ),
-          SizedBox(
-            height: 24,
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: SingleTapDetector(
-                onTap: () {
-                  Get.forceAppUpdate();
-                },
-                child: Container(
-                  width: Get.width,
-                  padding: EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(12),
-                      gradient: LinearGradient(
-                          begin: Alignment.topCenter,
-                          end: Alignment.bottomCenter,
-                          colors: [
-                            Color(0xFF0CBE8C).withOpacity(1),
-                            Color(0xFF5B72DE).withOpacity(1),
-                          ]
-                      )
-                  ),
-                  alignment: Alignment.center,
-                  child: Text(
-                    AppLocalizations.of(context)!.label_apply,
-                    style: TextStyle(
-                      color: ColorValue.white,
-                      fontWeight: FontWeight.w600,
-                      fontSize: 16,
-                      height: 24 / 16,
-                    ),
-                  ),
-                )),
-          )
-        ],
       ),
     ));
   }

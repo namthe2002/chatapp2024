@@ -18,7 +18,8 @@ class ChatCreate extends StatelessWidget {
   var delete = Get.delete<ChatCreateController>();
   ChatCreateController controller = Get.put(ChatCreateController());
 
-  ChatCreate({super.key});
+  final VoidCallback? callback;
+  ChatCreate({super.key,this.callback});
 
   @override
   Widget build(BuildContext context) {
@@ -40,8 +41,7 @@ class ChatCreate extends StatelessWidget {
               padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 8.h),
               child: InkWell(
                 onTap: () {
-
-                  Get.find<ChatController>().updateFeature(widget: GroupCreate());
+                  Get.find<ChatController>().updateFeature(widget: GroupCreate(callback: () {  },));
                 },
                 child: Container(
                   decoration: BoxDecoration(
@@ -127,43 +127,54 @@ class ChatCreate extends StatelessWidget {
     return AppBar(
       iconTheme: IconThemeData(
           color: Get.isDarkMode ? Colors.white : ColorValue.neutralColor),
-      centerTitle: true,
+      // centerTitle: true,
       elevation: 0,
+      titleSpacing: 15,
+      leading: IconButton(onPressed: () {
+       callback?.call();
+
+      }
+
+      , icon: Icon(Icons.arrow_back)),
       title: controller.isSearch.value == false
           ? Text(TextByNation.getStringByKey('create_chat'),
               style: TextStyle(
-                fontSize: 24,
+                fontSize: 20,
                 fontWeight: FontWeight.w600,
+                height: 28/20,
               ))
-          : TextFormField(
-              controller: controller.filterController.value,
-              onChanged: (value) {
-                controller.isLoangding.value = true;
-                if (controller.debounce?.isActive ?? false)
-                  controller.debounce?.cancel();
+          : Padding(
+            padding: const EdgeInsets.only(left: 10),
+            child: TextFormField(
+                controller: controller.filterController.value,
+                onChanged: (value) {
+                  controller.isLoangding.value = true;
+                  if (controller.debounce?.isActive ?? false)
+                    controller.debounce?.cancel();
 
-                controller.debounce =
-                    Timer(Duration(milliseconds: 2000), () async {
-                  await controller.resetFriend();
-                });
-                controller.keyword.value = value;
-              },
-              keyboardType: TextInputType.text,
-              decoration: InputDecoration(
-                isDense: true,
-                contentPadding: EdgeInsets.fromLTRB(0, 10, 0, 10),
-                hintText: TextByNation.getStringByKey('search_friend'),
-                hintStyle: TextStyle(
+                  controller.debounce =
+                      Timer(Duration(milliseconds: 2000), () async {
+                    await controller.resetFriend();
+                  });
+                  controller.keyword.value = value;
+                },
+                keyboardType: TextInputType.text,
+                decoration: InputDecoration(
+                  isDense: true,
+                  contentPadding: EdgeInsets.fromLTRB(0, 10, 0, 10),
+                  hintText: TextByNation.getStringByKey('search_friend'),
+                  hintStyle: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w400,
+                      color:
+                          Get.isDarkMode ? Colors.white : ColorValue.colorBorder),
+                  border: InputBorder.none,
+                ),
+                style: TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w400,
-                    color:
-                        Get.isDarkMode ? Colors.white : ColorValue.colorBorder),
-                border: InputBorder.none,
-              ),
-              style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w400,
-                  color: Get.isDarkMode ? Colors.white : ColorValue.textColor)),
+                    color: Get.isDarkMode ? Colors.white : ColorValue.textColor)),
+          ),
       actions: [
         InkWell(
             onTap: () async {

@@ -56,6 +56,7 @@ class ChatController extends GetxController {
   RxInt selectedChatItemIndex = (-1).obs;
   Rx<Widget?> widgetFeature = Rx<Widget?>(null);
 
+  Rx<Widget?> constHomeWidget = Rx<Widget?>(Container());
   final SocketManager _socketManager = SocketManager();
 
   @override
@@ -623,8 +624,13 @@ class ChatController extends GetxController {
     }
   }
 
-  void updateFeature({BuildContext? context,required Widget widget}) {
-    widgetFeature.value = widget;
+  void updateFeature({BuildContext? context,required Widget? widget}) {
+    widgetFeature.value = widget ?? null;
+  }
+
+
+  void updateConstHomeWidget({BuildContext? context,required Widget widget}) {
+    constHomeWidget.value = widget;
   }
 
   clearMessage({required int index}) async {

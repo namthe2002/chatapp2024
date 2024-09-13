@@ -5,6 +5,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:image_picker_web/image_picker_web.dart';
 import 'package:intl/intl.dart';
 import 'package:live_yoko/Controller/Chat/ChatController.dart';
 import 'package:live_yoko/Global/Constant.dart';
@@ -13,7 +14,7 @@ import 'package:live_yoko/Models/Account/Contact.dart';
 import 'package:live_yoko/Navigation/Navigation.dart';
 import 'package:live_yoko/Service/APICaller.dart';
 import 'package:live_yoko/Utils/Utils.dart';
-
+import "dart:html" as html;
 import '../../View/Chat/home_chat.dart';
 
 class GroupCreateController extends GetxController {
@@ -46,7 +47,10 @@ class GroupCreateController extends GetxController {
   String uuidAcount = '';
   RxBool isClick = false.obs;
   @override
-  void onInit() async {
+
+
+  void initData() async{
+
     uuidAcount = await Utils.getStringValueWithKey(Constant.UUID_USER);
     getFriend();
     scrollController.addListener(() {
@@ -58,6 +62,20 @@ class GroupCreateController extends GetxController {
         }
       }
     });
+  }
+
+  void onInit() async {
+    // uuidAcount = await Utils.getStringValueWithKey(Constant.UUID_USER);
+    // getFriend();
+    // scrollController.addListener(() {
+    //   if (scrollController.position.maxScrollExtent ==
+    //       scrollController.offset) {
+    //     if (hasMore.value) {
+    //       page++;
+    //       getFriend();
+    //     }
+    //   }
+    // });
     super.onInit();
   }
 
@@ -65,44 +83,55 @@ class GroupCreateController extends GetxController {
     return selectedItems.map((item) => item.uuid).contains(uuid);
   }
 
-  Future getImage() async {
-    final image = await ImagePicker().pickImage(source: ImageSource.gallery);
-    if (image == null) {
-      return;
+
+  getImageFiles({required bool isCamera}) async {
+    if (!Get.isRegistered<GroupCreateController>()) {
+      Get.put(GroupCreateController());
     }
-
-    final imageTemprary = await File(image.path);
-
-    imageAvatar.value = await imageTemprary;
-    await pushFile();
+    final List<html.File>? images = await ImagePickerWeb.getMultiImagesAsFile();
+    if (images != null && images.isNotEmpty) {
+      List<html.File> fileData = [];
+      for (var img in images) {
+        fileData.add(img);
+      }
+      String type = 'Image';
+      await pushFileWeb(
+          type: type == 'Image' || type == 'Video' ? 1 : 4, fileData: fileData);
+    } else {
+      Utils.showSnackBar(
+          title: TextByNation.getStringByKey('notification'),
+          message: TextByNation.getStringByKey('file_size'));
+    }
   }
 
-  pushFile() async {
-    if (imageAvatar.value.path != '') {
-      String formattedTime = DateFormat('MM/dd/yyyy HH:mm:ss').format(timeNow);
-      try {
-        // isImageLoading.value = true;
-        var data = await APICaller.getInstance().putFile(
-            endpoint: 'v1/Upload/upload-image',
-            filePath: imageAvatar.value,
-            type: 1,
-            keyCert: Utils.generateMd5(
-                Constant.NEXT_PUBLIC_KEY_CERT + formattedTime),
-            time: formattedTime);
-        if (data != null) {
-          List<dynamic> list = data['items'];
-          var listItem = list.map((dynamic json) => '"$json"').toList();
-          avatarUser.value = jsonDecode(listItem[0]);
 
-          avatarUser.refresh();
-        } else {
-          // isImageLoading.value = false;
-        }
-      } catch (e) {
+  pushFileWeb({required int type, required List<html.File> fileData}) async {
+    String formattedTime =
+    DateFormat('MM/dd/yyyy HH:mm:ss').format(DateTime.now());
+    try {
+      var data = await APICaller.getInstance().putFilesWeb(
+        endpoint: 'v1/Upload/upload-image',
+        fileData: fileData,
+        type: type,
+        keyCert:
+        Utils.generateMd5(Constant.NEXT_PUBLIC_KEY_CERT + formattedTime),
+        time: formattedTime,
+      );
+
+      if (data != null) {
+        List<dynamic> list = data['items'];
+                var listItem = list.map((dynamic json) => '"$json"').toList();
+                avatarUser.value = jsonDecode(listItem[0]);
+
+                avatarUser.refresh();
+      } else {
         Utils.showSnackBar(
-            title: TextByNation.getStringByKey('error_file'), message: '$e');
-        // isImageLoading.value = false;
+            title: TextByNation.getStringByKey('error_file'),
+            message: 'Upload file failed');
       }
+    } catch (e) {
+      Utils.showSnackBar(
+          title: TextByNation.getStringByKey('error_file'), message: '$e');
     }
   }
 
@@ -143,7 +172,9 @@ class GroupCreateController extends GetxController {
           // });
           //
           Get.find<ChatController>().update();
-          Get.offAll(() => HomeChatWebsite());
+          Get.find<ChatController>().refresh();
+          Get.find<ChatController>().updateFeature(widget: null );
+          Get.find<ChatController>().refresh();
           if (Get.isRegistered<ChatController>()) {
             var controller = await Get.find<ChatController>();
             controller.isUnPin.value = await true;

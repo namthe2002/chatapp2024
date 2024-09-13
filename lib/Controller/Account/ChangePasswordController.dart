@@ -20,7 +20,9 @@ class ChangePasswordController extends GetxController {
   DateTime timeNow = DateTime.now();
   RxBool isActive = false.obs;
   @override
-  void onInit() async {
+
+
+  void initData() async {
     passOld.value.addListener(() {
       if (passOld.value.text.trim().isNotEmpty &&
           passNew.value.text.trim().isNotEmpty &&
@@ -48,6 +50,11 @@ class ChangePasswordController extends GetxController {
         isActive.value = false;
       }
     });
+
+
+  }
+  void onInit() async {
+
     super.onInit();
   }
 

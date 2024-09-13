@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:live_yoko/Controller/Chat/ChatController.dart';
@@ -9,19 +8,42 @@ import 'package:live_yoko/Controller/Chat/GroupCreateController.dart';
 import 'package:live_yoko/Global/ColorValue.dart';
 import 'package:live_yoko/Global/Constant.dart';
 import 'package:live_yoko/Global/TextByNation.dart';
-import 'package:live_yoko/Navigation/Navigation.dart';
 import 'package:live_yoko/Utils/Utils.dart';
 import 'package:live_yoko/View/Chat/GroupCreateStep2.dart';
 
-class GroupCreate extends StatelessWidget {
+class GroupCreate extends StatefulWidget {
+  final VoidCallback? callback;
+
+  GroupCreate({super.key, this.callback});
+
+  @override
+  State<GroupCreate> createState() => _GroupCreateState();
+}
+
+class _GroupCreateState extends State<GroupCreate> {
   var delete = Get.delete<GroupCreateController>();
-  GroupCreateController controller = Get.put(GroupCreateController());
+
+  final controller = Get.put(GroupCreateController());
+
+  @override
+  void initState() {
+    controller.initData();
+    // TODO: implement initState
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    delete;
+    // TODO: implement dispose
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Obx(() => (Scaffold(
           // backgroundColor: Colors.white,
-          appBar: appBar(),
+          // appBar: appBar(),
           body: body(context),
         )));
   }
@@ -34,13 +56,83 @@ class GroupCreate extends StatelessWidget {
         color: Get.isDarkMode ? ColorValue.neutralColor : Colors.white,
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           SizedBox(
-            height: 12.h,
+            height: 12,
+          ),
+          Row(
+            children: [
+              IconButton(
+                  onPressed: () {
+                    widget.callback?.call();
+                  },
+                  icon: Icon(Icons.arrow_back)),
+              Expanded(
+                child: controller.isSearch.value == false
+                    ? Center(
+                        child: Text(TextByNation.getStringByKey('new_group'),
+                            style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.w600,
+                                height: 28 / 20)),
+                      )
+                    : Padding(
+                        padding: const EdgeInsets.only(left: 25),
+                        child: TextFormField(
+                            controller: controller.filterController.value,
+                            onChanged: (value) {
+                              controller.isLoangding.value = true;
+                              if (controller.debounce?.isActive ?? false)
+                                controller.debounce?.cancel();
+
+                              controller.debounce =
+                                  Timer(Duration(milliseconds: 2000), () async {
+                                await controller.resetFriend();
+                              });
+                              controller.keyword.value = value;
+                            },
+                            keyboardType: TextInputType.text,
+                            decoration: InputDecoration(
+                              isDense: true,
+                              contentPadding: EdgeInsets.fromLTRB(0, 10, 0, 10),
+                              hintText:
+                                  TextByNation.getStringByKey('search_friend'),
+                              hintStyle: TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w400,
+                                  color: ColorValue.colorBorder),
+                              border: InputBorder.none,
+                            ),
+                            style: TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w400,
+                                color: ColorValue.textColor)),
+                      ),
+              ),
+              IconButton(
+                  onPressed: () async {
+                    if (controller.isSearch.value == false) {
+                      controller.isSearch.value = true;
+                    } else {
+                      controller.filterController.value.text = await '';
+
+                      controller.isSearch.value = !controller.isSearch.value;
+                      if (controller.keyword.value != '') {
+                        await controller.resetFriend();
+                      }
+                    }
+                  },
+                  icon: Icon(
+                    controller.isSearch.value
+                        ? Icons.close
+                        : Icons.search_outlined,
+                    size: 24,
+                  ))
+            ],
           ),
           Padding(
-            padding: EdgeInsets.symmetric(horizontal: 20.w),
+            padding: EdgeInsets.symmetric(horizontal: 20),
             child: Text(TextByNation.getStringByKey('friends').toUpperCase(),
                 style: TextStyle(
-                    fontSize: 12.sp,
+                    fontSize: 12,
                     fontWeight: FontWeight.w600,
                     color: ColorValue.colorBorder)),
           ),
@@ -53,8 +145,8 @@ class GroupCreate extends StatelessWidget {
                       ? Center(
                           child: SvgPicture.asset(
                             'asset/icons/no_friend.svg',
-                            width: 200.w,
-                            height: 260.h,
+                            width: 200,
+                            height: 260,
                             fit: BoxFit.cover,
                           ),
                         )
@@ -76,7 +168,7 @@ class GroupCreate extends StatelessWidget {
                           }))),
           Container(
             padding: EdgeInsets.symmetric(
-              horizontal: 20.w,
+              horizontal: 20,
             ),
             decoration: BoxDecoration(
               color: Get.isDarkMode ? Color(0xff232323) : Colors.white,
@@ -98,7 +190,7 @@ class GroupCreate extends StatelessWidget {
                 ),
               ],
             ),
-            height: 70.h,
+            height: 70,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.center,
@@ -109,7 +201,7 @@ class GroupCreate extends StatelessWidget {
                       scrollDirection: Axis.horizontal,
                       itemBuilder: (context, index) {
                         return Padding(
-                          padding: EdgeInsets.only(right: 5.0.w),
+                          padding: EdgeInsets.only(right: 5.0),
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
@@ -121,8 +213,8 @@ class GroupCreate extends StatelessWidget {
                                               .avatar!.isNotEmpty
                                       ? ClipOval(
                                           child: Container(
-                                            width: 48.w,
-                                            height: 48.w,
+                                            width: 48,
+                                            height: 48,
                                             decoration: BoxDecoration(),
                                             child: Image.network(
                                               Constant.BASE_URL_IMAGE +
@@ -140,16 +232,16 @@ class GroupCreate extends StatelessWidget {
                                                       shape: BoxShape.circle,
                                                       color: ColorValue
                                                           .colorBorder),
-                                                  width: 48.w,
-                                                  height: 48.w,
+                                                  width: 48,
+                                                  height: 48,
                                                 );
                                               },
                                             ),
                                           ),
                                         )
                                       : Container(
-                                          width: 48.w,
-                                          height: 48.w,
+                                          width: 48,
+                                          height: 48,
                                           decoration: BoxDecoration(
                                               shape: BoxShape.circle,
                                               gradient:
@@ -187,7 +279,7 @@ class GroupCreate extends StatelessWidget {
                                                 .toUpperCase(),
                                             textAlign: TextAlign.center,
                                             style: TextStyle(
-                                                fontSize: 18.sp,
+                                                fontSize: 18,
                                                 fontWeight: FontWeight.w600,
                                                 color: Colors.white),
                                           )),
@@ -203,7 +295,7 @@ class GroupCreate extends StatelessWidget {
                                         child: Container(
                                           decoration: BoxDecoration(
                                               border: Border.all(
-                                                  width: 1.w,
+                                                  width: 1,
                                                   color: Colors.white),
                                               shape: BoxShape.circle,
                                               color: Color(0xffe4e6ec)),
@@ -212,7 +304,7 @@ class GroupCreate extends StatelessWidget {
                                             padding: const EdgeInsets.all(1),
                                             child: Icon(
                                               Icons.close,
-                                              size: 12.sp,
+                                              size: 12,
                                             ),
                                           )),
                                         ),
@@ -225,7 +317,7 @@ class GroupCreate extends StatelessWidget {
                       }),
                 ),
                 SizedBox(
-                  width: 20.w,
+                  width: 20,
                 ),
                 Container(
                   decoration: BoxDecoration(
@@ -235,19 +327,24 @@ class GroupCreate extends StatelessWidget {
                     ),
                   ),
                   child: FloatingActionButton(
-                      elevation: 0, // Tắt đổ bóng
-                      focusElevation: 0, // Tắt đổ bóng khi focus
-                      hoverElevation: 0, // Tắt đổ bóng khi hover
+                      elevation: 0,
+                      // Tắt đổ bóng
+                      focusElevation: 0,
+                      // Tắt đổ bóng khi focus
+                      hoverElevation: 0,
+                      // Tắt đổ bóng khi hover
                       focusColor: Colors.transparent,
                       backgroundColor: Colors.transparent,
                       onPressed: () {
-                        ChatController homeController = Get.find<ChatController>();
-                        homeController.updateFeature(widget: GroupCreateStep2());
+                        ChatController homeController =
+                            Get.find<ChatController>();
+                        homeController.updateFeature(
+                            widget: GroupCreateStep2());
                       },
                       tooltip: 'Create Group',
                       child: Icon(
                         Icons.arrow_forward_outlined,
-                        size: 24.sp,
+                        size: 24,
                         color: Colors.white,
                       )),
                 ),
@@ -263,42 +360,44 @@ class GroupCreate extends StatelessWidget {
     return AppBar(
       iconTheme: IconThemeData(
           color: Get.isDarkMode ? Colors.white : ColorValue.neutralColor),
-      centerTitle: true,
+      // centerTitle: true,,
+      titleSpacing: 15,
       elevation: 0,
       title: controller.isSearch.value == false
           ? Text(TextByNation.getStringByKey('new_group'),
               style: TextStyle(
-                fontSize: 24.sp,
-                fontWeight: FontWeight.w600,
-              ))
-          : TextFormField(
-              controller: controller.filterController.value,
-              onChanged: (value) {
-                controller.isLoangding.value = true;
-                if (controller.debounce?.isActive ?? false)
-                  controller.debounce?.cancel();
+                  fontSize: 20, fontWeight: FontWeight.w600, height: 28 / 20))
+          : Padding(
+              padding: const EdgeInsets.only(left: 10),
+              child: TextFormField(
+                  controller: controller.filterController.value,
+                  onChanged: (value) {
+                    controller.isLoangding.value = true;
+                    if (controller.debounce?.isActive ?? false)
+                      controller.debounce?.cancel();
 
-                controller.debounce =
-                    Timer(Duration(milliseconds: 2000), () async {
-                  await controller.resetFriend();
-                });
-                controller.keyword.value = value;
-              },
-              keyboardType: TextInputType.text,
-              decoration: InputDecoration(
-                isDense: true,
-                contentPadding: EdgeInsets.fromLTRB(0, 10, 0, 10),
-                hintText: TextByNation.getStringByKey('search_friend'),
-                hintStyle: TextStyle(
-                    fontSize: 13.sp,
-                    fontWeight: FontWeight.w400,
-                    color: ColorValue.colorBorder),
-                border: InputBorder.none,
-              ),
-              style: TextStyle(
-                  fontSize: 13.sp,
-                  fontWeight: FontWeight.w400,
-                  color: ColorValue.textColor)),
+                    controller.debounce =
+                        Timer(Duration(milliseconds: 2000), () async {
+                      await controller.resetFriend();
+                    });
+                    controller.keyword.value = value;
+                  },
+                  keyboardType: TextInputType.text,
+                  decoration: InputDecoration(
+                    isDense: true,
+                    contentPadding: EdgeInsets.fromLTRB(0, 10, 0, 10),
+                    hintText: TextByNation.getStringByKey('search_friend'),
+                    hintStyle: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w400,
+                        color: ColorValue.colorBorder),
+                    border: InputBorder.none,
+                  ),
+                  style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w400,
+                      color: ColorValue.textColor)),
+            ),
       actions: [
         InkWell(
             onTap: () async {
@@ -315,10 +414,10 @@ class GroupCreate extends StatelessWidget {
             },
             child: Icon(
               controller.isSearch.value ? Icons.close : Icons.search_outlined,
-              size: 24.sp,
+              size: 24,
             )),
         SizedBox(
-          width: 20.w,
+          width: 20,
         )
       ],
     );
@@ -339,7 +438,7 @@ class GroupCreate extends StatelessWidget {
           },
           child: Container(
             child: Padding(
-              padding: EdgeInsets.symmetric(vertical: 8.h, horizontal: 20.w),
+              padding: EdgeInsets.symmetric(vertical: 8, horizontal: 20),
               child: Row(
                 children: [
                   Stack(
@@ -348,8 +447,8 @@ class GroupCreate extends StatelessWidget {
                               controller.listContact[index].avatar!.isNotEmpty
                           ? ClipOval(
                               child: Container(
-                                width: 48.w,
-                                height: 48.w,
+                                width: 48,
+                                height: 48,
                                 decoration: BoxDecoration(),
                                 child: Image.network(
                                   Constant.BASE_URL_IMAGE +
@@ -363,16 +462,16 @@ class GroupCreate extends StatelessWidget {
                                       decoration: BoxDecoration(
                                           shape: BoxShape.circle,
                                           color: ColorValue.colorBorder),
-                                      width: 48.w,
-                                      height: 48.w,
+                                      width: 48,
+                                      height: 48,
                                     );
                                   },
                                 ),
                               ),
                             )
                           : Container(
-                              width: 48.w,
-                              height: 48.w,
+                              width: 48,
+                              height: 48,
                               decoration: BoxDecoration(
                                   shape: BoxShape.circle,
                                   gradient: Utils.getGradientForLetter(
@@ -396,7 +495,7 @@ class GroupCreate extends StatelessWidget {
                                     .toUpperCase(),
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
-                                    fontSize: 18.sp,
+                                    fontSize: 18,
                                     fontWeight: FontWeight.w600,
                                     color: Colors.white),
                               )),
@@ -423,7 +522,7 @@ class GroupCreate extends StatelessWidget {
                       // )
                     ],
                   ),
-                  SizedBox(width: 12.w),
+                  SizedBox(width: 12),
                   Expanded(
                       child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -435,14 +534,14 @@ class GroupCreate extends StatelessWidget {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
-                            fontSize: 16.sp,
+                            fontSize: 16,
                             fontWeight: FontWeight.w500,
                             color: Get.isDarkMode
                                 ? ColorValue.colorTextDark
                                 : ColorValue.textColor),
                       ),
                       SizedBox(
-                        height: 4.h,
+                        height: 4,
                       ),
                       Text(
                         TextByNation.getStringByKey('last_seen') +
@@ -452,7 +551,7 @@ class GroupCreate extends StatelessWidget {
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
-                            fontSize: 14.sp,
+                            fontSize: 14,
                             fontWeight: FontWeight.w400,
                             color: Get.isDarkMode
                                 ? ColorValue.colorTextDark
@@ -465,21 +564,20 @@ class GroupCreate extends StatelessWidget {
                   controller.isUuidInSelectedItems(
                           controller.listContact[index].uuid!)
                       ? Container(
-                          height: 20.sp,
-                          width: 20.sp,
+                          height: 20,
+                          width: 20,
                           child: Icon(
                             Icons.check_circle,
                             color: ColorValue.colorPrimary,
                           ),
                         )
                       : Container(
-                          height: 20.sp,
-                          width: 20.sp,
+                          height: 20,
+                          width: 20,
                           decoration: BoxDecoration(
                               shape: BoxShape.circle,
                               border: Border.all(
-                                  width: 1.5.sp,
-                                  color: ColorValue.colorBorder)),
+                                  width: 1.5, color: ColorValue.colorBorder)),
                         ),
                 ],
               ),

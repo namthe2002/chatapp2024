@@ -6,6 +6,7 @@ import 'package:live_yoko/Global/Constant.dart';
 import 'package:live_yoko/Global/TextByNation.dart';
 import 'package:live_yoko/Navigation/Navigation.dart';
 import 'package:live_yoko/Utils/Utils.dart';
+import 'package:live_yoko/View/Account/ChangePassword.dart';
 import 'package:live_yoko/View/Chat/home_chat.dart';
 import 'package:live_yoko/widget/single_tap_detector.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -67,21 +68,24 @@ class _UpdateProfileState extends State<UpdateProfile> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.max,
                 children: [
-                  SizedBox(height: 42,),
-                  Center(
-                      child:Text(
-                        AppLocalizations.of(context)!.update_profile,
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          color: Color(0xFF101114),
-                          fontSize: 24,
-                          fontFamily: 'SF Pro Display',
-                          fontWeight: FontWeight.w500,
-                          height: 32/24,
-                        ),
-                      )
+                  SizedBox(
+                    height: 42,
                   ),
-                  SizedBox(height: 8,),
+                  Center(
+                      child: Text(
+                    AppLocalizations.of(context)!.update_profile,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: Color(0xFF101114),
+                      fontSize: 24,
+                      fontFamily: 'SF Pro Display',
+                      fontWeight: FontWeight.w500,
+                      height: 32 / 24,
+                    ),
+                  )),
+                  SizedBox(
+                    height: 8,
+                  ),
                   Center(
                     child: Text(
                       TextByNation.getStringByKey('update_profile_content'),
@@ -246,9 +250,9 @@ class _UpdateProfileState extends State<UpdateProfile> {
                     height: 20,
                   ),
                   SingleTapDetector(
-                    delayTimeInMillisecond: 2500,
-                    onTap: () {
-                      Navigation.navigateTo(page: 'ChangePassword');
+                    delayTimeInMillisecond: 200,
+                    onTap: () async {
+                      showChangePassDialog();
                     },
                     child: Container(
                       decoration: BoxDecoration(
@@ -275,6 +279,21 @@ class _UpdateProfileState extends State<UpdateProfile> {
     );
   }
 
+  showChangePassDialog() {
+    return showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            backgroundColor:
+                Get.isDarkMode ? ColorValue.neutralColor : Colors.white,
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+            contentPadding: EdgeInsets.all(32),
+            content: ChangePassword(),
+          );
+        });
+  }
+
   AppBar appBar(BuildContext context) {
     return AppBar(
         centerTitle: false,
@@ -288,7 +307,7 @@ class _UpdateProfileState extends State<UpdateProfile> {
             fontSize: 20,
             fontFamily: 'SF Pro Display',
             fontWeight: FontWeight.w600,
-            height: 28/20,
+            height: 28 / 20,
           ),
         ));
   }
