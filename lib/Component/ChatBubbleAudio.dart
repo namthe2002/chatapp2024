@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:just_audio/just_audio.dart';
+import 'package:live_yoko/Component/WaveAudioForm.dart';
 // import 'package:waveform/waveform.dart';
 
 class ChatBubbleAudio extends StatefulWidget {
@@ -64,14 +65,6 @@ class WaveBubbleState extends State<ChatBubbleAudio> {
     }
   }
 
-  // Stream<Amplitude> _createAmplitudeStream() {
-  //   return Stream.periodic(Duration(milliseconds: 50), (count) {
-  //     final position = _currentPosition.inMilliseconds;
-  //     final total = _totalDuration.inMilliseconds;
-  //     if (total == 0) return Amplitude(0);
-  //     return Amplitude((position / total).clamp(0.0, 1.0), current: null);
-  //   });
-  // }
 
   String _formatDuration(Duration duration) {
     String twoDigits(int n) => n.toString().padLeft(2, '0');
@@ -113,19 +106,7 @@ class WaveBubbleState extends State<ChatBubbleAudio> {
           ),
         ),
         SizedBox(width: 8),
-        // Expanded(
-        //   child: SizedBox(
-        //     height: 30,
-        //     child: AnimatedWaveList(
-        //       stream: _amplitudeStream,
-        //       width: widget.width,
-        //       height: 30,
-        //       inactiveColor: Colors.grey,
-        //       activeColor: Colors.lightGreen,
-        //       maxDuration: _totalDuration,
-        //     ),
-        //   ),
-        // ),
+        AudioWaveformScreen(audioUrl: widget.url, timeAudio: _totalDuration),
         SizedBox(width: 8),
         Container(
           padding: EdgeInsets.all(6),

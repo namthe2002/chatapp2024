@@ -132,3 +132,18 @@ Future startNotification() async {
     PushNotifications.navigationInNotification(message.data);
   }
 }
+
+
+//
+// import 'package:flutter/material.dart';
+//
+// import 'Component/WaveAudioForm.dart';
+//
+// final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+// int roleId = 0;
+//
+// void main() {
+//   runApp(MaterialApp(debugShowCheckedModeBanner: false,
+//     home: AudioWaveformScreen( audioUrl: 'https://www2.cs.uic.edu/~i101/SoundFiles/gettysburg10.wav'),  // Thay thế bằng link file .wav của bạn
+//   ));
+// }

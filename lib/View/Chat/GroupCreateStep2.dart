@@ -44,7 +44,10 @@ class GroupCreateStep2 extends StatelessWidget {
                         )),),
                 ),
                 IconButton(onPressed: () async{
-                  Get.find<ChatController>().updateFeature(widget: GroupCreate(callback: () {  },));
+                  Get.find<ChatController>().updateFeature(widget: GroupCreate(callback: () async {
+                    Get.find<ChatController>().updateFeature(widget: null);
+                    // await Get.find<ChatController>().refreshListChat();
+                  },));
                 }, icon: Icon(Icons.close))
               ],
             ),

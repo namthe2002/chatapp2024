@@ -327,34 +327,26 @@ class ChatController extends GetxController {
         element.uuid == message['RoomUuid']);
     if (index != -1) {
       listChat.removeAt(index);
-      // isUnPin.value = true;
-      // await refreshListChat();
-      listChat.refresh();
-
       if (Get.isRegistered<ChatDetailController>()) {
         var controllerChatDetail = Get.find<ChatDetailController>();
         if (controllerChatDetail.ownerUuid == message['RoomUuid']) {
-          // Get.close(1);
-          int isBack = 1;
           if (Get.isRegistered<ProfileChatDetailController>()) {
             Get.delete<ProfileChatDetailController>();
-            isBack += 1;
           }
           if (Get.isRegistered<MediaChatDetailController>()) {
             Get.delete<MediaChatDetailController>();
-            isBack += 1;
           }
-
-          Get.close(isBack);
-          Get.delete<ChatDetailController>();
         }
-      } // check thêm cả trường hợp đang ở trong các phần khác nữa trong chi tiểt
+
+        Get.find<ChatController>().selectChatItem(null);
+      }
+      await refreshListChat();
     }
   }
 
   joinChat(dynamic message) async {
     isUnPin.value = true;
-    await refreshListChat(); // thông báo khi có nhóm mới
+    await refreshListChat();
   }
 
   updateChat(dynamic message) async {
@@ -481,10 +473,14 @@ class ChatController extends GetxController {
     if (isUnPin.value) {
       getChat();
       listChat.refresh();
+      Get.find<ChatController>().updateFeature(widget: null );
+      Get.find<ChatController>().refresh();
     } else {
       isLoading.value = true;
       listChat.clear();
       getChat();
+      Get.find<ChatController>().updateFeature(widget: null );
+      Get.find<ChatController>().refresh();
     }
   }
 
@@ -674,7 +670,7 @@ class ChatController extends GetxController {
     selectedChatItemIndex.value = index;
   }
 
-  void selectChatItem(Chat item) {
+  void selectChatItem(Chat? item) {
     selectedChatItem.value = item;
     print('namthe12 ${selectedChatItem.value!.fullName}');
   }

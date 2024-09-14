@@ -69,16 +69,11 @@ class _HomeChatWebsiteState extends State<HomeChatWebsite> {
     super.dispose();
   }
 
-
   void didChangeDependencies() {
     // TODO: implement didChangeDependencies
     // _homeController.updateConstHomeWidget(widget: homeChatWidget());
     super.didChangeDependencies();
-
-
   }
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -1163,28 +1158,27 @@ class _HomeChatWebsiteState extends State<HomeChatWebsite> {
 
   Widget buttonAddChat() {
     return
-      //
-      // AnimatedSlide(
-      // duration: const Duration(microseconds: 300),
-      // offset: _homeController.isVisible.value ? Offset.zero : Offset(0, 2),
-      // child: AnimatedOpacity(
-      //   duration: const Duration(microseconds: 300),
-      //   opacity: _homeController.isVisible.value ? 1 : 0,
-      //   child:
-      //
-      //
-
+        //
+        // AnimatedSlide(
+        // duration: const Duration(microseconds: 300),
+        // offset: _homeController.isVisible.value ? Offset.zero : Offset(0, 2),
+        // child: AnimatedOpacity(
+        //   duration: const Duration(microseconds: 300),
+        //   opacity: _homeController.isVisible.value ? 1 : 0,
+        //   child:
+        //
+        //
 
         Container(
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            gradient: _homeController.isSelected.value == true
-                ? null
-                : LinearGradient(
-                    colors: [Colors.blue, Colors.green],
-                  ),
-          ),
-          child: _createChatButton(),
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        gradient: _homeController.isSelected.value == true
+            ? null
+            : LinearGradient(
+                colors: [Colors.blue, Colors.green],
+              ),
+      ),
+      child: _createChatButton(),
       //   ),
       // ),
     );
@@ -2630,9 +2624,7 @@ class _HomeChatWebsiteState extends State<HomeChatWebsite> {
                       _homeController.updateFeature(
                           context: context,
                           widget: GroupCreate(
-                            callback: () {
-                              backToHomePage;
-                            },
+                            callback: backToHomePage,
                           ));
                     }),
               ];

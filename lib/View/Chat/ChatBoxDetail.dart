@@ -661,10 +661,10 @@ class _ChatBoxDetailState extends State<ChatBoxDetail>
                                                                           GestureDetector(
                                                                             onTap:
                                                                                 () {
-                                                                              FocusManager.instance.primaryFocus?.unfocus();
-                                                                              showDialog(
+                                                                              // FocusManager.instance.primaryFocus?.unfocus();
+                                                                              showGeneralDialog(
                                                                                 context: context,
-                                                                                builder: (context) => _dialogPin(),
+                                                                                pageBuilder: (context, _, __) => _dialogPin(),
                                                                               );
                                                                             },
                                                                             child:
@@ -1185,25 +1185,18 @@ class _ChatBoxDetailState extends State<ChatBoxDetail>
         padding: EdgeInsets.symmetric(vertical: 4, horizontal: 4),
         margin: EdgeInsets.symmetric(horizontal: 4),
         decoration: BoxDecoration(
-          color: Get.isDarkMode
-              ? Color(0xff232323)
-              : ColorValue.colorBrSearch,
-          borderRadius:
-          BorderRadius.circular(16),
-          boxShadow: controller
-              .replyChat.value.uuid !=
-              null
+          color: Get.isDarkMode ? Color(0xff232323) : ColorValue.colorBrSearch,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: controller.replyChat.value.uuid != null
               ? null
               : [
-            BoxShadow(
-              color: Colors.grey
-                  .withOpacity(0.5),
-              spreadRadius: .1,
-              blurRadius: 10,
-              offset: Offset(0,
-                  3), // changes position of shadow
-            ),
-          ],
+                  BoxShadow(
+                    color: Colors.grey.withOpacity(0.5),
+                    spreadRadius: .1,
+                    blurRadius: 10,
+                    offset: Offset(0, 3), // changes position of shadow
+                  ),
+                ],
         ),
         child: PopupMenuButton(
             offset: Offset(100, -150),
@@ -2638,6 +2631,7 @@ class _ChatBoxDetailState extends State<ChatBoxDetail>
           : showImage(
               url: decoded, width: Get.width * 0.15, height: Get.height * 0.28);
     } else if (message.contentType == 5) {
+      print('link wav: ${Constant.BASE_URL_IMAGE + jsonDecode(decoded)[0]}');
       return pinType == 1
           ? Row(
               children: [

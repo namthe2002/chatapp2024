@@ -597,7 +597,7 @@ class Friend extends StatelessWidget {
                 border: Border(
                   bottom: BorderSide(
                       width: 1,
-                      color: ColorValue.colorPrimary ?? ColorValue.white),
+                      color: ColorValue.colorPrimary ),
                 )),
             child: Text(
               '0',

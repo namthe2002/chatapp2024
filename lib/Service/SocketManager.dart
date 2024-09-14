@@ -87,7 +87,8 @@ class SocketManager {
         } else if (data['MsgType'] == 5) {
           Get.find<ChatController>().resetListOnline(json.decode(data['Data']));
         } else if (data['MsgType'] == 9) {
-          Get.find<ChatController>().remoteChat(json.decode(data['Data']));
+        Get.find<ChatController>().remoteChat(json.decode(data['Data']));
+        print('daxoachat ${json.decode(data['Data'])}');
         } else if (data['MsgType'] == 10) {
           Get.find<ChatController>().joinChat(json.decode(data['Data']));
         } else if (data['MsgType'] == 3) {
