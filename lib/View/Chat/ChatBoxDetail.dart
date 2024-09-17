@@ -42,6 +42,7 @@ import '../../core/constant/sticker/sticker.dart';
 import '../../main.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
+import '../../widget/RecordTime.dart';
 import '../../widget/text_field_widget.dart';
 import '../../widget/utils_widget.dart';
 
@@ -661,7 +662,6 @@ class _ChatBoxDetailState extends State<ChatBoxDetail>
                                                                           GestureDetector(
                                                                             onTap:
                                                                                 () {
-                                                                              // FocusManager.instance.primaryFocus?.unfocus();
                                                                               showGeneralDialog(
                                                                                 context: context,
                                                                                 pageBuilder: (context, _, __) => _dialogPin(),
@@ -726,10 +726,14 @@ class _ChatBoxDetailState extends State<ChatBoxDetail>
                                                                         10,
                                                                     vertical:
                                                                         10),
+                                                            addAutomaticKeepAlives:
+                                                                false,
                                                             itemCount: controller
                                                                     .chatList
                                                                     .length +
                                                                 1,
+                                                            minCacheExtent:
+                                                                10000,
                                                             itemBuilder:
                                                                 (BuildContext
                                                                         context,
@@ -761,10 +765,16 @@ class _ChatBoxDetailState extends State<ChatBoxDetail>
                                                                         ],
                                                                       ));
                                                               }
+                                                              // {{ edit_1 }}: Use a key to preserve the state of the chat items
                                                               return _chatItem(
                                                                   context,
-                                                                  index: index -
-                                                                      1);
+                                                                  index:
+                                                                      index - 1,
+                                                                  key: ValueKey(controller
+                                                                      .chatList[
+                                                                          index -
+                                                                              1]
+                                                                      .uuid));
                                                             },
                                                           ))
                                                         ],
@@ -1001,7 +1011,10 @@ class _ChatBoxDetailState extends State<ChatBoxDetail>
                                                     size: 24,
                                                   ),
                                                 ),
-                                                Expanded(child: SizedBox()),
+                                                Expanded(
+                                                    child: Center(
+                                                        child:
+                                                            RecordingTimer())),
                                                 IconButton(
                                                   onPressed: () async {
                                                     await controller
@@ -1231,9 +1244,10 @@ class _ChatBoxDetailState extends State<ChatBoxDetail>
             }));
   }
 
-  _chatItem(BuildContext context, {required int index}) {
+  _chatItem(BuildContext context, {required int index, required Key key}) {
     cd.ChatDetail message = controller.chatList[index];
     final bool isMe = message.userSent == controller.userName;
+
 
     cd.ChatDetail messageTime =
         controller.chatList[index - 1 == -1 ? index : index - 1];
@@ -2685,7 +2699,7 @@ class _ChatBoxDetailState extends State<ChatBoxDetail>
                               await controller.translator.translate(value);
                           if (indexMessage != -1) {
                             controller.chatList[indexMessage].translate = data;
-                            controller.chatList.refresh();
+                            // controller.chatList.refresh();
                           }
                         },
                       );
@@ -2842,7 +2856,7 @@ class _ChatBoxDetailState extends State<ChatBoxDetail>
                           : value;
                   controller.chatList[indexMessage].isTranslate =
                       !controller.chatList[indexMessage].isTranslate;
-                  controller.chatList.refresh();
+                  // controller.chatList.refresh();
                 }
               },
               child: Container(
@@ -3296,7 +3310,7 @@ class _ChatBoxDetailState extends State<ChatBoxDetail>
                                   ? 1
                                   : 0);
                         }),
-                        if (controller.chatList.value.length > 1)
+                        if (controller.chatList.length > 1)
                           _customChildShowDialog(
                               'asset/icons/multiple_select.svg',
                               AppLocalizations.of(context)!.multiple_select,

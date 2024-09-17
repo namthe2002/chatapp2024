@@ -34,21 +34,22 @@ class GroupCreateStep2 extends StatelessWidget {
           children: [
             Row(
               children: [
+                IconButton(onPressed: () async{
+                  Get.find<ChatController>().updateFeature(widget: GroupCreate(callback: () async {
+                    Get.find<ChatController>().updateFeature(widget: null);
+                    // await Get.find<ChatController>().refreshListChat();
+                  },));
+                }, icon: Icon(Icons.arrow_back)),
                 Expanded(
-                  child: Padding(padding: EdgeInsets.only(left: 15)
-                    ,child: Text(TextByNation.getStringByKey('new_group'),
+                  child: Center(
+                    child: Text(TextByNation.getStringByKey('new_group'),
                         style: TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.w600,
                           height: 28/20,
                         )),),
                 ),
-                IconButton(onPressed: () async{
-                  Get.find<ChatController>().updateFeature(widget: GroupCreate(callback: () async {
-                    Get.find<ChatController>().updateFeature(widget: null);
-                    // await Get.find<ChatController>().refreshListChat();
-                  },));
-                }, icon: Icon(Icons.close))
+
               ],
             ),
             Stack(

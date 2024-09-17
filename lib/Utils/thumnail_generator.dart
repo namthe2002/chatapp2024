@@ -107,6 +107,7 @@ class GenThumbnailImage extends StatefulWidget {
     Key? key,
     required this.thumbnailRequest,
   }) : super(key: key);
+
   final ThumbnailRequest thumbnailRequest;
 
   @override
@@ -143,10 +144,6 @@ class _GenThumbnailImageState extends State<GenThumbnailImage> {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: <Widget>[
-              // Text(
-              //   'Generating the thumbnail for: ${widget.thumbnailRequest.video}...',
-              // ),
-              // const SizedBox(height: 10),
               const CircularProgressIndicator(),
             ],
           );

@@ -40,7 +40,8 @@ class ChatDetailController extends GetxController {
   String uuidUser = '';
   String userName = '';
   var selectedChatDetail = Rxn<Chat>();
-  RxList<ChatDetail> chatList = RxList<ChatDetail>();
+  // RxList<ChatDetail> chatList = RxList<ChatDetail>();
+  List<ChatDetail> chatList = [];
   RxBool isChatLoading = true.obs;
   RxInt totalPageChat = 1.obs;
   int pageSize = 24;
@@ -538,7 +539,7 @@ class ChatDetailController extends GetxController {
         }
       }
       userTyping.value = '';
-      chatList.refresh();
+      // chatList.refresh();
     } else {
       if (msgType == 0) {
         String decoded = newMessage.content ?? '';
@@ -1065,7 +1066,7 @@ class ChatDetailController extends GetxController {
         if (chatList[i].readState == 1) break;
         chatList[i].readState = 1;
       }
-      chatList.refresh();
+      // chatList.refresh();
     }
   }
 
@@ -1080,7 +1081,7 @@ class ChatDetailController extends GetxController {
     if (message['RoomUuid'] == uuidChat) {
       chatList.removeWhere(
               (element) => message['ListMsgUuid'].contains(element.uuid));
-      chatList.refresh();
+      // chatList.refresh();
 
       pinList.removeWhere(
               (element) => message['ListMsgUuid'].contains(element.uuid));
@@ -1110,13 +1111,14 @@ class ChatDetailController extends GetxController {
     }
   }
 
+
   setEditMessage(dynamic message) async {
     int index = chatList
         .indexWhere((element) => element.uuid! == message['MsgLineUuid']);
     if (index != -1) {
       chatList[index].content = message['Content'];
       chatList[index].status = 2;
-      chatList.refresh();
+      // chatList.refresh();
     }
   }
 
@@ -1125,7 +1127,7 @@ class ChatDetailController extends GetxController {
         .indexWhere((element) => element.uuid! == message['MsgLineUuid']);
     if (index != -1) {
       chatList[index].likeCount = chatList[index].likeCount! + 1;
-      chatList.refresh();
+      // chatList.refresh();
     }
   }
 
