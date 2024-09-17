@@ -34,7 +34,7 @@ class _AudioWaveformScreenState extends State<AudioWaveformScreen> {
       setState(() {
         isLoading = true;
       });
-      audioSamples = await parseWavFromUrl(widget.audioUrl, totalSamples: 48);
+      audioSamples = await parseWavFromUrl(widget.audioUrl, totalSamples: 55);
       setState(() {
         isLoading = false;
       });
@@ -56,7 +56,7 @@ class _AudioWaveformScreenState extends State<AudioWaveformScreen> {
         : audioSamples.isEmpty
             ? SizedBox.shrink()
             : Container(
-                padding: EdgeInsets.all(5),
+                padding: EdgeInsets.all(8),
                 decoration: BoxDecoration(
                   border:
                       Border.all(width: 0.2, color: ColorValue.colorPrimary),
@@ -66,10 +66,10 @@ class _AudioWaveformScreenState extends State<AudioWaveformScreen> {
                 child: SquigglyWaveform(
                   samples: audioSamples,
                   width: Get.width / 12,
-                  height: 28,
+                  height: 25,
                   inactiveColor: ColorValue.colorPrimary,
                   strokeWidth: 1,
-                  absolute: true,
+                  // absolute: true,
                 ),
               );
   }

@@ -10,15 +10,16 @@ import '../Global/ColorValue.dart';
 class MyEntry<T> extends StatefulWidget implements PopupMenuEntry<T> {
   MyEntry(
       {super.key,
-      required this.icon,
-      required this.title,
-      required this.onTap,
-      this.value});
+       this.icon,
+       this.title,
+       this.onTap,
+      this.value, this.widgetCustom});
 
-  final String icon;
-  final String title;
+  final String? icon;
+  final String? title;
   final VoidCallback? onTap;
   final T? value;
+  final Widget? widgetCustom;
 
   @override
   State<MyEntry> createState() => _MyEntryState();
@@ -33,7 +34,7 @@ class MyEntry<T> extends StatefulWidget implements PopupMenuEntry<T> {
 class _MyEntryState extends State<MyEntry> {
   @override
   Widget build(BuildContext context) {
-    return Padding(
+    return widget.widgetCustom != null ? widget.widgetCustom! :  Padding(
       padding: EdgeInsets.symmetric(horizontal: 12),
       child: SingleTapDetector(
         onTap: () {
@@ -46,11 +47,11 @@ class _MyEntryState extends State<MyEntry> {
           height: widget.height,
           child: Row(
             children: [
-              SvgPicture.asset(widget.icon,
+              SvgPicture.asset(widget.icon ?? 'asset/images/default.svg',
               color:
                   Get.isDarkMode ? ColorValue.white : ColorValue.neutralColor,),
               SizedBox(width: 12),
-              Text(widget.title,
+              Text(widget.title ?? 'My entry',
                   style: TextStyle(
                     fontSize: 14,
                     height: 24 / 14,

@@ -8,6 +8,8 @@ class ChatDetailMember {
   int? roleId;
   bool? isFriend;
   int? canMakeFriend;
+  bool? isBlock;
+  bool? isOnline;
 
   ChatDetailMember(
       {this.uuid,
@@ -18,7 +20,8 @@ class ChatDetailMember {
         this.status,
         this.roleId,
         this.isFriend,
-        this.canMakeFriend});
+        this.canMakeFriend,
+      this.isBlock,this.isOnline});
 
   ChatDetailMember.fromJson(Map<String, dynamic> json) {
     uuid = json['uuid'];
@@ -30,6 +33,8 @@ class ChatDetailMember {
     roleId = json['roleId'];
     isFriend = json['isFriend'];
     canMakeFriend = json['canMakeFriend'];
+    isBlock = json['isBlock'];
+    isOnline = json['isOnline'];
   }
 
   Map<String, dynamic> toJson() {
@@ -43,6 +48,8 @@ class ChatDetailMember {
     data['roleId'] = this.roleId;
     data['isFriend'] = this.isFriend;
     data['canMakeFriend'] = this.canMakeFriend;
+    data['isBlock'] = this.isBlock;
+    data['isOnline'] = this.isOnline;
     return data;
   }
 }

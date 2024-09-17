@@ -19,20 +19,20 @@ import 'Global/Themes.dart';
 import 'Service/PushNotification/firebase_options.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'View/Account/Splash.dart';
+import 'View/Chat/ProfileChatDetail2.dart';
 import 'View/Login/Login.dart';
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 int roleId = 0;
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  SystemChrome.setSystemUIOverlayStyle(
-      const SystemUiOverlayStyle(statusBarColor: Colors.transparent));
+  SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(statusBarColor: Colors.transparent));
 
   bool isDarkMode = await Utils.getBoolValueWithKey(Constant.DARK_MODE);
   bool isAutoMode = await Utils.getBoolValueWithKey(Constant.AUTO_MODE);
   Locale? locale;
-  String language =
-      await Utils.getStringValueWithKey(Constant.LANGUAGE_SYSTEM_INDEX);
+  String language = await Utils.getStringValueWithKey(Constant.LANGUAGE_SYSTEM_INDEX);
   if (language.isNotEmpty) {
     TextByNation.nationCode.value = language;
     locale = Locale(language);
@@ -90,9 +90,7 @@ Future<bool> startForegroundService() async {
   const androidConfig = FlutterBackgroundAndroidConfig(
     notificationTitle: 'Title of the notification',
     notificationText: 'Text of the notification',
-    notificationIcon: AndroidResource(
-        name: 'background_icon',
-        defType: 'drawable'), // Default is ic_launcher from folder mipmap
+    notificationIcon: AndroidResource(name: 'background_icon', defType: 'drawable'), // Default is ic_launcher from folder mipmap
   );
   await FlutterBackground.initialize(androidConfig: androidConfig);
   return FlutterBackground.enableBackgroundExecution();
@@ -126,13 +124,11 @@ Future startNotification() async {
     await PushNotifications.navigationInNotification(message.data);
   });
 
-  final RemoteMessage? message = await FirebaseMessaging.instance
-      .getInitialMessage();
+  final RemoteMessage? message = await FirebaseMessaging.instance.getInitialMessage();
   if (message != null) {
     PushNotifications.navigationInNotification(message.data);
   }
 }
-
 
 //
 // import 'package:flutter/material.dart';

@@ -45,6 +45,7 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../../widget/RecordTime.dart';
 import '../../widget/text_field_widget.dart';
 import '../../widget/utils_widget.dart';
+import 'ProfileChatDetail2.dart';
 
 class ChatBoxDetail extends StatefulWidget {
   final Chat? chatDetail;
@@ -55,8 +56,7 @@ class ChatBoxDetail extends StatefulWidget {
   State<ChatBoxDetail> createState() => _ChatBoxDetailState();
 }
 
-class _ChatBoxDetailState extends State<ChatBoxDetail>
-    with TickerProviderStateMixin {
+class _ChatBoxDetailState extends State<ChatBoxDetail> with TickerProviderStateMixin {
   final controller = Get.put(ChatDetailController());
   late TabController _tabEmojiController;
 
@@ -162,98 +162,70 @@ class _ChatBoxDetailState extends State<ChatBoxDetail>
                   child: Column(
                     children: [
                       Expanded(
-                        child: TabBarView(
-                            controller: _tabEmojiController,
-                            children: [
-                              EmojiPicker(
-                                textEditingController:
-                                    controller.textMessageController,
-                                config: Config(
-                                  emojiTextStyle: TextStyle(
-                                    fontFamily: 'NotoColorEmoji',
-                                  ),
-                                  emojiViewConfig: EmojiViewConfig(
-                                    emojiSizeMax: 28 * 1.0,
-                                    backgroundColor: Colors.transparent,
-                                    // Sử dụng customWidget để điều khiển hiển thị emoji với font 'NotoColorEmoji'
-                                  ),
-                                  swapCategoryAndBottomBar: true,
-                                  categoryViewConfig: CategoryViewConfig(
-                                    backgroundColor: Colors.transparent,
-                                    tabBarHeight: 46,
-                                    dividerColor: Colors.transparent,
-                                  ),
-                                  bottomActionBarConfig:
-                                      const BottomActionBarConfig(
-                                    enabled: false,
-                                  ),
-                                ),
+                        child: TabBarView(controller: _tabEmojiController, children: [
+                          EmojiPicker(
+                            textEditingController: controller.textMessageController,
+                            config: Config(
+                              emojiTextStyle: TextStyle(
+                                fontFamily: 'NotoColorEmoji',
                               ),
-                              Padding(
-                                padding: EdgeInsets.only(top: 12),
-                                child: GiphyTabDetail(
-                                    chatDetailController: controller,
-                                    scrollController: ScrollController()),
+                              emojiViewConfig: EmojiViewConfig(
+                                emojiSizeMax: 28 * 1.0,
+                                backgroundColor: Colors.transparent,
+                                // Sử dụng customWidget để điều khiển hiển thị emoji với font 'NotoColorEmoji'
                               ),
-                              //stickers
-                              DefaultTabController(
-                                  length: stickerPacks.length,
-                                  child: Column(
-                                    children: [
-                                      SizedBox(
-                                        height: 12,
-                                      ),
-                                      SizedBox(
-                                          height: 50,
-                                          child: TabBar(
-                                            tabAlignment: TabAlignment.start,
-                                            dividerColor: Colors.transparent,
-                                            isScrollable: true,
-                                            tabs: List.generate(
-                                                stickerPacks.length, (index) {
-                                              return Image.asset(
-                                                  stickerPacks[index]
-                                                          ['tray_image_file']
-                                                      as String);
-                                            }),
-                                          )),
-                                      Expanded(
-                                        child: TabBarView(
-                                            children: List.generate(
-                                                stickerPacks.length, (index) {
-                                          return GridView.builder(
-                                              itemCount: (stickerPacks[index]
-                                                      ['stickers'] as List)
-                                                  .length,
-                                              gridDelegate:
-                                                  SliverGridDelegateWithFixedCrossAxisCount(
-                                                      crossAxisCount: 4,
-                                                      crossAxisSpacing: 10,
-                                                      mainAxisSpacing: 10),
-                                              itemBuilder: (context,
-                                                      indexStic) =>
-                                                  InkWell(
-                                                    onTap: () {
-                                                      controller.sendMessage(
-                                                          content: (stickerPacks[
-                                                                          index]
-                                                                      [
-                                                                      'stickers']
-                                                                  as List)[
-                                                              indexStic]['text'],
-                                                          type: 6);
-                                                    },
-                                                    child: Image.asset(
-                                                        (stickerPacks[index]
-                                                                    ['stickers']
-                                                                as List)[indexStic]
-                                                            ['image_file']),
-                                                  ));
-                                        })),
-                                      )
-                                    ],
-                                  )),
-                            ]),
+                              swapCategoryAndBottomBar: true,
+                              categoryViewConfig: CategoryViewConfig(
+                                backgroundColor: Colors.transparent,
+                                tabBarHeight: 46,
+                                dividerColor: Colors.transparent,
+                              ),
+                              bottomActionBarConfig: const BottomActionBarConfig(
+                                enabled: false,
+                              ),
+                            ),
+                          ),
+                          Padding(
+                            padding: EdgeInsets.only(top: 12),
+                            child: GiphyTabDetail(chatDetailController: controller, scrollController: ScrollController()),
+                          ),
+                          //stickers
+                          DefaultTabController(
+                              length: stickerPacks.length,
+                              child: Column(
+                                children: [
+                                  SizedBox(
+                                    height: 12,
+                                  ),
+                                  SizedBox(
+                                      height: 50,
+                                      child: TabBar(
+                                        tabAlignment: TabAlignment.start,
+                                        dividerColor: Colors.transparent,
+                                        isScrollable: true,
+                                        tabs: List.generate(stickerPacks.length, (index) {
+                                          return Image.asset(stickerPacks[index]['tray_image_file'] as String);
+                                        }),
+                                      )),
+                                  Expanded(
+                                    child: TabBarView(
+                                        children: List.generate(stickerPacks.length, (index) {
+                                      return GridView.builder(
+                                          itemCount: (stickerPacks[index]['stickers'] as List).length,
+                                          gridDelegate:
+                                              SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 4, crossAxisSpacing: 10, mainAxisSpacing: 10),
+                                          itemBuilder: (context, indexStic) => InkWell(
+                                                onTap: () {
+                                                  controller.sendMessage(
+                                                      content: (stickerPacks[index]['stickers'] as List)[indexStic]['text'], type: 6);
+                                                },
+                                                child: Image.asset((stickerPacks[index]['stickers'] as List)[indexStic]['image_file']),
+                                              ));
+                                    })),
+                                  )
+                                ],
+                              )),
+                        ]),
                       ),
                       TabBar(
                         controller: _tabEmojiController,
@@ -266,9 +238,7 @@ class _ChatBoxDetailState extends State<ChatBoxDetail>
                         dividerColor: Colors.transparent,
                         indicatorColor: Colors.transparent,
                         tabAlignment: TabAlignment.center,
-                        labelColor: Get.isDarkMode
-                            ? Colors.lightBlueAccent
-                            : ColorValue.neutralLineIcon,
+                        labelColor: Get.isDarkMode ? Colors.lightBlueAccent : ColorValue.neutralLineIcon,
                       )
                     ],
                   ),
@@ -281,32 +251,6 @@ class _ChatBoxDetailState extends State<ChatBoxDetail>
     );
   }
 
-  // void _updateTabHeight() {
-  //   if (controller.isExtendShowEmoji.value) {
-  //     if (_tabEmojiController.indexIsChanging) {
-  //       if (_tabEmojiController.index == 0) {
-  //         controller.isExtendShowEmoji.value =
-  //             !controller.isExtendShowEmoji.value;
-  //         controller.tabHeight = (256.0).obs;
-  //       } else {
-  //         controller.tabHeight = (Get.height * .796).obs;
-  //       }
-  //     } else {
-  //       if (_tabEmojiController.index == 0) {
-  //         controller.tabHeight = (256.0).obs;
-  //         controller.isExtendShowEmoji.value =
-  //             !controller.isExtendShowEmoji.value;
-  //       } else {
-  //         controller.tabHeight = (Get.height * .796).obs;
-  //       }
-  //     }
-  //   } else {
-  //     controller.tabHeight = 256.0.obs;
-  //   }
-  //
-  //   FocusScope.of(context).unfocus();
-  // }
-
   @override
   Widget build(BuildContext context) {
     size = MediaQuery.of(context).size;
@@ -315,11 +259,8 @@ class _ChatBoxDetailState extends State<ChatBoxDetail>
           ? Scaffold(body: emptyChat())
           : Scaffold(
               appBar: AppBar(
-                backgroundColor: controller.isShowMultiselect.value
-                    ? (Get.isDarkMode
-                        ? Color(controller.textColor)
-                        : Colors.white)
-                    : Color(controller.textColor),
+                backgroundColor:
+                    controller.isShowMultiselect.value ? (Get.isDarkMode ? Color(controller.textColor) : Colors.white) : Color(controller.textColor),
                 title: controller.isShowMultiselect.value
                     ? Text(
                         '${controller.selectedItems.length} ${TextByNation.getStringByKey('select')}',
@@ -330,8 +271,7 @@ class _ChatBoxDetailState extends State<ChatBoxDetail>
                             autofocus: true,
                             style: TextStyle(color: Colors.white),
                             decoration: InputDecoration(
-                              hintText:
-                                  '${TextByNation.getStringByKey('enter_message')}',
+                              hintText: '${TextByNation.getStringByKey('enter_message')}',
                               hintStyle: TextStyle(
                                 color: Colors.white70,
                               ),
@@ -343,28 +283,21 @@ class _ChatBoxDetailState extends State<ChatBoxDetail>
                             : SizedBox(
                                 child: GestureDetector(
                                   onTap: () {
-                                    controller.showGroupInfoMode();
+                                    Get.find<ChatController>().showGroupInfoMode();
                                   },
                                   child: Row(
                                     children: [
                                       controller.chatAvatar.isNotEmpty
                                           ? Obx(
                                               () => Padding(
-                                                padding:
-                                                    EdgeInsets.only(left: 20),
+                                                padding: EdgeInsets.only(left: 20),
                                                 child: ClipOval(
                                                   child: Image.network(
-                                                    Constant.BASE_URL_IMAGE +
-                                                        controller
-                                                            .chatAvatar.value,
+                                                    Constant.BASE_URL_IMAGE + controller.chatAvatar.value,
                                                     width: 40,
                                                     height: 40,
                                                     fit: BoxFit.cover,
-                                                    errorBuilder:
-                                                        (BuildContext context,
-                                                            Object exception,
-                                                            StackTrace?
-                                                                stackTrace) {
+                                                    errorBuilder: (BuildContext context, Object exception, StackTrace? stackTrace) {
                                                       return SvgPicture.asset(
                                                         width: 40,
                                                         height: 40,
@@ -381,25 +314,13 @@ class _ChatBoxDetailState extends State<ChatBoxDetail>
                                               () => Container(
                                                 width: 40,
                                                 height: 40,
-                                                margin:
-                                                    EdgeInsets.only(left: 20),
+                                                margin: EdgeInsets.only(left: 20),
                                                 decoration: BoxDecoration(
-                                                    shape: BoxShape.circle,
-                                                    gradient: Utils
-                                                        .getGradientForLetter(
-                                                            controller.chatName
-                                                                .value)),
+                                                    shape: BoxShape.circle, gradient: Utils.getGradientForLetter(controller.chatName.value)),
                                                 child: Center(
                                                     child: Text(
-                                                  Utils.getInitialsName(
-                                                          controller
-                                                              .chatName.value)
-                                                      .toUpperCase(),
-                                                  style: TextStyle(
-                                                      fontSize: 14,
-                                                      fontWeight:
-                                                          FontWeight.w600,
-                                                      color: Colors.white),
+                                                  Utils.getInitialsName(controller.chatName.value).toUpperCase(),
+                                                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.white),
                                                   textAlign: TextAlign.center,
                                                 )),
                                               ),
@@ -409,15 +330,11 @@ class _ChatBoxDetailState extends State<ChatBoxDetail>
                                       ),
                                       Expanded(
                                         child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
+                                          crossAxisAlignment: CrossAxisAlignment.start,
                                           children: [
                                             Text(
                                               controller.chatName.value,
-                                              style: TextStyle(
-                                                  fontWeight: FontWeight.w500,
-                                                  fontSize: 16,
-                                                  color: Colors.white),
+                                              style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16, color: Colors.white),
                                               overflow: TextOverflow.ellipsis,
                                             ),
                                             if (controller.chatType == 2) ...[
@@ -426,10 +343,7 @@ class _ChatBoxDetailState extends State<ChatBoxDetail>
                                               ),
                                               Text(
                                                 '${controller.memberLength.value} ${TextByNation.getStringByKey('members').toLowerCase()}',
-                                                style: TextStyle(
-                                                    fontWeight: FontWeight.w400,
-                                                    fontSize: 12,
-                                                    color: Colors.white),
+                                                style: TextStyle(fontWeight: FontWeight.w400, fontSize: 12, color: Colors.white),
                                                 overflow: TextOverflow.ellipsis,
                                               )
                                             ]
@@ -482,14 +396,12 @@ class _ChatBoxDetailState extends State<ChatBoxDetail>
                         controller.textSearchController.clear();
                       },
                       icon: Icon(
-                        controller.isSearch.value
-                            ? Icons.close_rounded
-                            : Icons.search,
+                        controller.isSearch.value ? Icons.close_rounded : Icons.search,
                       ),
                     ),
                     IconButton(
                       onPressed: () {
-                        controller.showGroupInfoMode();
+                        Get.find<ChatController>().showGroupInfoMode();
                       },
                       icon: Icon(
                         Icons.more_vert_rounded,
@@ -502,24 +414,17 @@ class _ChatBoxDetailState extends State<ChatBoxDetail>
                 mainAxisSize: MainAxisSize.max,
                 children: [
                   Expanded(
-                    flex: 2,
                     child: Container(
                       decoration: BoxDecoration(
                           image: Get.isDarkMode
-                              ? DecorationImage(
-                                  image: AssetImage('asset/images/bg_dark.png'),
-                                  fit: BoxFit.cover,
-                                  opacity: 0.2)
+                              ? DecorationImage(image: AssetImage('asset/images/bg_dark.png'), fit: BoxFit.cover, opacity: 0.2)
                               : DecorationImage(
-                                  image:
-                                      AssetImage('asset/images/bg_light.png'),
+                                  image: AssetImage('asset/images/bg_light.png'),
                                   fit: BoxFit.cover,
                                 )),
                       child: Obx(() => Padding(
                             padding: EdgeInsets.symmetric(
-                                horizontal: controller.isShowGroupInfo == true
-                                    ? Get.width * 0.045
-                                    : Get.width * 0.08),
+                                horizontal: Get.find<ChatController>().isShowGroupInfo == true ? Get.width * 0.045 : Get.width * 0.08),
                             child: Column(
                               children: [
                                 Expanded(
@@ -529,32 +434,20 @@ class _ChatBoxDetailState extends State<ChatBoxDetail>
                                           )
                                         : controller.chatList.isEmpty
                                             ? Column(
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment.center,
+                                                mainAxisAlignment: MainAxisAlignment.center,
                                                 children: [
                                                   SizedBox(
                                                     width: size.width,
                                                   ),
                                                   Container(
-                                                    padding:
-                                                        EdgeInsets.symmetric(
-                                                            horizontal: 32,
-                                                            vertical: 24),
+                                                    padding: EdgeInsets.symmetric(horizontal: 32, vertical: 24),
                                                     decoration: BoxDecoration(
-                                                      borderRadius:
-                                                          BorderRadius.circular(
-                                                              24),
-                                                      color: Get.isDarkMode
-                                                          ? Color(0xFF1C1F25)
-                                                          : ColorValue.white
-                                                              .withOpacity(0.2),
+                                                      borderRadius: BorderRadius.circular(24),
+                                                      color: Get.isDarkMode ? Color(0xFF1C1F25) : ColorValue.white.withOpacity(0.2),
                                                     ),
                                                     child: Column(
-                                                      mainAxisSize:
-                                                          MainAxisSize.min,
-                                                      mainAxisAlignment:
-                                                          MainAxisAlignment
-                                                              .center,
+                                                      mainAxisSize: MainAxisSize.min,
+                                                      mainAxisAlignment: MainAxisAlignment.center,
                                                       children: [
                                                         Get.isDarkMode
                                                             ? Image.asset(
@@ -570,18 +463,10 @@ class _ChatBoxDetailState extends State<ChatBoxDetail>
                                                         ),
                                                         Text(
                                                           '${TextByNation.getStringByKey('no_message')}',
-                                                          style: TextStyle(
-                                                              color:
-                                                                  Colors.white,
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .w400,
-                                                              fontSize: 14),
-                                                          textAlign:
-                                                              TextAlign.center,
+                                                          style: TextStyle(color: Colors.white, fontWeight: FontWeight.w400, fontSize: 14),
+                                                          textAlign: TextAlign.center,
                                                           maxLines: 3,
-                                                          overflow: TextOverflow
-                                                              .ellipsis,
+                                                          overflow: TextOverflow.ellipsis,
                                                         )
                                                       ],
                                                     ),
@@ -590,13 +475,6 @@ class _ChatBoxDetailState extends State<ChatBoxDetail>
                                               )
                                             : Stack(
                                                 children: [
-                                                  // if (controller.chatList.isNotEmpty && controller.hasMoreData.value && controller.pageSize < controller.chatList.length) ...[
-                                                  //   Center(
-                                                  //     child: CircularProgressIndicator(
-                                                  //       backgroundColor: Colors.white,
-                                                  //     ),
-                                                  //   )
-                                                  // ],
                                                   Positioned(
                                                       top: 0,
                                                       bottom: 0,
@@ -604,22 +482,14 @@ class _ChatBoxDetailState extends State<ChatBoxDetail>
                                                       right: 0,
                                                       child: Column(
                                                         children: [
-                                                          controller
-                                                                  .isPinLoading
-                                                                  .value
+                                                          controller.isPinLoading.value
                                                               ? Container()
-                                                              : controller
-                                                                      .pinList
-                                                                      .isEmpty
+                                                              : controller.pinList.isEmpty
                                                                   ? Container()
                                                                   : Container(
-                                                                      padding: EdgeInsets.symmetric(
-                                                                          vertical:
-                                                                              10),
+                                                                      padding: EdgeInsets.symmetric(vertical: 10),
                                                                       decoration: BoxDecoration(
-                                                                          color: Get.isDarkMode
-                                                                              ? Color(0xff232323)
-                                                                              : Colors.white,
+                                                                          color: Get.isDarkMode ? Color(0xff232323) : Colors.white,
                                                                           boxShadow: [
                                                                             BoxShadow(
                                                                               color: Colors.grey.withOpacity(0.5),
@@ -628,49 +498,49 @@ class _ChatBoxDetailState extends State<ChatBoxDetail>
                                                                               offset: Offset(0, 3), // changes position of shadow
                                                                             ),
                                                                           ]),
-                                                                      child:
-                                                                          Row(
+                                                                      child: Row(
                                                                         children: [
                                                                           SizedBox(
-                                                                            width:
-                                                                                20,
+                                                                            width: 20,
                                                                           ),
-                                                                          SvgPicture.asset(
-                                                                              'asset/icons/pin.svg',
-                                                                              color: Color(controller.textColor)),
+                                                                          SvgPicture.asset('asset/icons/pin.svg', color: Color(controller.textColor)),
                                                                           SizedBox(
-                                                                            width:
-                                                                                10,
+                                                                            width: 10,
                                                                           ),
                                                                           Expanded(
                                                                               child: Column(
-                                                                            crossAxisAlignment:
-                                                                                CrossAxisAlignment.start,
+                                                                            crossAxisAlignment: CrossAxisAlignment.start,
                                                                             children: [
                                                                               Text(
                                                                                 TextByNation.getStringByKey('pinned_message'),
-                                                                                style: TextStyle(fontWeight: FontWeight.w400, fontSize: 14, color: Color(controller.textColor)),
+                                                                                style: TextStyle(
+                                                                                    fontWeight: FontWeight.w400,
+                                                                                    fontSize: 14,
+                                                                                    color: Color(controller.textColor)),
                                                                               ),
                                                                               SizedBox(height: 5),
-                                                                              _chatContentType(message: controller.pinList[0], time: DateFormat("yyyy-MM-dd'T'HH:mm:ss").parse(controller.pinList[0].timeCreated.toString(), true).toLocal(), pinType: 1)
+                                                                              _chatContentType(
+                                                                                  message: controller.pinList[0],
+                                                                                  time: DateFormat("yyyy-MM-dd'T'HH:mm:ss")
+                                                                                      .parse(controller.pinList[0].timeCreated.toString(), true)
+                                                                                      .toLocal(),
+                                                                                  pinType: 1)
                                                                             ],
                                                                           )),
                                                                           SizedBox(
-                                                                            width:
-                                                                                10,
+                                                                            width: 10,
                                                                           ),
                                                                           GestureDetector(
-                                                                            onTap:
-                                                                                () {
-                                                                              showGeneralDialog(
-                                                                                context: context,
-                                                                                pageBuilder: (context, _, __) => _dialogPin(),
-                                                                              );
+                                                                            onTap: () {
+                                                                              dialogPin();
                                                                             },
-                                                                            child:
-                                                                                Container(
+                                                                            child: Container(
                                                                               padding: EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-                                                                              decoration: BoxDecoration(color: Get.isDarkMode ? Color.fromRGBO(152, 152, 152, 1.0) : Color.fromRGBO(228, 230, 236, 1), borderRadius: BorderRadius.circular(20)),
+                                                                              decoration: BoxDecoration(
+                                                                                  color: Get.isDarkMode
+                                                                                      ? Color.fromRGBO(152, 152, 152, 1.0)
+                                                                                      : Color.fromRGBO(228, 230, 236, 1),
+                                                                                  borderRadius: BorderRadius.circular(20)),
                                                                               child: Row(
                                                                                 children: [
                                                                                   SvgPicture.asset(
@@ -687,8 +557,7 @@ class _ChatBoxDetailState extends State<ChatBoxDetail>
                                                                             ),
                                                                           ),
                                                                           SizedBox(
-                                                                            width:
-                                                                                10,
+                                                                            width: 10,
                                                                           ),
                                                                           // IconButton(
                                                                           //     onPressed:
@@ -710,117 +579,65 @@ class _ChatBoxDetailState extends State<ChatBoxDetail>
                                                                       ),
                                                                     ),
                                                           Expanded(
-                                                              child:
-                                                                  ScrollablePositionedList
-                                                                      .builder(
+                                                              child: ScrollablePositionedList.builder(
                                                             reverse: true,
-                                                            itemScrollController:
-                                                                controller
-                                                                    .itemScrollController,
-                                                            itemPositionsListener:
-                                                                controller
-                                                                    .itemPositionsListener,
-                                                            padding: EdgeInsets
-                                                                .symmetric(
-                                                                    horizontal:
-                                                                        10,
-                                                                    vertical:
-                                                                        10),
-                                                            addAutomaticKeepAlives:
-                                                                false,
-                                                            itemCount: controller
-                                                                    .chatList
-                                                                    .length +
-                                                                1,
-                                                            minCacheExtent:
-                                                                10000,
-                                                            itemBuilder:
-                                                                (BuildContext
-                                                                        context,
-                                                                    int index) {
+                                                            itemScrollController: controller.itemScrollController,
+                                                            itemPositionsListener: controller.itemPositionsListener,
+                                                            padding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                                                            addAutomaticKeepAlives: true,
+                                                            itemCount: controller.chatList.length + 1,
+                                                            minCacheExtent: 10000,
+                                                            itemBuilder: (BuildContext context, int index) {
                                                               if (index == 0) {
-                                                                return Obx(() => controller
-                                                                        .userTyping
-                                                                        .value
-                                                                        .isEmpty
+                                                                return Obx(() => controller.userTyping.value.isEmpty
                                                                     ? Container()
                                                                     : Row(
                                                                         children: [
                                                                           Flexible(
-                                                                            child:
-                                                                                Text(
+                                                                            child: Text(
                                                                               '${utf8.decode(base64Url.decode(controller.userTyping.value))} ${TextByNation.getStringByKey('is_typing')}',
-                                                                              style: TextStyle(fontWeight: FontWeight.w400, fontSize: 14, fontStyle: FontStyle.italic, color: Colors.white),
+                                                                              style: TextStyle(
+                                                                                  fontWeight: FontWeight.w400,
+                                                                                  fontSize: 14,
+                                                                                  fontStyle: FontStyle.italic,
+                                                                                  color: Colors.white),
                                                                               overflow: TextOverflow.ellipsis,
                                                                             ),
                                                                           ),
-                                                                          Lottie
-                                                                              .asset(
+                                                                          Lottie.asset(
                                                                             'asset/json/importing.json',
-                                                                            width:
-                                                                                30,
-                                                                            height:
-                                                                                15,
+                                                                            width: 30,
+                                                                            height: 15,
                                                                           )
                                                                         ],
                                                                       ));
                                                               }
-                                                              // {{ edit_1 }}: Use a key to preserve the state of the chat items
-                                                              return _chatItem(
-                                                                  context,
-                                                                  index:
-                                                                      index - 1,
-                                                                  key: ValueKey(controller
-                                                                      .chatList[
-                                                                          index -
-                                                                              1]
-                                                                      .uuid));
+                                                              return _chatItem(context,
+                                                                  index: index - 1, key: ValueKey(controller.chatList[index - 1].uuid));
                                                             },
-                                                          ))
+                                                          )
+                                                          )
                                                         ],
                                                       )),
                                                   Positioned(
                                                     bottom: 20,
                                                     right: 20,
                                                     child: Visibility(
-                                                      visible: controller
-                                                          .isNewMessage.value,
+                                                      visible: controller.isNewMessage.value,
                                                       child: GestureDetector(
                                                         onTap: () {
-                                                          controller
-                                                                  .isNewMessage
-                                                                  .value =
-                                                              !controller
-                                                                  .isNewMessage
-                                                                  .value;
-                                                          controller
-                                                              .itemScrollController
-                                                              .scrollTo(
-                                                                  index: 0,
-                                                                  duration:
-                                                                      Duration(
-                                                                          seconds:
-                                                                              1),
-                                                                  alignment:
-                                                                      0.5);
+                                                          controller.isNewMessage.value = !controller.isNewMessage.value;
+                                                          controller.itemScrollController
+                                                              .scrollTo(index: 0, duration: Duration(seconds: 1), alignment: 0.5);
                                                         },
                                                         child: Container(
-                                                          padding:
-                                                              EdgeInsets.all(
-                                                                  10),
-                                                          decoration:
-                                                              BoxDecoration(
-                                                            shape:
-                                                                BoxShape.circle,
-                                                            color: Get
-                                                                    .isDarkMode
-                                                                ? Colors.white70
-                                                                : Colors
-                                                                    .black26,
+                                                          padding: EdgeInsets.all(10),
+                                                          decoration: BoxDecoration(
+                                                            shape: BoxShape.circle,
+                                                            color: Get.isDarkMode ? Colors.white70 : Colors.black26,
                                                           ),
                                                           child: Icon(
-                                                            Icons
-                                                                .keyboard_arrow_down_rounded,
+                                                            Icons.keyboard_arrow_down_rounded,
                                                             size: 30,
                                                           ),
                                                         ),
@@ -833,59 +650,38 @@ class _ChatBoxDetailState extends State<ChatBoxDetail>
                                   controller.replyChat.value.uuid == null
                                       ? Container()
                                       : Container(
-                                          padding: EdgeInsets.symmetric(
-                                              horizontal: 20, vertical: 12),
+                                          padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                                           decoration: BoxDecoration(
-                                            color: Get.isDarkMode
-                                                ? Color(0xff232323)
-                                                : Colors.white,
+                                            color: Get.isDarkMode ? Color(0xff232323) : Colors.white,
                                             border: Border(
-                                                bottom: BorderSide(
-                                                    width: 1,
-                                                    color: Get.isDarkMode
-                                                        ? Colors.grey
-                                                        : Color.fromRGBO(
-                                                            228, 230, 236, 1))),
+                                                bottom: BorderSide(width: 1, color: Get.isDarkMode ? Colors.grey : Color.fromRGBO(228, 230, 236, 1))),
                                             boxShadow: [
                                               BoxShadow(
-                                                color: Colors.grey
-                                                    .withOpacity(0.5),
+                                                color: Colors.grey.withOpacity(0.5),
                                                 spreadRadius: .1,
                                                 blurRadius: 10,
-                                                offset: Offset(0,
-                                                    3), // changes position of shadow
+                                                offset: Offset(0, 3), // changes position of shadow
                                               ),
                                             ],
                                           ),
                                           child: Row(
                                             children: [
                                               SvgPicture.asset(
-                                                controller.isEdit.value == 1
-                                                    ? 'asset/icons/edit.svg'
-                                                    : 'asset/icons/reply.svg',
-                                                color:
-                                                    Color(controller.textColor),
+                                                controller.isEdit.value == 1 ? 'asset/icons/edit.svg' : 'asset/icons/reply.svg',
+                                                color: Color(controller.textColor),
                                               ),
                                               SizedBox(
                                                 width: 10,
                                               ),
                                               Expanded(
                                                   child: Column(
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.start,
+                                                crossAxisAlignment: CrossAxisAlignment.start,
                                                 children: [
                                                   Text(
                                                     controller.isEdit.value == 1
-                                                        ? TextByNation
-                                                            .getStringByKey(
-                                                                'edit')
+                                                        ? TextByNation.getStringByKey('edit')
                                                         : '${TextByNation.getStringByKey('reply')} ${controller.decodedName(controller.replyChat.value.fullName ?? controller.replyChat.value.userSent!)}',
-                                                    style: TextStyle(
-                                                        color: Color(controller
-                                                            .textColor),
-                                                        fontSize: 14,
-                                                        fontWeight:
-                                                            FontWeight.w400),
+                                                    style: TextStyle(color: Color(controller.textColor), fontSize: 14, fontWeight: FontWeight.w400),
                                                   ),
                                                   SizedBox(
                                                     height: 8,
@@ -895,27 +691,12 @@ class _ChatBoxDetailState extends State<ChatBoxDetail>
                                                     child: Opacity(
                                                       opacity: .5,
                                                       child: Container(
-                                                        padding: EdgeInsets.symmetric(
-                                                            horizontal: controller
-                                                                        .replyChat
-                                                                        .value
-                                                                        .contentType ==
-                                                                    3
-                                                                ? 50
-                                                                : 0),
+                                                        padding:
+                                                            EdgeInsets.symmetric(horizontal: controller.replyChat.value.contentType == 3 ? 50 : 0),
                                                         child: _chatContentType(
-                                                            message: controller
-                                                                .replyChat
-                                                                .value,
-                                                            time: DateFormat(
-                                                                    "yyyy-MM-dd'T'HH:mm:ss")
-                                                                .parse(
-                                                                    controller
-                                                                        .replyChat
-                                                                        .value
-                                                                        .timeCreated
-                                                                        .toString(),
-                                                                    true)
+                                                            message: controller.replyChat.value,
+                                                            time: DateFormat("yyyy-MM-dd'T'HH:mm:ss")
+                                                                .parse(controller.replyChat.value.timeCreated.toString(), true)
                                                                 .toLocal(),
                                                             replyShow: true),
                                                       ),
@@ -926,13 +707,11 @@ class _ChatBoxDetailState extends State<ChatBoxDetail>
                                               IconButton(
                                                 onPressed: () {
                                                   controller.isEdit.value = 0;
-                                                  controller.replyChat.value =
-                                                      cd.ChatDetail();
+                                                  controller.replyChat.value = cd.ChatDetail();
                                                 },
                                                 icon: Icon(
                                                   Icons.close_rounded,
-                                                  color: Color.fromRGBO(
-                                                      146, 154, 169, 1),
+                                                  color: Color.fromRGBO(146, 154, 169, 1),
                                                 ),
                                               )
                                             ],
@@ -943,135 +722,81 @@ class _ChatBoxDetailState extends State<ChatBoxDetail>
                                     children: [
                                       Expanded(
                                         child: Container(
-                                          padding: EdgeInsets.symmetric(
-                                              horizontal: 12),
-                                          margin: EdgeInsets.symmetric(
-                                              vertical: 16),
+                                          padding: EdgeInsets.symmetric(horizontal: 12),
+                                          margin: EdgeInsets.symmetric(vertical: 16),
                                           decoration: BoxDecoration(
-                                            color: Get.isDarkMode
-                                                ? Color(0xff232323)
-                                                : ColorValue.colorBrSearch,
-                                            borderRadius:
-                                                BorderRadius.circular(16),
-                                            boxShadow: controller
-                                                        .replyChat.value.uuid !=
-                                                    null
+                                            color: Get.isDarkMode ? Color(0xff232323) : ColorValue.colorBrSearch,
+                                            borderRadius: BorderRadius.circular(16),
+                                            boxShadow: controller.replyChat.value.uuid != null
                                                 ? null
                                                 : [
                                                     BoxShadow(
-                                                      color: Colors.grey
-                                                          .withOpacity(0.5),
+                                                      color: Colors.grey.withOpacity(0.5),
                                                       spreadRadius: .1,
                                                       blurRadius: 10,
-                                                      offset: Offset(0,
-                                                          3), // changes position of shadow
+                                                      offset: Offset(0, 3), // changes position of shadow
                                                     ),
                                                   ],
                                           ),
                                           child: Row(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.center,
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.start,
+                                            crossAxisAlignment: CrossAxisAlignment.center,
+                                            mainAxisAlignment: MainAxisAlignment.start,
                                             mainAxisSize: MainAxisSize.max,
                                             children: [
                                               // icon, gif, emoji
-                                              if (controller
-                                                      .isRecording.value ==
-                                                  false) ...[
+                                              if (controller.isRecording.value == false) ...[
                                                 MouseRegion(
-                                                    onEnter: (event) =>
-                                                        _showOverlay(context),
+                                                    onEnter: (event) => _showOverlay(context),
                                                     onExit: (event) {
-                                                      setState(() =>
-                                                          _isOverIcon = false);
+                                                      setState(() => _isOverIcon = false);
                                                       _updateOverlayVisibility();
                                                     },
                                                     child: Icon(
-                                                      Icons
-                                                          .emoji_emotions_outlined,
+                                                      Icons.emoji_emotions_outlined,
                                                       size: 24,
                                                     )),
                                               ],
-                                              if (controller
-                                                  .isRecording.value) ...[
+                                              if (controller.isRecording.value) ...[
                                                 IconButton(
                                                   onPressed: () async {
-                                                    if (controller
-                                                        .isRecording.value) {
-                                                      await controller.recorder
-                                                          .stop();
-                                                      controller.isRecording
-                                                          .value = false;
+                                                    if (controller.isRecording.value) {
+                                                      await controller.recorder.stop();
+                                                      controller.isRecording.value = false;
                                                     }
                                                   },
                                                   icon: Icon(
-                                                    Icons
-                                                        .delete_outline_rounded,
+                                                    Icons.delete_outline_rounded,
                                                     size: 24,
                                                   ),
                                                 ),
-                                                Expanded(
-                                                    child: Center(
-                                                        child:
-                                                            RecordingTimer())),
+                                                Expanded(child: Center(child: RecordingTimer())),
                                                 IconButton(
                                                   onPressed: () async {
-                                                    await controller
-                                                        .startOrStopRecording(
-                                                            isSend: true);
+                                                    await controller.startOrStopRecording(isSend: true);
                                                   },
-                                                  icon:
-                                                      Icon(Icons.send_rounded),
+                                                  icon: Icon(Icons.send_rounded),
                                                 )
                                               ] else ...[
                                                 Expanded(
                                                   child: TextField(
-                                                    controller: controller
-                                                        .textMessageController,
-                                                    focusNode:
-                                                        controller.focusNode,
+                                                    controller: controller.textMessageController,
+                                                    focusNode: controller.focusNode,
                                                     onSubmitted: (value) async {
-                                                      if (value
-                                                          .trim()
-                                                          .isNotEmpty) {
-                                                        FocusScope.of(context)
-                                                            .requestFocus(
-                                                                controller
-                                                                    .focusNode);
-                                                        controller
-                                                            .isTextFieldFocused
-                                                            .value = false;
-                                                        Future.delayed(
-                                                            Duration(
-                                                                milliseconds:
-                                                                    300), () {
-                                                          controller.isVisible
-                                                              .value = true;
-                                                          Get.put(ChatController())
-                                                              .selectedChatIndex
-                                                              .value = 0;
+                                                      if (value.trim().isNotEmpty) {
+                                                        FocusScope.of(context).requestFocus(controller.focusNode);
+                                                        controller.isTextFieldFocused.value = false;
+                                                        Future.delayed(Duration(milliseconds: 300), () {
+                                                          controller.isVisible.value = true;
+                                                          Get.put(ChatController()).selectedChatIndex.value = 0;
                                                         });
-                                                        if (controller
-                                                                .isEdit.value ==
-                                                            1) {
-                                                          await controller
-                                                              .editMessage();
+                                                        if (controller.isEdit.value == 1) {
+                                                          await controller.editMessage();
                                                         } else {
-                                                          await controller
-                                                              .sendMessage(
-                                                            content: controller
-                                                                .textMessageController
-                                                                .text,
-                                                            type: controller.isImageLink(
-                                                                    controller
-                                                                        .textMessageController
-                                                                        .text)
+                                                          await controller.sendMessage(
+                                                            content: controller.textMessageController.text,
+                                                            type: controller.isImageLink(controller.textMessageController.text)
                                                                 ? 7
-                                                                : controller.isLink(
-                                                                        controller
-                                                                            .textMessageController
-                                                                            .text)
+                                                                : controller.isLink(controller.textMessageController.text)
                                                                     ? 2
                                                                     : 1,
                                                           );
@@ -1079,80 +804,52 @@ class _ChatBoxDetailState extends State<ChatBoxDetail>
                                                       }
                                                     },
                                                     decoration: InputDecoration(
-                                                      hintText:
-                                                          '${TextByNation.getStringByKey('type_a_message')}',
+                                                      hintText: '${TextByNation.getStringByKey('type_a_message')}',
                                                       hintStyle: TextStyle(
-                                                        color: Get.isDarkMode
-                                                            ? Colors.white70
-                                                            : Colors.grey,
+                                                        color: Get.isDarkMode ? Colors.white70 : Colors.grey,
                                                         fontSize: 14,
                                                       ),
                                                       labelStyle: TextStyle(
-                                                        color: Get.isDarkMode
-                                                            ? Colors.white
-                                                            : Colors.black,
+                                                        color: Get.isDarkMode ? Colors.white : Colors.black,
                                                       ),
                                                       border: InputBorder.none,
-                                                      contentPadding:
-                                                          EdgeInsets.only(
-                                                              left: 15),
+                                                      contentPadding: EdgeInsets.only(left: 15),
                                                     ),
                                                     style: TextStyle(
                                                       fontSize: 14,
-                                                      fontWeight:
-                                                          FontWeight.w400,
+                                                      fontWeight: FontWeight.w400,
                                                     ),
                                                   ),
                                                 ),
-                                                controller.isTextFieldFocused
-                                                        .value
+                                                controller.isTextFieldFocused.value
                                                     ? IconButton(
                                                         onPressed: () async {
-                                                          Get.put(ChatController())
-                                                              .selectedChatIndex
-                                                              .value = 0;
-                                                          if (controller.isEdit
-                                                                  .value ==
-                                                              1) {
-                                                            await controller
-                                                                .editMessage();
+                                                          Get.put(ChatController()).selectedChatIndex.value = 0;
+                                                          if (controller.isEdit.value == 1) {
+                                                            await controller.editMessage();
                                                           } else {
-                                                            await controller
-                                                                .sendMessage(
-                                                                    content: controller
-                                                                        .textMessageController
-                                                                        .text,
-                                                                    type: controller.isImageLink(controller
-                                                                            .textMessageController
-                                                                            .text)
-                                                                        ? 2
-                                                                        : controller.isLink(controller.textMessageController.text)
-                                                                            ? 7
-                                                                            : 1);
+                                                            await controller.sendMessage(
+                                                                content: controller.textMessageController.text,
+                                                                type: controller.isImageLink(controller.textMessageController.text)
+                                                                    ? 2
+                                                                    : controller.isLink(controller.textMessageController.text)
+                                                                        ? 7
+                                                                        : 1);
                                                           }
                                                         },
                                                         icon: Icon(
                                                           Icons.send_rounded,
                                                           size: 24,
-                                                          color: Get.isDarkMode
-                                                              ? Colors.white
-                                                              : null,
+                                                          color: Get.isDarkMode ? Colors.white : null,
                                                         ),
                                                       )
                                                     : IconButton(
                                                         onPressed: () async {
-                                                          await controller
-                                                              .startOrStopRecording();
+                                                          await controller.startOrStopRecording();
                                                         },
                                                         icon: Icon(
-                                                          controller.isRecording
-                                                                  .value
-                                                              ? Icons.stop
-                                                              : Icons
-                                                                  .mic_none_rounded,
-                                                          color: Get.isDarkMode
-                                                              ? Colors.white
-                                                              : null,
+                                                          controller.isRecording.value ? Icons.stop : Icons.mic_none_rounded,
+                                                          color: Get.isDarkMode ? Colors.white : null,
                                                           size: 24,
                                                         ),
                                                       ),
@@ -1165,8 +862,7 @@ class _ChatBoxDetailState extends State<ChatBoxDetail>
                                         width: 6,
                                       ),
                                       Row(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.center,
+                                        crossAxisAlignment: CrossAxisAlignment.center,
                                         children: [
                                           _buildGetMediaIcon(),
                                         ],
@@ -1179,14 +875,6 @@ class _ChatBoxDetailState extends State<ChatBoxDetail>
                           )),
                     ),
                   ),
-                  Visibility(
-                    visible: controller.isShowGroupInfo == true,
-                    child: Expanded(
-                        flex: 1,
-                        child: ProfileChatDetail(
-                          chatDetail: widget.chatDetail,
-                        )),
-                  )
                 ],
               ),
             ),
@@ -1215,11 +903,9 @@ class _ChatBoxDetailState extends State<ChatBoxDetail>
             offset: Offset(100, -150),
             icon: SvgPicture.asset(
               'asset/icons/file_picker.svg',
-              color:
-                  Get.isDarkMode ? ColorValue.white : ColorValue.neutralColor,
+              color: Get.isDarkMode ? ColorValue.white : ColorValue.neutralColor,
             ),
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             itemBuilder: (context) {
               return [
                 MyEntry(
@@ -1248,34 +934,25 @@ class _ChatBoxDetailState extends State<ChatBoxDetail>
     cd.ChatDetail message = controller.chatList[index];
     final bool isMe = message.userSent == controller.userName;
 
-
-    cd.ChatDetail messageTime =
-        controller.chatList[index - 1 == -1 ? index : index - 1];
+    cd.ChatDetail messageTime = controller.chatList[index - 1 == -1 ? index : index - 1];
     cd.ChatDetail messageTime2 = controller.chatList[index == 0
         ? controller.chatList.length == 1
             ? index
             : index + 1
         : index];
-    cd.ChatDetail messageTime3 = controller
-        .chatList[index == controller.chatList.length - 1 ? index : index + 1];
+    cd.ChatDetail messageTime3 = controller.chatList[index == controller.chatList.length - 1 ? index : index + 1];
 
     DateFormat originalFormat = DateFormat("yyyy-MM-dd'T'HH:mm:ss");
 
-    final DateTime dt =
-        originalFormat.parse(messageTime.timeCreated.toString(), true);
-    final DateTime dt2 =
-        originalFormat.parse(messageTime2.timeCreated.toString(), true);
-    final DateTime dt3 =
-        originalFormat.parse(messageTime3.timeCreated.toString(), true);
-    final DateTime dtData = originalFormat
-        .parse(controller.chatList[index].timeCreated.toString(), true)
-        .toLocal();
+    final DateTime dt = originalFormat.parse(messageTime.timeCreated.toString(), true);
+    final DateTime dt2 = originalFormat.parse(messageTime2.timeCreated.toString(), true);
+    final DateTime dt3 = originalFormat.parse(messageTime3.timeCreated.toString(), true);
+    final DateTime dtData = originalFormat.parse(controller.chatList[index].timeCreated.toString(), true).toLocal();
 
     final bool isNewTime = dt3.isAfter(dt2.subtract(Duration(minutes: 20)));
     final bool isNewTime2 = dt2.isAfter(dt.subtract(Duration(minutes: 20)));
 
-    final bool isSameUser =
-        messageTime2.userSent == messageTime.userSent && isNewTime2;
+    final bool isSameUser = messageTime2.userSent == messageTime.userSent && isNewTime2;
     final bool isShowEnd = !isSameUser || index == 0;
 
     return Column(
@@ -1286,17 +963,11 @@ class _ChatBoxDetailState extends State<ChatBoxDetail>
               child: Container(
             margin: EdgeInsets.symmetric(vertical: 10),
             padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-            decoration: BoxDecoration(
-                color: Get.isDarkMode
-                    ? Color(0xff232323)
-                    : Color.fromRGBO(240, 243, 251, 1),
-                borderRadius: BorderRadius.circular(30)),
+            decoration:
+                BoxDecoration(color: Get.isDarkMode ? Color(0xff232323) : Color.fromRGBO(240, 243, 251, 1), borderRadius: BorderRadius.circular(30)),
             child: Text(
               DateFormat("HH:mm dd/MM").format(dt2.toLocal()),
-              style: TextStyle(
-                  color: Color.fromRGBO(146, 154, 169, 1),
-                  fontWeight: FontWeight.w400,
-                  fontSize: 12),
+              style: TextStyle(color: Color.fromRGBO(146, 154, 169, 1), fontWeight: FontWeight.w400, fontSize: 12),
             ),
           )),
         ),
@@ -1320,9 +991,7 @@ class _ChatBoxDetailState extends State<ChatBoxDetail>
                               height: 24,
                               width: 24,
                               margin: EdgeInsets.only(right: 20),
-                              decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  color: Color(controller.textColor)),
+                              decoration: BoxDecoration(shape: BoxShape.circle, color: Color(controller.textColor)),
                               child: Center(
                                 child: Icon(
                                   Icons.check_rounded,
@@ -1335,11 +1004,8 @@ class _ChatBoxDetailState extends State<ChatBoxDetail>
                               height: 24,
                               width: 24,
                               margin: EdgeInsets.only(right: 20),
-                              decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  border: Border.all(
-                                      width: 1,
-                                      color: Color.fromRGBO(146, 154, 169, 1))),
+                              decoration:
+                                  BoxDecoration(shape: BoxShape.circle, border: Border.all(width: 1, color: Color.fromRGBO(146, 154, 169, 1))),
                             ),
                     ),
                     if (isMe) ...[
@@ -1351,10 +1017,7 @@ class _ChatBoxDetailState extends State<ChatBoxDetail>
                             isMe: isMe,
                             time: dtData,
                             isShowEnd: isShowEnd,
-                            marginMessage:
-                                messageTime2.userSent != messageTime.userSent
-                                    ? 4
-                                    : 0),
+                            marginMessage: messageTime2.userSent != messageTime.userSent ? 4 : 0),
                       ))
                     ] else ...[
                       Expanded(
@@ -1365,22 +1028,16 @@ class _ChatBoxDetailState extends State<ChatBoxDetail>
                           children: [
                             isShowEnd
                                 ? Padding(
-                                    padding:
-                                        EdgeInsets.only(right: 6, bottom: 4),
+                                    padding: EdgeInsets.only(right: 6, bottom: 4),
                                     child: ClipOval(
-                                      child: message.avatar != null &&
-                                              message.avatar!.isNotEmpty
+                                      child: message.avatar != null && message.avatar!.isNotEmpty
                                           ? Image.network(
-                                              Constant.BASE_URL_IMAGE +
-                                                  message.avatar!,
+                                              Constant.BASE_URL_IMAGE + message.avatar!,
                                               key: UniqueKey(),
                                               width: 28,
                                               height: 28,
                                               fit: BoxFit.cover,
-                                              errorBuilder:
-                                                  (BuildContext context,
-                                                      Object exception,
-                                                      StackTrace? stackTrace) {
+                                              errorBuilder: (BuildContext context, Object exception, StackTrace? stackTrace) {
                                                 return SvgPicture.asset(
                                                   'asset/images/default.svg',
                                                   width: 28,
@@ -1393,23 +1050,12 @@ class _ChatBoxDetailState extends State<ChatBoxDetail>
                                               height: 28,
                                               decoration: BoxDecoration(
                                                   shape: BoxShape.circle,
-                                                  gradient: Utils
-                                                      .getGradientForLetter(
-                                                          controller.decodedName(
-                                                              message.fullName ??
-                                                                  message
-                                                                      .userSent!))),
+                                                  gradient:
+                                                      Utils.getGradientForLetter(controller.decodedName(message.fullName ?? message.userSent!))),
                                               child: Center(
                                                   child: Text(
-                                                Utils.getInitialsName(controller
-                                                        .decodedName(message
-                                                                .fullName ??
-                                                            message.userSent!))
-                                                    .toUpperCase(),
-                                                style: TextStyle(
-                                                    fontSize: 12,
-                                                    fontWeight: FontWeight.w600,
-                                                    color: Colors.white),
+                                                Utils.getInitialsName(controller.decodedName(message.fullName ?? message.userSent!)).toUpperCase(),
+                                                style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Colors.white),
                                                 textAlign: TextAlign.center,
                                               )),
                                             ),
@@ -1423,18 +1069,12 @@ class _ChatBoxDetailState extends State<ChatBoxDetail>
                                 message: message,
                                 isMe: isMe,
                                 time: dtData,
-                                isNewTime: index == 0 &&
-                                        messageTime.userSent !=
-                                            messageTime3.userSent ||
+                                isNewTime: index == 0 && messageTime.userSent != messageTime3.userSent ||
                                     index == controller.chatList.length - 1 ||
-                                    messageTime2.userSent !=
-                                        messageTime3.userSent ||
+                                    messageTime2.userSent != messageTime3.userSent ||
                                     !isNewTime,
                                 isShowEnd: isShowEnd,
-                                marginMessage: messageTime2.userSent !=
-                                        messageTime.userSent
-                                    ? 4
-                                    : 0)
+                                marginMessage: messageTime2.userSent != messageTime.userSent ? 4 : 0)
                           ],
                         ),
                       ))
@@ -1503,8 +1143,7 @@ class _ChatBoxDetailState extends State<ChatBoxDetail>
         if (!isBottomSheet) {
           controller.focusNode.unfocus();
           controller.isShowEmoji.value = false;
-          bottomSheetChatItem2(context,
-              message: message, isMe: isMe, time: time);
+          bottomSheetChatItem2(context, message: message, isMe: isMe, time: time);
         }
       },
       child: Stack(children: [
@@ -1517,52 +1156,35 @@ class _ChatBoxDetailState extends State<ChatBoxDetail>
                 ),
           padding: EdgeInsets.symmetric(
               horizontal: message.contentType == 3 &&
-                      (Utils.getFileType(Constant.BASE_URL_IMAGE +
-                                  jsonDecode(decoded)[0]) ==
-                              'Image' ||
-                          Utils.getFileType(Constant.BASE_URL_IMAGE +
-                                  jsonDecode(decoded)[0]) ==
-                              'Video') &&
+                      (Utils.getFileType(Constant.BASE_URL_IMAGE + jsonDecode(decoded)[0]) == 'Image' ||
+                          Utils.getFileType(Constant.BASE_URL_IMAGE + jsonDecode(decoded)[0]) == 'Video') &&
                       !(controller.chatType == 2 && !isMe && isNewTime)
                   ? 0
                   : (decoded.length < 4 && message.likeCount! > 0)
                       ? 16
                       : 6,
               vertical: message.contentType == 3 &&
-                      (Utils.getFileType(Constant.BASE_URL_IMAGE +
-                                  jsonDecode(decoded)[0]) ==
-                              'Image' ||
-                          Utils.getFileType(Constant.BASE_URL_IMAGE +
-                                  jsonDecode(decoded)[0]) ==
-                              'Video') &&
+                      (Utils.getFileType(Constant.BASE_URL_IMAGE + jsonDecode(decoded)[0]) == 'Image' ||
+                          Utils.getFileType(Constant.BASE_URL_IMAGE + jsonDecode(decoded)[0]) == 'Video') &&
                       !(controller.chatType == 2 && !isMe && isNewTime)
                   ? 0
                   : 6),
-          margin: EdgeInsets.only(
-              top: 4, bottom: message.likeCount! > 0 ? 12 : marginMessage),
+          margin: EdgeInsets.only(top: 4, bottom: message.likeCount! > 0 ? 12 : marginMessage),
           decoration: message.contentType == 3 &&
-                  (Utils.getFileType(Constant.BASE_URL_IMAGE +
-                              jsonDecode(decoded)[0]) ==
-                          'Image' ||
-                      Utils.getFileType(Constant.BASE_URL_IMAGE +
-                              jsonDecode(decoded)[0]) ==
-                          'Video') &&
+                  (Utils.getFileType(Constant.BASE_URL_IMAGE + jsonDecode(decoded)[0]) == 'Image' ||
+                      Utils.getFileType(Constant.BASE_URL_IMAGE + jsonDecode(decoded)[0]) == 'Video') &&
                   !(controller.chatType == 2 && !isMe && isNewTime)
               ? null
               : BoxDecoration(
                   color: isMe
                       ? Get.isDarkMode
-                          ? Color.lerp(Color(controller.backgroundColor),
-                              Colors.black, 0.2)
+                          ? Color.lerp(Color(controller.backgroundColor), Colors.black, 0.2)
                           : Color(controller.backgroundColor)
-                      : (Get.isDarkMode
-                          ? Color.fromRGBO(31, 30, 30, 0.872)
-                          : Color.fromRGBO(240, 243, 251, 1)),
+                      : (Get.isDarkMode ? Color.fromRGBO(31, 30, 30, 0.872) : Color.fromRGBO(240, 243, 251, 1)),
                   borderRadius: BorderRadius.circular(12)),
           child: Column(
             mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment:
-                isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+            crossAxisAlignment: isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
             children: [
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -1581,11 +1203,7 @@ class _ChatBoxDetailState extends State<ChatBoxDetail>
                     )
                   ],
                   _chatContentType(
-                      message: message,
-                      time: time,
-                      isBottomSheet: isBottomSheet,
-                      isPaddingImage:
-                          !(controller.chatType == 2 && !isMe && isNewTime))
+                      message: message, time: time, isBottomSheet: isBottomSheet, isPaddingImage: !(controller.chatType == 2 && !isMe && isNewTime))
                 ],
               ),
               if (decodedForwardFrom != null) ...[
@@ -1598,12 +1216,8 @@ class _ChatBoxDetailState extends State<ChatBoxDetail>
                       fontWeight: FontWeight.w400,
                       fontSize: 11,
                       color: message.contentType == 3 &&
-                              (Utils.getFileType(Constant.BASE_URL_IMAGE +
-                                          jsonDecode(decoded)[0]) ==
-                                      'Image' ||
-                                  Utils.getFileType(Constant.BASE_URL_IMAGE +
-                                          jsonDecode(decoded)[0]) ==
-                                      'Video')
+                              (Utils.getFileType(Constant.BASE_URL_IMAGE + jsonDecode(decoded)[0]) == 'Image' ||
+                                  Utils.getFileType(Constant.BASE_URL_IMAGE + jsonDecode(decoded)[0]) == 'Video')
                           ? Colors.white60
                           : Get.isDarkMode
                               ? Colors.white60
@@ -1613,12 +1227,8 @@ class _ChatBoxDetailState extends State<ChatBoxDetail>
               if (message.status == 2 ||
                   (isShowEnd != null && isShowEnd) &&
                       !(message.contentType == 3 &&
-                          (Utils.getFileType(Constant.BASE_URL_IMAGE +
-                                      jsonDecode(decoded)[0]) ==
-                                  'Image' ||
-                              Utils.getFileType(Constant.BASE_URL_IMAGE +
-                                      jsonDecode(decoded)[0]) ==
-                                  'Video'))) ...[
+                          (Utils.getFileType(Constant.BASE_URL_IMAGE + jsonDecode(decoded)[0]) == 'Image' ||
+                              Utils.getFileType(Constant.BASE_URL_IMAGE + jsonDecode(decoded)[0]) == 'Video'))) ...[
                 const SizedBox(
                   height: 2,
                 ),
@@ -1629,11 +1239,7 @@ class _ChatBoxDetailState extends State<ChatBoxDetail>
                     Text(
                       '${message.status == 2 ? TextByNation.getStringByKey('edited') : ''} ${DateFormat("HH:mm").format(time.toLocal())}',
                       style: TextStyle(
-                          color: Get.isDarkMode
-                              ? Colors.white70
-                              : Color.fromRGBO(115, 121, 135, 1),
-                          fontWeight: FontWeight.w400,
-                          fontSize: 12),
+                          color: Get.isDarkMode ? Colors.white70 : Color.fromRGBO(115, 121, 135, 1), fontWeight: FontWeight.w400, fontSize: 12),
                       textAlign: TextAlign.right,
                     ),
                     if (isMe) ...[
@@ -1641,9 +1247,7 @@ class _ChatBoxDetailState extends State<ChatBoxDetail>
                         width: 5,
                       ),
                       Icon(
-                        message.readState != 0
-                            ? Icons.done_all_rounded
-                            : Icons.done_rounded,
+                        message.readState != 0 ? Icons.done_all_rounded : Icons.done_rounded,
                         size: 16,
                         color: Color(controller.textColor),
                       )
@@ -1661,257 +1265,163 @@ class _ChatBoxDetailState extends State<ChatBoxDetail>
                   bottom: 0,
                   child: GestureDetector(
                     onTap: () {},
-                    child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
+                    child: Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
+                      SizedBox(height: 2),
+                      //reaction
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
                         children: [
-                          SizedBox(height: 2),
-                          //reaction
-                          Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              message.emojis != null &&
-                                      message.emojis!.isNotEmpty
-                                  ? isMe
-                                      ? Container(
-                                          padding: const EdgeInsets.all(4),
-                                          decoration: BoxDecoration(
-                                              color: Color(
-                                                  controller.backgroundColor),
-                                              borderRadius:
-                                                  BorderRadius.circular(15)),
-                                          child: Row(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.end,
-                                            mainAxisSize: MainAxisSize.min,
-                                            children: [
-                                              Container(
-                                                decoration: BoxDecoration(
-                                                    color: const Color.fromRGBO(
-                                                        240, 243, 251, 1),
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            16),
-                                                    border: Border.all(
-                                                        width: 2,
-                                                        color: Colors.white)),
+                          message.emojis != null && message.emojis!.isNotEmpty
+                              ? isMe
+                                  ? Container(
+                                      padding: const EdgeInsets.all(4),
+                                      decoration: BoxDecoration(color: Color(controller.backgroundColor), borderRadius: BorderRadius.circular(15)),
+                                      child: Row(
+                                        mainAxisAlignment: MainAxisAlignment.end,
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Container(
+                                            decoration: BoxDecoration(
+                                                color: const Color.fromRGBO(240, 243, 251, 1),
+                                                borderRadius: BorderRadius.circular(16),
+                                                border: Border.all(width: 2, color: Colors.white)),
 
-                                                ///column check
-                                                child: Row(
-                                                  mainAxisSize:
-                                                      MainAxisSize.min,
-                                                  children: [
-                                                    Row(
-                                                      mainAxisSize:
-                                                          MainAxisSize.min,
-                                                      children: List.generate(
-                                                          getListReaction
-                                                                      .length >
-                                                                  3
-                                                              ? 3
-                                                              : getListReaction
-                                                                  .length,
-                                                          (index) {
-                                                        return GestureDetector(
-                                                          onTap: () async {
-                                                            // String uuidUser = await Utils
-                                                            //     .getStringValueWithKey(
-                                                            //     Constant.UUID_USER);
-                                                            // controller.likeMessage(uuid: message.uuid!,
-                                                            //     type: 0,
-                                                            //     status: 0,
-                                                            //     uuidUser: uuidUser);
-                                                          },
+                                            ///column check
+                                            child: Row(
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: [
+                                                Row(
+                                                  mainAxisSize: MainAxisSize.min,
+                                                  children: List.generate(getListReaction.length > 3 ? 3 : getListReaction.length, (index) {
+                                                    return GestureDetector(
+                                                      onTap: () async {
+                                                        // String uuidUser = await Utils
+                                                        //     .getStringValueWithKey(
+                                                        //     Constant.UUID_USER);
+                                                        // controller.likeMessage(uuid: message.uuid!,
+                                                        //     type: 0,
+                                                        //     status: 0,
+                                                        //     uuidUser: uuidUser);
+                                                      },
 
-                                                          ///column check
-                                                          child: Row(
-                                                            mainAxisSize:
-                                                                MainAxisSize
-                                                                    .min,
-                                                            children: [
-                                                              SvgPicture.asset(
-                                                                listReaction[
-                                                                    getListReaction
-                                                                            .keys
-                                                                            .toList()[
-                                                                        index]],
-                                                                width: 14,
-                                                                fit: BoxFit
-                                                                    .fitWidth,
-                                                              ),
-                                                              // Text('${e.value.length}',
-                                                              //   style: const TextStyle(
-                                                              //       fontSize: 10,
-                                                              //       fontWeight: FontWeight.w400,
-                                                              //       color: Colors.black),
-                                                              // )
-                                                            ],
+                                                      ///column check
+                                                      child: Row(
+                                                        mainAxisSize: MainAxisSize.min,
+                                                        children: [
+                                                          SvgPicture.asset(
+                                                            listReaction[getListReaction.keys.toList()[index]],
+                                                            width: 14,
+                                                            fit: BoxFit.fitWidth,
                                                           ),
-                                                        );
-                                                      }),
-                                                    ),
-                                                    Text(
-                                                      '${message.emojis!.length}',
-                                                      style: TextStyle(
-                                                          fontSize: 10,
-                                                          color: Colors.black,
-                                                          fontWeight:
-                                                              FontWeight.w400),
-                                                    ),
-                                                  ],
+                                                          // Text('${e.value.length}',
+                                                          //   style: const TextStyle(
+                                                          //       fontSize: 10,
+                                                          //       fontWeight: FontWeight.w400,
+                                                          //       color: Colors.black),
+                                                          // )
+                                                        ],
+                                                      ),
+                                                    );
+                                                  }),
                                                 ),
-                                              ),
-                                              Text(
-                                                '${message.status == 2 ? AppLocalizations.of(context)!.edited : ''} ${DateFormat("HH:mm").format(time.toLocal())}',
-                                                style: TextStyle(
-                                                    color: Get.isDarkMode
-                                                        ? Colors.white70
-                                                        : const Color.fromRGBO(
-                                                            115, 121, 135, 1),
-                                                    fontSize: 12),
-                                                textAlign: TextAlign.right,
-                                              ),
-                                            ],
+                                                Text(
+                                                  '${message.emojis!.length}',
+                                                  style: TextStyle(fontSize: 10, color: Colors.black, fontWeight: FontWeight.w400),
+                                                ),
+                                              ],
+                                            ),
                                           ),
-                                        )
-                                      : Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.end,
+                                          Text(
+                                            '${message.status == 2 ? AppLocalizations.of(context)!.edited : ''} ${DateFormat("HH:mm").format(time.toLocal())}',
+                                            style: TextStyle(
+                                                color: Get.isDarkMode ? Colors.white70 : const Color.fromRGBO(115, 121, 135, 1), fontSize: 12),
+                                            textAlign: TextAlign.right,
+                                          ),
+                                        ],
+                                      ),
+                                    )
+                                  : Row(mainAxisAlignment: MainAxisAlignment.end, mainAxisSize: MainAxisSize.min, children: [
+                                      Container(
+                                        decoration: BoxDecoration(
+                                            color: const Color.fromRGBO(240, 243, 251, 1),
+                                            borderRadius: BorderRadius.circular(16),
+                                            border: Border.all(width: 2, color: Colors.white)),
+                                        child: Row(
                                           mainAxisSize: MainAxisSize.min,
                                           children: [
-                                              Container(
-                                                decoration: BoxDecoration(
-                                                    color: const Color.fromRGBO(
-                                                        240, 243, 251, 1),
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            16),
-                                                    border: Border.all(
-                                                        width: 2,
-                                                        color: Colors.white)),
-                                                child: Row(
-                                                  mainAxisSize:
-                                                      MainAxisSize.min,
-                                                  children: [
-                                                    Row(
-                                                      mainAxisSize:
-                                                          MainAxisSize.min,
-                                                      children: List.generate(
-                                                        getListReaction.length >
-                                                                3
-                                                            ? 3
-                                                            : getListReaction
-                                                                .length,
-                                                        (index) =>
-                                                            GestureDetector(
-                                                          onTap: () async {},
-                                                          child: Row(
-                                                            mainAxisSize:
-                                                                MainAxisSize
-                                                                    .min,
-                                                            children: [
-                                                              SvgPicture.asset(
-                                                                listReaction[
-                                                                    getListReaction
-                                                                            .keys
-                                                                            .toList()[
-                                                                        index]],
-                                                                width: 14,
-                                                                fit: BoxFit
-                                                                    .fitWidth,
-                                                              ),
-                                                              SizedBox(
-                                                                  width: 3),
-                                                            ],
-                                                          ),
-                                                        ),
+                                            Row(
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: List.generate(
+                                                getListReaction.length > 3 ? 3 : getListReaction.length,
+                                                (index) => GestureDetector(
+                                                  onTap: () async {},
+                                                  child: Row(
+                                                    mainAxisSize: MainAxisSize.min,
+                                                    children: [
+                                                      SvgPicture.asset(
+                                                        listReaction[getListReaction.keys.toList()[index]],
+                                                        width: 14,
+                                                        fit: BoxFit.fitWidth,
                                                       ),
-                                                    ),
-                                                    Text(
-                                                      '${message.emojis!.length}',
-                                                      style: TextStyle(
-                                                          fontWeight:
-                                                              FontWeight.w400,
-                                                          fontSize: 10,
-                                                          color: Colors.black),
-                                                    )
-                                                  ],
+                                                      SizedBox(width: 3),
+                                                    ],
+                                                  ),
                                                 ),
                                               ),
-                                              SizedBox(width: 2),
-                                              //time send
-                                              Text(
-                                                  '${message.status == 2 ? AppLocalizations.of(context)!.edited : ''} ${DateFormat("HH:mm").format(time.toLocal())}',
-                                                  style: TextStyle(
-                                                      color: Get.isDarkMode
-                                                          ? Colors.white70
-                                                          : const Color
-                                                              .fromRGBO(
-                                                              115, 121, 135, 1),
-                                                      fontSize: 12,
-                                                      fontWeight:
-                                                          FontWeight.w400),
-                                                  textAlign: TextAlign.right),
-                                            ])
-                                  :
+                                            ),
+                                            Text(
+                                              '${message.emojis!.length}',
+                                              style: TextStyle(fontWeight: FontWeight.w400, fontSize: 10, color: Colors.black),
+                                            )
+                                          ],
+                                        ),
+                                      ),
+                                      SizedBox(width: 2),
+                                      //time send
+                                      Text(
+                                          '${message.status == 2 ? AppLocalizations.of(context)!.edited : ''} ${DateFormat("HH:mm").format(time.toLocal())}',
+                                          style: TextStyle(
+                                              color: Get.isDarkMode ? Colors.white70 : const Color.fromRGBO(115, 121, 135, 1),
+                                              fontSize: 12,
+                                              fontWeight: FontWeight.w400),
+                                          textAlign: TextAlign.right),
+                                    ])
+                              :
 
-                                  ///read message
-                                  (isShowEnd != null && isShowEnd) &&
-                                          !(message.contentType == 3)
-                                      ? Container(
-                                          padding: EdgeInsets.all(
-                                              message.contentType == 6 ||
-                                                      message.contentType == 8
-                                                  ? 4
-                                                  : 0),
-                                          decoration: message.contentType ==
-                                                      6 ||
-                                                  message.contentType == 8
-                                              ? BoxDecoration(
-                                                  color: Color(controller
-                                                      .backgroundColor),
-                                                  borderRadius:
-                                                      BorderRadius.circular(15))
-                                              : null,
-                                          child: Row(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment.end,
-                                              children: [
-                                                Text(
-                                                  '${message.status == 2 ? AppLocalizations.of(context)!.edited : ''} ${DateFormat("HH:mm").format(time.toLocal())}',
-                                                  style: TextStyle(
-                                                      color: Get.isDarkMode
-                                                          ? message.contentType ==
-                                                                      6 ||
-                                                                  message.contentType ==
-                                                                      8
-                                                              ? ColorValue
-                                                                  .textColor
-                                                              : Colors.white70
-                                                          : const Color
-                                                              .fromRGBO(
-                                                              115, 121, 135, 1),
-                                                      fontSize: 12,
-                                                      fontWeight:
-                                                          FontWeight.w400),
-                                                  textAlign: TextAlign.right,
-                                                ),
-                                                if (isMe) ...[
-                                                  SizedBox(width: 5),
-                                                  Icon(
-                                                    message.readState != 0
-                                                        ? Icons.done_all_rounded
-                                                        : Icons.done_rounded,
-                                                    size: 16,
-                                                    color: Color(
-                                                        controller.textColor),
-                                                  )
-                                                ]
-                                              ]),
-                                        )
-                                      : const SizedBox()
-                            ],
-                          )
-                        ]),
+                              ///read message
+                              (isShowEnd != null && isShowEnd) && !(message.contentType == 3)
+                                  ? Container(
+                                      padding: EdgeInsets.all(message.contentType == 6 || message.contentType == 8 ? 4 : 0),
+                                      decoration: message.contentType == 6 || message.contentType == 8
+                                          ? BoxDecoration(color: Color(controller.backgroundColor), borderRadius: BorderRadius.circular(15))
+                                          : null,
+                                      child: Row(mainAxisAlignment: MainAxisAlignment.end, children: [
+                                        Text(
+                                          '${message.status == 2 ? AppLocalizations.of(context)!.edited : ''} ${DateFormat("HH:mm").format(time.toLocal())}',
+                                          style: TextStyle(
+                                              color: Get.isDarkMode
+                                                  ? message.contentType == 6 || message.contentType == 8
+                                                      ? ColorValue.textColor
+                                                      : Colors.white70
+                                                  : const Color.fromRGBO(115, 121, 135, 1),
+                                              fontSize: 12,
+                                              fontWeight: FontWeight.w400),
+                                          textAlign: TextAlign.right,
+                                        ),
+                                        if (isMe) ...[
+                                          SizedBox(width: 5),
+                                          Icon(
+                                            message.readState != 0 ? Icons.done_all_rounded : Icons.done_rounded,
+                                            size: 16,
+                                            color: Color(controller.textColor),
+                                          )
+                                        ]
+                                      ]),
+                                    )
+                                  : const SizedBox()
+                        ],
+                      )
+                    ]),
                   ),
                 )
               : Positioned(
@@ -1919,256 +1429,162 @@ class _ChatBoxDetailState extends State<ChatBoxDetail>
                   bottom: 0,
                   child: GestureDetector(
                     onTap: () {},
-                    child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
+                    child: Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
+                      SizedBox(height: 2),
+                      Row(
+                        mainAxisSize: MainAxisSize.max,
                         children: [
-                          SizedBox(height: 2),
-                          Row(
-                            mainAxisSize: MainAxisSize.max,
-                            children: [
-                              message.emojis != null &&
-                                      message.emojis!.isNotEmpty
-                                  ? isMe
-                                      ? Container(
-                                          padding: const EdgeInsets.all(4),
-                                          decoration: BoxDecoration(
-                                              color: Color(
-                                                  controller.backgroundColor),
-                                              borderRadius:
-                                                  BorderRadius.circular(15)),
-                                          child: Row(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.end,
-                                            mainAxisSize: MainAxisSize.min,
-                                            children: [
-                                              Container(
-                                                decoration: BoxDecoration(
-                                                    color: const Color.fromRGBO(
-                                                        240, 243, 251, 1),
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            16),
-                                                    border: Border.all(
-                                                        width: 2,
-                                                        color: Colors.white)),
+                          message.emojis != null && message.emojis!.isNotEmpty
+                              ? isMe
+                                  ? Container(
+                                      padding: const EdgeInsets.all(4),
+                                      decoration: BoxDecoration(color: Color(controller.backgroundColor), borderRadius: BorderRadius.circular(15)),
+                                      child: Row(
+                                        mainAxisAlignment: MainAxisAlignment.end,
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Container(
+                                            decoration: BoxDecoration(
+                                                color: const Color.fromRGBO(240, 243, 251, 1),
+                                                borderRadius: BorderRadius.circular(16),
+                                                border: Border.all(width: 2, color: Colors.white)),
 
-                                                ///column check
-                                                child: Row(
-                                                  mainAxisSize:
-                                                      MainAxisSize.min,
-                                                  children: [
-                                                    Row(
-                                                      mainAxisSize:
-                                                          MainAxisSize.min,
-                                                      children: List.generate(
-                                                          getListReaction
-                                                                      .length >
-                                                                  3
-                                                              ? 3
-                                                              : getListReaction
-                                                                  .length,
-                                                          (index) {
-                                                        return GestureDetector(
-                                                          onTap: () async {
-                                                            // String uuidUser = await Utils
-                                                            //     .getStringValueWithKey(
-                                                            //     Constant.UUID_USER);
-                                                            // controller.likeMessage(uuid: message.uuid!,
-                                                            //     type: 0,
-                                                            //     status: 0,
-                                                            //     uuidUser: uuidUser);
-                                                          },
+                                            ///column check
+                                            child: Row(
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: [
+                                                Row(
+                                                  mainAxisSize: MainAxisSize.min,
+                                                  children: List.generate(getListReaction.length > 3 ? 3 : getListReaction.length, (index) {
+                                                    return GestureDetector(
+                                                      onTap: () async {
+                                                        // String uuidUser = await Utils
+                                                        //     .getStringValueWithKey(
+                                                        //     Constant.UUID_USER);
+                                                        // controller.likeMessage(uuid: message.uuid!,
+                                                        //     type: 0,
+                                                        //     status: 0,
+                                                        //     uuidUser: uuidUser);
+                                                      },
 
-                                                          ///column check
-                                                          child: Row(
-                                                            mainAxisSize:
-                                                                MainAxisSize
-                                                                    .min,
-                                                            children: [
-                                                              SvgPicture.asset(
-                                                                listReaction[
-                                                                    getListReaction
-                                                                            .keys
-                                                                            .toList()[
-                                                                        index]],
-                                                                width: 14,
-                                                                fit: BoxFit
-                                                                    .fitWidth,
-                                                              ),
-                                                              // Text('${e.value.length}',
-                                                              //   style: const TextStyle(
-                                                              //       fontSize: 10,
-                                                              //       fontWeight: FontWeight.w400,
-                                                              //       color: Colors.black),
-                                                              // )
-                                                            ],
+                                                      ///column check
+                                                      child: Row(
+                                                        mainAxisSize: MainAxisSize.min,
+                                                        children: [
+                                                          SvgPicture.asset(
+                                                            listReaction[getListReaction.keys.toList()[index]],
+                                                            width: 14,
+                                                            fit: BoxFit.fitWidth,
                                                           ),
-                                                        );
-                                                      }),
-                                                    ),
-                                                    Text(
-                                                      '${message.emojis!.length}',
-                                                      style: TextStyle(
-                                                          fontSize: 10,
-                                                          color: Colors.black,
-                                                          fontWeight:
-                                                              FontWeight.w400),
-                                                    ),
-                                                  ],
+                                                          // Text('${e.value.length}',
+                                                          //   style: const TextStyle(
+                                                          //       fontSize: 10,
+                                                          //       fontWeight: FontWeight.w400,
+                                                          //       color: Colors.black),
+                                                          // )
+                                                        ],
+                                                      ),
+                                                    );
+                                                  }),
                                                 ),
-                                              ),
-                                              Text(
-                                                '${message.status == 2 ? AppLocalizations.of(context)!.edited : ''} ${DateFormat("HH:mm").format(time.toLocal())}',
-                                                style: TextStyle(
-                                                    color: Get.isDarkMode
-                                                        ? Colors.white70
-                                                        : const Color.fromRGBO(
-                                                            115, 121, 135, 1),
-                                                    fontSize: 12),
-                                                textAlign: TextAlign.right,
-                                              ),
-                                            ],
+                                                Text(
+                                                  '${message.emojis!.length}',
+                                                  style: TextStyle(fontSize: 10, color: Colors.black, fontWeight: FontWeight.w400),
+                                                ),
+                                              ],
+                                            ),
                                           ),
-                                        )
-                                      : Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.end,
+                                          Text(
+                                            '${message.status == 2 ? AppLocalizations.of(context)!.edited : ''} ${DateFormat("HH:mm").format(time.toLocal())}',
+                                            style: TextStyle(
+                                                color: Get.isDarkMode ? Colors.white70 : const Color.fromRGBO(115, 121, 135, 1), fontSize: 12),
+                                            textAlign: TextAlign.right,
+                                          ),
+                                        ],
+                                      ),
+                                    )
+                                  : Row(mainAxisAlignment: MainAxisAlignment.end, mainAxisSize: MainAxisSize.min, children: [
+                                      Container(
+                                        decoration: BoxDecoration(
+                                            color: const Color.fromRGBO(240, 243, 251, 1),
+                                            borderRadius: BorderRadius.circular(16),
+                                            border: Border.all(width: 2, color: Colors.white)),
+                                        child: Row(
                                           mainAxisSize: MainAxisSize.min,
                                           children: [
-                                              Container(
-                                                decoration: BoxDecoration(
-                                                    color: const Color.fromRGBO(
-                                                        240, 243, 251, 1),
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            16),
-                                                    border: Border.all(
-                                                        width: 2,
-                                                        color: Colors.white)),
-                                                child: Row(
-                                                  mainAxisSize:
-                                                      MainAxisSize.min,
-                                                  children: [
-                                                    Row(
-                                                      mainAxisSize:
-                                                          MainAxisSize.min,
-                                                      children: List.generate(
-                                                        getListReaction.length >
-                                                                3
-                                                            ? 3
-                                                            : getListReaction
-                                                                .length,
-                                                        (index) =>
-                                                            GestureDetector(
-                                                          onTap: () async {},
-                                                          child: Row(
-                                                            mainAxisSize:
-                                                                MainAxisSize
-                                                                    .min,
-                                                            children: [
-                                                              SvgPicture.asset(
-                                                                listReaction[
-                                                                    getListReaction
-                                                                            .keys
-                                                                            .toList()[
-                                                                        index]],
-                                                                width: 14,
-                                                                fit: BoxFit
-                                                                    .fitWidth,
-                                                              ),
-                                                              SizedBox(
-                                                                  width: 3),
-                                                            ],
-                                                          ),
-                                                        ),
+                                            Row(
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: List.generate(
+                                                getListReaction.length > 3 ? 3 : getListReaction.length,
+                                                (index) => GestureDetector(
+                                                  onTap: () async {},
+                                                  child: Row(
+                                                    mainAxisSize: MainAxisSize.min,
+                                                    children: [
+                                                      SvgPicture.asset(
+                                                        listReaction[getListReaction.keys.toList()[index]],
+                                                        width: 14,
+                                                        fit: BoxFit.fitWidth,
                                                       ),
-                                                    ),
-                                                    Text(
-                                                      '${message.emojis!.length}',
-                                                      style: TextStyle(
-                                                          fontWeight:
-                                                              FontWeight.w400,
-                                                          fontSize: 10,
-                                                          color: Colors.black),
-                                                    )
-                                                  ],
+                                                      SizedBox(width: 3),
+                                                    ],
+                                                  ),
                                                 ),
                                               ),
-                                              SizedBox(width: 2),
-                                              //time send
-                                              Text(
-                                                  '${message.status == 2 ? AppLocalizations.of(context)!.edited : ''} ${DateFormat("HH:mm").format(time.toLocal())}',
-                                                  style: TextStyle(
-                                                      color: Get.isDarkMode
-                                                          ? Colors.white70
-                                                          : const Color
-                                                              .fromRGBO(
-                                                              115, 121, 135, 1),
-                                                      fontSize: 12,
-                                                      fontWeight:
-                                                          FontWeight.w400),
-                                                  textAlign: TextAlign.right),
-                                            ])
-                                  :
+                                            ),
+                                            Text(
+                                              '${message.emojis!.length}',
+                                              style: TextStyle(fontWeight: FontWeight.w400, fontSize: 10, color: Colors.black),
+                                            )
+                                          ],
+                                        ),
+                                      ),
+                                      SizedBox(width: 2),
+                                      //time send
+                                      Text(
+                                          '${message.status == 2 ? AppLocalizations.of(context)!.edited : ''} ${DateFormat("HH:mm").format(time.toLocal())}',
+                                          style: TextStyle(
+                                              color: Get.isDarkMode ? Colors.white70 : const Color.fromRGBO(115, 121, 135, 1),
+                                              fontSize: 12,
+                                              fontWeight: FontWeight.w400),
+                                          textAlign: TextAlign.right),
+                                    ])
+                              :
 
-                                  ///read message
-                                  (isShowEnd != null && isShowEnd) &&
-                                          !(message.contentType == 3)
-                                      ? Container(
-                                          padding: EdgeInsets.all(
-                                              message.contentType == 6 ||
-                                                      message.contentType == 8
-                                                  ? 4
-                                                  : 0),
-                                          decoration: message.contentType ==
-                                                      6 ||
-                                                  message.contentType == 8
-                                              ? BoxDecoration(
-                                                  color: Color(controller
-                                                      .backgroundColor),
-                                                  borderRadius:
-                                                      BorderRadius.circular(15))
-                                              : null,
-                                          child: Row(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment.end,
-                                              children: [
-                                                Text(
-                                                  '${message.status == 2 ? AppLocalizations.of(context)!.edited : ''} ${DateFormat("HH:mm").format(time.toLocal())}',
-                                                  style: TextStyle(
-                                                      color: Get.isDarkMode
-                                                          ? message.contentType ==
-                                                                      6 ||
-                                                                  message.contentType ==
-                                                                      8
-                                                              ? ColorValue
-                                                                  .textColor
-                                                              : Colors.white70
-                                                          : const Color
-                                                              .fromRGBO(
-                                                              115, 121, 135, 1),
-                                                      fontSize: 12,
-                                                      fontWeight:
-                                                          FontWeight.w400),
-                                                  textAlign: TextAlign.right,
-                                                ),
-                                                if (isMe) ...[
-                                                  SizedBox(width: 5),
-                                                  Icon(
-                                                    message.readState != 0
-                                                        ? Icons.done_all_rounded
-                                                        : Icons.done_rounded,
-                                                    size: 16,
-                                                    color: Color(
-                                                        controller.textColor),
-                                                  )
-                                                ]
-                                              ]),
-                                        )
-                                      : const SizedBox()
-                            ],
-                          )
-                        ]),
+                              ///read message
+                              (isShowEnd != null && isShowEnd) && !(message.contentType == 3)
+                                  ? Container(
+                                      padding: EdgeInsets.all(message.contentType == 6 || message.contentType == 8 ? 4 : 0),
+                                      decoration: message.contentType == 6 || message.contentType == 8
+                                          ? BoxDecoration(color: Color(controller.backgroundColor), borderRadius: BorderRadius.circular(15))
+                                          : null,
+                                      child: Row(mainAxisAlignment: MainAxisAlignment.end, children: [
+                                        Text(
+                                          '${message.status == 2 ? AppLocalizations.of(context)!.edited : ''} ${DateFormat("HH:mm").format(time.toLocal())}',
+                                          style: TextStyle(
+                                              color: Get.isDarkMode
+                                                  ? message.contentType == 6 || message.contentType == 8
+                                                      ? ColorValue.textColor
+                                                      : Colors.white70
+                                                  : const Color.fromRGBO(115, 121, 135, 1),
+                                              fontSize: 12,
+                                              fontWeight: FontWeight.w400),
+                                          textAlign: TextAlign.right,
+                                        ),
+                                        if (isMe) ...[
+                                          SizedBox(width: 5),
+                                          Icon(
+                                            message.readState != 0 ? Icons.done_all_rounded : Icons.done_rounded,
+                                            size: 16,
+                                            color: Color(controller.textColor),
+                                          )
+                                        ]
+                                      ]),
+                                    )
+                                  : const SizedBox()
+                        ],
+                      )
+                    ]),
                   ),
                 ),
         ]
@@ -2203,8 +1619,7 @@ class _ChatBoxDetailState extends State<ChatBoxDetail>
           ownerUuid: message.replyMsgUu!.ownerUuid,
           roomName: message.replyMsgUu!.roomName);
     }
-    final indexMessage = controller.chatList
-        .indexWhere((element) => element.uuid! == message.uuid!);
+    final indexMessage = controller.chatList.indexWhere((element) => element.uuid! == message.uuid!);
     String decoded = message.content ?? '';
 
     try {
@@ -2216,8 +1631,7 @@ class _ChatBoxDetailState extends State<ChatBoxDetail>
     if (message.replyMsgUu != null && message.replyMsgUu!.fullName != null) {
       decodedFullName = message.replyMsgUu!.fullName;
       try {
-        decodedFullName =
-            utf8.decode(base64Url.decode(message.replyMsgUu!.fullName!));
+        decodedFullName = utf8.decode(base64Url.decode(message.replyMsgUu!.fullName!));
       } catch (e) {
         decodedFullName = message.replyMsgUu!.fullName;
       }
@@ -2236,9 +1650,7 @@ class _ChatBoxDetailState extends State<ChatBoxDetail>
               child: Text(
                 '${decoded}',
                 style: TextStyle(
-                    fontWeight: FontWeight.w400,
-                    fontSize: controller.sizeText.toDouble(),
-                    color: !reply && Get.isDarkMode ? Colors.black : null),
+                    fontWeight: FontWeight.w400, fontSize: controller.sizeText.toDouble(), color: !reply && Get.isDarkMode ? Colors.black : null),
                 maxLines: pinType == 1 ? 1 : null,
                 overflow: pinType == 1 ? TextOverflow.ellipsis : null,
               ),
@@ -2284,9 +1696,7 @@ class _ChatBoxDetailState extends State<ChatBoxDetail>
               child: Text(
                 '${decoded}',
                 style: TextStyle(
-                    fontWeight: FontWeight.w400,
-                    fontSize: controller.sizeText.toDouble(),
-                    color: !reply && Get.isDarkMode ? Colors.black : null),
+                    fontWeight: FontWeight.w400, fontSize: controller.sizeText.toDouble(), color: !reply && Get.isDarkMode ? Colors.black : null),
                 maxLines: pinType == 1 ? 1 : null,
                 overflow: pinType == 1 ? TextOverflow.ellipsis : null,
               ),
@@ -2336,8 +1746,7 @@ class _ChatBoxDetailState extends State<ChatBoxDetail>
                       style: TextStyle(
                           fontWeight: FontWeight.w400,
                           fontSize: controller.sizeText.toDouble(),
-                          color:
-                              !reply && Get.isDarkMode ? Colors.black : null),
+                          color: !reply && Get.isDarkMode ? Colors.black : null),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     )
@@ -2377,9 +1786,7 @@ class _ChatBoxDetailState extends State<ChatBoxDetail>
                                         : 1,
                                 child: ClipRRect(
                                   borderRadius: BorderRadius.circular(12),
-                                  child: _imageView(
-                                      url: Constant.BASE_URL_IMAGE +
-                                          array[index]),
+                                  child: _imageView(url: Constant.BASE_URL_IMAGE + array[index]),
                                 ),
                               );
                             }),
@@ -2390,8 +1797,7 @@ class _ChatBoxDetailState extends State<ChatBoxDetail>
                               right: 5,
                               bottom: 5,
                               child: Container(
-                                padding: EdgeInsets.symmetric(
-                                    vertical: 2, horizontal: 5),
+                                padding: EdgeInsets.symmetric(vertical: 2, horizontal: 5),
                                 decoration: BoxDecoration(
                                   color: Color.fromRGBO(0, 0, 0, 0.6),
                                   borderRadius: BorderRadius.circular(6),
@@ -2399,22 +1805,15 @@ class _ChatBoxDetailState extends State<ChatBoxDetail>
                                 child: Row(
                                   children: [
                                     Text(
-                                      DateFormat("HH:mm")
-                                          .format(time.toLocal()),
-                                      style: TextStyle(
-                                          fontSize: 12,
-                                          fontWeight: FontWeight.w400,
-                                          color: Colors.white),
+                                      DateFormat("HH:mm").format(time.toLocal()),
+                                      style: TextStyle(fontSize: 12, fontWeight: FontWeight.w400, color: Colors.white),
                                     ),
-                                    if (message.userSent ==
-                                        controller.userName) ...[
+                                    if (message.userSent == controller.userName) ...[
                                       SizedBox(
                                         width: 5,
                                       ),
                                       Icon(
-                                        message.readState != 0
-                                            ? Icons.done_all_rounded
-                                            : Icons.done_rounded,
+                                        message.readState != 0 ? Icons.done_all_rounded : Icons.done_rounded,
                                         size: 16,
                                         color: Color(controller.textColor),
                                       )
@@ -2440,8 +1839,7 @@ class _ChatBoxDetailState extends State<ChatBoxDetail>
                       style: TextStyle(
                           fontWeight: FontWeight.w400,
                           fontSize: controller.sizeText.toDouble(),
-                          color:
-                              !reply && Get.isDarkMode ? Colors.black : null),
+                          color: !reply && Get.isDarkMode ? Colors.black : null),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     )
@@ -2456,10 +1854,7 @@ class _ChatBoxDetailState extends State<ChatBoxDetail>
                     itemBuilder: (context, index) {
                       return GestureDetector(
                         onTap: () {
-                          Navigation.navigateTo(
-                              page: 'MediaChatDetail',
-                              arguments:
-                                  Constant.BASE_URL_IMAGE + array[index]);
+                          Navigation.navigateTo(page: 'MediaChatDetail', arguments: Constant.BASE_URL_IMAGE + array[index]);
                         },
                         child: Container(
                           height: Get.height * 0.3,
@@ -2494,8 +1889,7 @@ class _ChatBoxDetailState extends State<ChatBoxDetail>
           return Container();
       }
     } else if (message.contentType == 4) {
-      String type =
-          Utils.getFileType(Constant.BASE_URL_IMAGE + jsonDecode(decoded)[0]);
+      String type = Utils.getFileType(Constant.BASE_URL_IMAGE + jsonDecode(decoded)[0]);
       switch (type) {
         case 'PDF':
         case 'Microsoft Word':
@@ -2520,8 +1914,7 @@ class _ChatBoxDetailState extends State<ChatBoxDetail>
                       style: TextStyle(
                           fontWeight: FontWeight.w400,
                           fontSize: controller.sizeText.toDouble(),
-                          color:
-                              !reply && Get.isDarkMode ? Colors.black : null),
+                          color: !reply && Get.isDarkMode ? Colors.black : null),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     )
@@ -2529,20 +1922,15 @@ class _ChatBoxDetailState extends State<ChatBoxDetail>
                 )
               : GestureDetector(
                   onTap: () async {
-                    await controller.saveFile(
-                        url: Constant.BASE_URL_IMAGE + jsonDecode(decoded)[0],
-                        fileName: '${message.mediaName}');
-                    print(
-                        'urlpdf ${Constant.BASE_URL_IMAGE + jsonDecode(decoded)[0]}');
+                    await controller.saveFile(url: Constant.BASE_URL_IMAGE + jsonDecode(decoded)[0], fileName: '${message.mediaName}');
+                    print('urlpdf ${Constant.BASE_URL_IMAGE + jsonDecode(decoded)[0]}');
                   },
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Container(
                         padding: EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                            color: Color(controller.textColor),
-                            borderRadius: BorderRadius.circular(12)),
+                        decoration: BoxDecoration(color: Color(controller.textColor), borderRadius: BorderRadius.circular(12)),
                         child: Icon(
                           Icons.download_outlined,
                           size: 24,
@@ -2559,15 +1947,12 @@ class _ChatBoxDetailState extends State<ChatBoxDetail>
                         children: [
                           Text(
                             '${message.mediaName}',
-                            style: TextStyle(
-                                fontWeight: FontWeight.w400, fontSize: 14),
+                            style: TextStyle(fontWeight: FontWeight.w400, fontSize: 14),
                           ),
                           SizedBox(
                             height: 8,
                           ),
-                          if (controller.fileTrafficCache.containsKey(
-                              Constant.BASE_URL_IMAGE +
-                                  jsonDecode(decoded)[0])) ...[
+                          if (controller.fileTrafficCache.containsKey(Constant.BASE_URL_IMAGE + jsonDecode(decoded)[0])) ...[
                             Obx(() => Text(
                                   controller.isDownload ==
                                           '${TextByNation.getStringByKey('downloading')} ${Constant.BASE_URL_IMAGE + jsonDecode(decoded)[0]}'
@@ -2582,16 +1967,10 @@ class _ChatBoxDetailState extends State<ChatBoxDetail>
                                 ))
                           ] else ...[
                             FutureBuilder<String?>(
-                              future: controller.fetchFileSize(
-                                  Constant.BASE_URL_IMAGE +
-                                      jsonDecode(decoded)[0]),
+                              future: controller.fetchFileSize(Constant.BASE_URL_IMAGE + jsonDecode(decoded)[0]),
                               builder: (context, snapshot) {
-                                if (snapshot.connectionState ==
-                                        ConnectionState.done &&
-                                    snapshot.hasData) {
-                                  controller.fileTrafficCache[Constant
-                                          .BASE_URL_IMAGE +
-                                      jsonDecode(decoded)[0]] = snapshot.data!;
+                                if (snapshot.connectionState == ConnectionState.done && snapshot.hasData) {
+                                  controller.fileTrafficCache[Constant.BASE_URL_IMAGE + jsonDecode(decoded)[0]] = snapshot.data!;
                                   return Obx(() => Text(
                                         controller.isDownload ==
                                                 '${TextByNation.getStringByKey('downloading')} ${Constant.BASE_URL_IMAGE + jsonDecode(decoded)[0]}'
@@ -2634,16 +2013,13 @@ class _ChatBoxDetailState extends State<ChatBoxDetail>
                 SizedBox(width: 5),
                 Text(
                   'GIF',
-                  style: TextStyle(
-                      fontSize: controller.sizeText.toDouble(),
-                      color: !reply && Get.isDarkMode ? Colors.black : null),
+                  style: TextStyle(fontSize: controller.sizeText.toDouble(), color: !reply && Get.isDarkMode ? Colors.black : null),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 )
               ],
             )
-          : showImage(
-              url: decoded, width: Get.width * 0.15, height: Get.height * 0.28);
+          : showImage(url: decoded, width: Get.width * 0.15, height: Get.height * 0.28);
     } else if (message.contentType == 5) {
       print('link wav: ${Constant.BASE_URL_IMAGE + jsonDecode(decoded)[0]}');
       return pinType == 1
@@ -2656,9 +2032,7 @@ class _ChatBoxDetailState extends State<ChatBoxDetail>
                 Text(
                   TextByNation.getStringByKey('audio'),
                   style: TextStyle(
-                      fontWeight: FontWeight.w400,
-                      fontSize: controller.sizeText.toDouble(),
-                      color: !reply && Get.isDarkMode ? Colors.black : null),
+                      fontWeight: FontWeight.w400, fontSize: controller.sizeText.toDouble(), color: !reply && Get.isDarkMode ? Colors.black : null),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 )
@@ -2675,9 +2049,7 @@ class _ChatBoxDetailState extends State<ChatBoxDetail>
                   width: isBottomSheet
                       ? size.width - 150
                       : !reply
-                          ? (pinType == 2
-                              ? (size.width * 0.65) - 210
-                              : (size.width * 0.65) - 130)
+                          ? (pinType == 2 ? (size.width * 0.65) - 210 : (size.width * 0.65) - 130)
                           : pinType == 2
                               ? (size.width * 0.65) - 190
                               : (size.width * 0.65) - 110,
@@ -2689,14 +2061,9 @@ class _ChatBoxDetailState extends State<ChatBoxDetail>
                   visible: controller.countryCode != message.countryCode,
                   child: GestureDetector(
                     onTap: () async {
-                      await controller.speech2text
-                          .getTextFromAudio(
-                              Constant.BASE_URL_IMAGE + jsonDecode(decoded)[0],
-                              message.countryCode!)
-                          .then(
+                      await controller.speech2text.getTextFromAudio(Constant.BASE_URL_IMAGE + jsonDecode(decoded)[0], message.countryCode!).then(
                         (value) async {
-                          String data =
-                              await controller.translator.translate(value);
+                          String data = await controller.translator.translate(value);
                           if (indexMessage != -1) {
                             controller.chatList[indexMessage].translate = data;
                             // controller.chatList.refresh();
@@ -2707,9 +2074,7 @@ class _ChatBoxDetailState extends State<ChatBoxDetail>
                     child: Container(
                       padding: EdgeInsets.all(6),
                       decoration: BoxDecoration(
-                          color: Get.isDarkMode
-                              ? Color.fromRGBO(152, 152, 152, 1.0)
-                              : Color.fromRGBO(228, 230, 236, 1),
+                          color: Get.isDarkMode ? Color.fromRGBO(152, 152, 152, 1.0) : Color.fromRGBO(228, 230, 236, 1),
                           borderRadius: BorderRadius.circular(6)),
                       child: Icon(Icons.translate_rounded, size: 13),
                     ),
@@ -2723,16 +2088,14 @@ class _ChatBoxDetailState extends State<ChatBoxDetail>
                       style: TextStyle(
                           fontWeight: FontWeight.w400,
                           fontSize: controller.sizeText.toDouble(),
-                          color:
-                              !reply && Get.isDarkMode ? Colors.black : null)),
+                          color: !reply && Get.isDarkMode ? Colors.black : null)),
                 ]
               ],
             );
     } else if (message.contentType == 6) {
       var index = int.tryParse(decoded.split('_')[1]) ?? -1;
       var indexSticker = int.tryParse(decoded.split('_')[2]) ?? -1;
-      String stickerString = (stickerPacks[index - 1]['stickers']
-          as List)[indexSticker - 1]['image_file'];
+      String stickerString = (stickerPacks[index - 1]['stickers'] as List)[indexSticker - 1]['image_file'];
       return pinType == 1
           ? Row(
               children: [
@@ -2740,26 +2103,19 @@ class _ChatBoxDetailState extends State<ChatBoxDetail>
                 SizedBox(width: 5),
                 Text(
                   'Sticker',
-                  style: TextStyle(
-                      fontSize: controller.sizeText.toDouble(),
-                      color: !reply && Get.isDarkMode ? Colors.black : null),
+                  style: TextStyle(fontSize: controller.sizeText.toDouble(), color: !reply && Get.isDarkMode ? Colors.black : null),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 )
               ],
             )
-          : Image.asset(
-              width: Get.width * 0.11,
-              height: Get.height * 0.23,
-              stickerString);
+          : Image.asset(width: Get.width * 0.11, height: Get.height * 0.23, stickerString);
     }
 
     return Container(
       constraints: BoxConstraints(
-        maxWidth: controller.isShowGroupInfo == true
-            ? Get.width / 3.5
-            : Get.width / 2.3,
-        minWidth: Get.width / 5,
+        maxWidth: Get.find<ChatController>().isShowGroupInfo == true ? Get.width / 3.5 : Get.width / 2.3,
+        minWidth: 0,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -2768,38 +2124,20 @@ class _ChatBoxDetailState extends State<ChatBoxDetail>
           if (message.replyMsgUu != null && reply && pinType != 1) ...[
             GestureDetector(
               onTap: () {
-                int index = controller.chatList.indexWhere(
-                    (element) => element.uuid! == message.replyMsgUu!.uuid!);
+                int index = controller.chatList.indexWhere((element) => element.uuid! == message.replyMsgUu!.uuid!);
                 index = index != -1 ? index : 0;
-                controller.itemScrollController.scrollTo(
-                    index: index,
-                    duration: Duration(seconds: 1),
-                    alignment: 0.5);
+                controller.itemScrollController.scrollTo(index: index, duration: Duration(seconds: 1), alignment: 0.5);
               },
               child: AbsorbPointer(
                 absorbing: true,
                 child: Container(
                   padding: EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                      color: Colors.white,
-                      border: Border(
-                          left: BorderSide(
-                              color: Color(controller.textColor), width: 2))),
+                  decoration: BoxDecoration(color: Colors.white, border: Border(left: BorderSide(color: Color(controller.textColor), width: 2))),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Text(
-                      //   '${decodedFullName ?? message.replyMsgUu!.userSent}',
-                      //   style: TextStyle(
-                      //     fontWeight: FontWeight.w500,
-                      //     color: Color(controller.textColor),
-                      //     fontFamily: 'NotoColorEmoji',
-                      //   ),
-                      // ),
-
                       TextWithEmoji(
-                        text:
-                            '${decodedFullName ?? message.replyMsgUu!.userSent}',
+                        text: '${decodedFullName ?? message.replyMsgUu!.userSent}',
                         fontWeight: FontWeight.w500,
                         fontSize: 14,
                         color: Colors.white,
@@ -2809,11 +2147,7 @@ class _ChatBoxDetailState extends State<ChatBoxDetail>
                       SizedBox(
                         height: 10,
                       ),
-                      _chatContentType(
-                          message: message,
-                          time: time,
-                          reply: false,
-                          pinType: pinType == 2 ? 2 : 0)
+                      _chatContentType(message: message, time: time, reply: false, pinType: pinType == 2 ? 2 : 0)
                     ],
                   ),
                 ),
@@ -2836,9 +2170,7 @@ class _ChatBoxDetailState extends State<ChatBoxDetail>
                     ? 1
                     : null,
           ),
-          if (controller.countryCode != message.countryCode &&
-              reply &&
-              pinType != 1) ...[
+          if (controller.countryCode != message.countryCode && reply && pinType != 1) ...[
             SizedBox(
               height: 8,
             ),
@@ -2846,25 +2178,19 @@ class _ChatBoxDetailState extends State<ChatBoxDetail>
               onTap: () async {
                 String value = await controller.translator.translate(decoded);
                 if (indexMessage != -1) {
-                  if (controller
-                      .chatList[indexMessage].translateOrigin.isEmpty) {
+                  if (controller.chatList[indexMessage].translateOrigin.isEmpty) {
                     controller.chatList[indexMessage].translateOrigin = decoded;
                   }
                   controller.chatList[indexMessage].content =
-                      controller.chatList[indexMessage].isTranslate
-                          ? controller.chatList[indexMessage].translateOrigin
-                          : value;
-                  controller.chatList[indexMessage].isTranslate =
-                      !controller.chatList[indexMessage].isTranslate;
+                      controller.chatList[indexMessage].isTranslate ? controller.chatList[indexMessage].translateOrigin : value;
+                  controller.chatList[indexMessage].isTranslate = !controller.chatList[indexMessage].isTranslate;
                   // controller.chatList.refresh();
                 }
               },
               child: Container(
                 padding: EdgeInsets.all(6),
                 decoration: BoxDecoration(
-                    color: Get.isDarkMode
-                        ? Color.fromRGBO(152, 152, 152, 1.0)
-                        : Color.fromRGBO(228, 230, 236, 1),
+                    color: Get.isDarkMode ? Color.fromRGBO(152, 152, 152, 1.0) : Color.fromRGBO(228, 230, 236, 1),
                     borderRadius: BorderRadius.circular(6)),
                 child: Icon(Icons.translate_rounded, size: 13),
               ),
@@ -2884,8 +2210,7 @@ class _ChatBoxDetailState extends State<ChatBoxDetail>
         url,
         key: UniqueKey(),
         fit: BoxFit.cover,
-        errorBuilder:
-            (BuildContext context, Object exception, StackTrace? stackTrace) {
+        errorBuilder: (BuildContext context, Object exception, StackTrace? stackTrace) {
           return SvgPicture.asset(
             'asset/images/default.svg',
             key: UniqueKey(),
@@ -2963,12 +2288,8 @@ class _ChatBoxDetailState extends State<ChatBoxDetail>
   //   );
   // }
 
-  bottomSheetChatItem(
-      {required cd.ChatDetail message,
-      required bool isMe,
-      required DateTime time}) {
-    final indexMessage = controller.chatList
-        .indexWhere((element) => element.uuid! == message.uuid!);
+  bottomSheetChatItem({required cd.ChatDetail message, required bool isMe, required DateTime time}) {
+    final indexMessage = controller.chatList.indexWhere((element) => element.uuid! == message.uuid!);
     String uuidChat = controller.chatList[indexMessage].uuid!;
 
     String decoded = message.content ?? '';
@@ -2989,21 +2310,17 @@ class _ChatBoxDetailState extends State<ChatBoxDetail>
         top: Radius.circular(20),
       )),
       builder: (context) => Container(
-        padding:
-            EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+        padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
         child: SingleChildScrollView(
           child: Padding(
             padding: EdgeInsets.symmetric(horizontal: 20),
-            child:
-                Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
               Center(
                 child: Container(
                   width: 32,
                   margin: EdgeInsets.all(8),
                   padding: EdgeInsets.symmetric(vertical: 2),
-                  decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(4),
-                      color: Color.fromRGBO(134, 140, 154, 1)),
+                  decoration: BoxDecoration(borderRadius: BorderRadius.circular(4), color: Color.fromRGBO(134, 140, 154, 1)),
                 ),
               ),
               SizedBox(height: 12),
@@ -3084,8 +2401,7 @@ class _ChatBoxDetailState extends State<ChatBoxDetail>
                             }
                             ChatController chat = Get.find<ChatController>();
                             chat.forward = message;
-                            await Navigation.navigateTo(
-                                page: 'Chat', arguments: message);
+                            await Navigation.navigateTo(page: 'Chat', arguments: message);
                             chat.forward = cd.ChatDetail();
                             chat.update();
                           }
@@ -3103,9 +2419,7 @@ class _ChatBoxDetailState extends State<ChatBoxDetail>
                   //     },
                   //   )
                   // ),
-                  if (isMe &&
-                      (message.contentType == 1 || message.contentType == 2) &&
-                      message.forwardFrom == null) ...[
+                  if (isMe && (message.contentType == 1 || message.contentType == 2) && message.forwardFrom == null) ...[
                     StaggeredGridTile.fit(
                         crossAxisCellCount: 1,
                         child: _optionItem(
@@ -3135,8 +2449,7 @@ class _ChatBoxDetailState extends State<ChatBoxDetail>
                   StaggeredGridTile.fit(
                       crossAxisCellCount: 1,
                       child: _optionItem(
-                        title:
-                            '${TextByNation.getStringByKey('multiple_select')}',
+                        title: '${TextByNation.getStringByKey('multiple_select')}',
                         svg: 'asset/icons/multiple_select.svg',
                         onTap: () {
                           controller.selectedItems.clear();
@@ -3171,8 +2484,7 @@ class _ChatBoxDetailState extends State<ChatBoxDetail>
                           onTap: () async {
                             List<dynamic> arrays = jsonDecode(decoded);
                             for (String array in arrays) {
-                              await controller
-                                  .saveImage(Constant.BASE_URL_IMAGE + array);
+                              await controller.saveImage(Constant.BASE_URL_IMAGE + array);
                             }
                             Navigator.pop(context);
                           },
@@ -3187,12 +2499,8 @@ class _ChatBoxDetailState extends State<ChatBoxDetail>
     );
   }
 
-  bottomSheetChatItem2(BuildContext context,
-      {required cd.ChatDetail message,
-      required bool isMe,
-      required DateTime time}) {
-    final indexMessage = controller.chatList
-        .indexWhere((element) => element.uuid! == message.uuid!);
+  bottomSheetChatItem2(BuildContext context, {required cd.ChatDetail message, required bool isMe, required DateTime time}) {
+    final indexMessage = controller.chatList.indexWhere((element) => element.uuid! == message.uuid!);
     String uuidChat = controller.chatList[indexMessage].uuid!;
 
     String decoded = message.content ?? '';
@@ -3209,8 +2517,7 @@ class _ChatBoxDetailState extends State<ChatBoxDetail>
           return AlertDialog(
             backgroundColor: Colors.transparent,
             insetPadding: EdgeInsets.symmetric(horizontal: 24),
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             content: SizedBox(
               width: Get.width * .7,
               child: Column(
@@ -3228,14 +2535,8 @@ class _ChatBoxDetailState extends State<ChatBoxDetail>
                             listReaction.length,
                             (index) => GestureDetector(
                                   onTap: () async {
-                                    String uuidUser =
-                                        await Utils.getStringValueWithKey(
-                                            Constant.UUID_USER);
-                                    controller.likeMessage(
-                                        uuid: message.uuid!,
-                                        type: index,
-                                        status: 1,
-                                        uuidUser: uuidUser);
+                                    String uuidUser = await Utils.getStringValueWithKey(Constant.UUID_USER);
+                                    controller.likeMessage(uuid: message.uuid!, type: index, status: 1, uuidUser: uuidUser);
                                     Navigator.pop(context);
                                   },
                                   child: SvgPicture.asset(
@@ -3251,26 +2552,21 @@ class _ChatBoxDetailState extends State<ChatBoxDetail>
                   ),
                   Container(
                     padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(12)),
+                    decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12)),
                     child: Column(
                       children: [
-                        _customChildShowDialog('asset/icons/reply.svg',
-                            AppLocalizations.of(context)!.reply, () {
+                        _customChildShowDialog('asset/icons/reply.svg', AppLocalizations.of(context)!.reply, () {
                           controller.focusNode.requestFocus();
                           controller.replyChat.value = message;
                           controller.isEdit.value = 2;
                           Navigator.of(context).pop();
                         }),
                         if (message.contentType != 6)
-                          _customChildShowDialog('asset/icons/copy.svg',
-                              AppLocalizations.of(context)!.copy, () {
+                          _customChildShowDialog('asset/icons/copy.svg', AppLocalizations.of(context)!.copy, () {
                             Clipboard.setData(ClipboardData(text: decoded));
                             Navigator.of(context).pop();
                           }),
-                        _customChildShowDialog('asset/icons/forward.svg',
-                            AppLocalizations.of(context)!.forward, () async {
+                        _customChildShowDialog('asset/icons/forward.svg', AppLocalizations.of(context)!.forward, () async {
                           Navigator.of(context).pop();
                           if (Get.isRegistered<ChatController>()) {
                             if (controller.isAppResume) {
@@ -3284,54 +2580,37 @@ class _ChatBoxDetailState extends State<ChatBoxDetail>
                             chat.update();
                           }
                         }),
-                        if (isMe &&
-                            (message.contentType == 1 ||
-                                message.contentType == 2) &&
-                            message.forwardFrom == null)
-                          _customChildShowDialog('asset/icons/edit.svg',
-                              AppLocalizations.of(context)!.edit, () {
+                        if (isMe && (message.contentType == 1 || message.contentType == 2) && message.forwardFrom == null)
+                          _customChildShowDialog('asset/icons/edit.svg', AppLocalizations.of(context)!.edit, () {
                             controller.focusNode.requestFocus();
                             controller.replyChat.value = message;
                             controller.isEdit.value = 1;
                             controller.textMessageController.text = decoded;
                             Navigator.of(context).pop();
                           }),
-                        _customChildShowDialog(
-                            !controller.pinList.value.contains(message)
-                                ? 'asset/icons/pin.svg'
-                                : 'asset/icons/un_pin.svg',
-                            !controller.pinList.value.contains(message)
-                                ? AppLocalizations.of(context)!.pin
-                                : AppLocalizations.of(context)!.un_pin, () {
+                        _customChildShowDialog(!controller.pinList.value.contains(message) ? 'asset/icons/pin.svg' : 'asset/icons/un_pin.svg',
+                            !controller.pinList.value.contains(message) ? AppLocalizations.of(context)!.pin : AppLocalizations.of(context)!.un_pin,
+                            () {
                           Navigator.of(context).pop();
                           controller.selectedItems.value.add(uuidChat);
-                          controller.pinMessage(
-                              state: !controller.pinList.value.contains(message)
-                                  ? 1
-                                  : 0);
+                          controller.pinMessage(state: !controller.pinList.value.contains(message) ? 1 : 0);
                         }),
                         if (controller.chatList.length > 1)
-                          _customChildShowDialog(
-                              'asset/icons/multiple_select.svg',
-                              AppLocalizations.of(context)!.multiple_select,
-                              () async {
+                          _customChildShowDialog('asset/icons/multiple_select.svg', AppLocalizations.of(context)!.multiple_select, () async {
                             controller.selectedItems.clear();
                             controller.selectedItems.add(message.uuid!);
                             controller.isShowMultiselect.value = true;
                             Navigator.of(context).pop();
                           }),
                         if (isMe)
-                          _customChildShowDialog('asset/icons/delete.svg',
-                              AppLocalizations.of(context)!.delete, () {
+                          _customChildShowDialog('asset/icons/delete.svg', AppLocalizations.of(context)!.delete, () {
                             Navigator.pop(context);
                             UtilsWidget.showDialogCustomInChatScreen(
                                 controller.isDeleteOwnOrMulti,
                                 AppLocalizations.of(context)!.delete_message,
                                 AppLocalizations.of(context)!.delete_message,
-                                AppLocalizations.of(context)!
-                                    .delete_group_confirm,
-                                (value) => controller.isDeleteOwnOrMulti.value =
-                                    !controller.isDeleteOwnOrMulti.value, () {
+                                AppLocalizations.of(context)!.delete_group_confirm,
+                                (value) => controller.isDeleteOwnOrMulti.value = !controller.isDeleteOwnOrMulti.value, () {
                               if (controller.isClickLoading) {
                                 controller.isClickLoading = false;
                                 controller.selectedItems.value.clear();
@@ -3343,29 +2622,19 @@ class _ChatBoxDetailState extends State<ChatBoxDetail>
                             }, isDelete: true);
                           }),
                         if (roleId == 1 && !isMe)
-                          _customChildShowDialog('asset/icons/copy.svg',
-                              AppLocalizations.of(context)!.lock_account,
-                              () async {
+                          _customChildShowDialog('asset/icons/copy.svg', AppLocalizations.of(context)!.lock_account, () async {
                             Navigator.pop(context);
                             UtilsWidget.showModalBottomSheetCustom([
                               SizedBox(height: 14),
                               Text(AppLocalizations.of(context)!.lock_account,
-                                  style: TextStyle(
-                                      fontSize: 20,
-                                      fontWeight: FontWeight.w500,
-                                      height: 28 / 20,
-                                      color: ColorValue.neutralColor)),
+                                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.w500, height: 28 / 20, color: ColorValue.neutralColor)),
                               SizedBox(height: 4),
                               Text(
                                 // TextByNation.getStringByKey(KeyByNation
                                 //     .choose_one_of_the_reasons_below),
 
                                 AppLocalizations.of(context)!.choose_mode,
-                                style: TextStyle(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w400,
-                                    height: 24 / 14,
-                                    color: ColorValue.neutralColor),
+                                style: TextStyle(fontSize: 14, fontWeight: FontWeight.w400, height: 24 / 14, color: ColorValue.neutralColor),
                               ),
                               SizedBox(height: 14),
                               UtilsWidget.itemShowBlockPopup(
@@ -3374,12 +2643,8 @@ class _ChatBoxDetailState extends State<ChatBoxDetail>
                                   AppLocalizations.of(context)!.delete_message,
                                   // TextByNation.getStringByKey(KeyByNation
                                   //     .block_this_account_messages_in_the_group),
-                                  AppLocalizations.of(context)!.delete_message,
-                                  () {
-                                controller.blockMember(
-                                    13,
-                                    message.msgRoomUuid ?? '',
-                                    message.userSent ?? '');
+                                  AppLocalizations.of(context)!.delete_message, () {
+                                controller.blockMember(13, message.msgRoomUuid ?? '', message.userSent ?? '');
                               }),
                               SizedBox(height: 14),
                               UtilsWidget.itemShowBlockPopup(
@@ -3389,15 +2654,13 @@ class _ChatBoxDetailState extends State<ChatBoxDetail>
 
                                   // TextByNation.getStringByKey(KeyByNation
                                   //     .block_and_delete_this_account_messages_in_the_group),
-                                  AppLocalizations.of(context)!
-                                      .delete_group_confirm, () {
+                                  AppLocalizations.of(context)!.delete_group_confirm, () {
                                 Navigator.pop(Get.context!);
                                 UtilsWidget.showDialogCustomInChatScreen(
                                     controller.isBlockMemberCheck,
                                     // TextByNation.getStringByKey(
                                     //     KeyByNation.lock_message),
-                                    AppLocalizations.of(context)!
-                                        .delete_group_confirm,
+                                    AppLocalizations.of(context)!.delete_group_confirm,
 
                                     // TextByNation.getStringByKey(KeyByNation
                                     //     .block_and_delete_this_account_messages_in_the_group),
@@ -3405,15 +2668,10 @@ class _ChatBoxDetailState extends State<ChatBoxDetail>
 
                                     // TextByNation.getStringByKey(
                                     //     KeyByNation.remove_account_from_group),
-                                    AppLocalizations.of(context)!
-                                        .delete_group_confirm, (p0) {
-                                  controller.isBlockMemberCheck.value =
-                                      !controller.isBlockMemberCheck.value;
+                                    AppLocalizations.of(context)!.delete_group_confirm, (p0) {
+                                  controller.isBlockMemberCheck.value = !controller.isBlockMemberCheck.value;
                                 }, () {
-                                  controller.blockMember(
-                                      16,
-                                      message.msgRoomUuid ?? '',
-                                      message.userSent ?? '');
+                                  controller.blockMember(16, message.msgRoomUuid ?? '', message.userSent ?? '');
                                 }, isLock: true);
                               }),
                             ]);
@@ -3428,8 +2686,7 @@ class _ChatBoxDetailState extends State<ChatBoxDetail>
         });
   }
 
-  Widget _customChildShowDialog(String icon, String title, VoidCallback? onTap,
-      {bool? isMore = false}) {
+  Widget _customChildShowDialog(String icon, String title, VoidCallback? onTap, {bool? isMore = false}) {
     return InkWell(
       onTap: onTap,
       splashFactory: NoSplash.splashFactory,
@@ -3443,29 +2700,20 @@ class _ChatBoxDetailState extends State<ChatBoxDetail>
               SizedBox(width: 12),
               Text(title),
             ]),
-            isMore == true
-                ? Icon(Icons.arrow_forward_ios_outlined, size: 20)
-                : const SizedBox()
+            isMore == true ? Icon(Icons.arrow_forward_ios_outlined, size: 20) : const SizedBox()
           ],
         ),
       ),
     );
   }
 
-  _optionItem(
-      {required GestureTapCallback onTap,
-      IconData? icon,
-      String? svg,
-      required String title}) {
+  _optionItem({required GestureTapCallback onTap, IconData? icon, String? svg, required String title}) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
         padding: EdgeInsets.symmetric(vertical: 12, horizontal: 8),
-        decoration: BoxDecoration(
-            color: Get.isDarkMode
-                ? Color(0xff232323)
-                : Color.fromRGBO(240, 243, 251, 1),
-            borderRadius: BorderRadius.circular(12)),
+        decoration:
+            BoxDecoration(color: Get.isDarkMode ? Color(0xff232323) : Color.fromRGBO(240, 243, 251, 1), borderRadius: BorderRadius.circular(12)),
         child: Column(
           children: [
             icon != null
@@ -3491,141 +2739,118 @@ class _ChatBoxDetailState extends State<ChatBoxDetail>
     );
   }
 
-  _dialogPin() {
-    return Dialog(
-      shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.all(Radius.circular(20.0))),
-      child: Obx(() => Container(
-            margin: EdgeInsets.symmetric(horizontal: 15),
-            child: Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Row(
+  dialogPin() {
+    return showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+            contentPadding: EdgeInsets.all(32),
+            content: Obx(() => Container(
+                  width: Get.width / 2.5,
+                  color: Colors.transparent,
+                  margin: EdgeInsets.symmetric(horizontal: 15),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
                     children: [
-                      Expanded(
-                          child: Text(
-                        TextByNation.getStringByKey('pin_list'),
-                        style: TextStyle(
-                            fontSize: 16, fontWeight: FontWeight.w500),
-                      )),
-                      IconButton(
-                          onPressed: () {
-                            Navigator.pop(Get.context!);
+                      Row(
+                        children: [
+                          Expanded(
+                              child: Text(
+                            TextByNation.getStringByKey('pin_list'),
+                            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+                          )),
+                          IconButton(
+                              onPressed: () {
+                                Navigator.pop(Get.context!);
+                              },
+                              icon: Icon(Icons.close_rounded))
+                        ],
+                      ),
+                      Container(
+                        constraints: BoxConstraints(
+                          maxHeight: size.height / 2.5,
+                        ),
+                        child: ListView.separated(
+                          itemCount: controller.pinList.length,
+                          separatorBuilder: (context, index) => SizedBox(
+                            height: 4,
+                          ),
+                          shrinkWrap: true,
+                          itemBuilder: (context, index) {
+                            return Container(
+                              padding: EdgeInsets.symmetric(vertical: 10, horizontal: 16),
+                              decoration: BoxDecoration(
+                                  color: Get.isDarkMode ? Color(0xff232323) : Color.fromRGBO(240, 243, 251, 1),
+                                  borderRadius: BorderRadius.circular(12)),
+                              child: Row(
+                                children: [
+                                  Text(
+                                    '${index + 1}',
+                                    style: TextStyle(fontWeight: FontWeight.w500, fontSize: 20, color: Color(controller.textColor)),
+                                  ),
+                                  SizedBox(
+                                    width: 16,
+                                  ),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        _chatContentType(
+                                            message: controller.pinList[index],
+                                            time: DateFormat("yyyy-MM-dd'T'HH:mm:ss")
+                                                .parse(controller.pinList[index].timeCreated.toString(), true)
+                                                .toLocal(),
+                                            pinType: 2),
+                                        SizedBox(height: 5),
+                                        Text(
+                                          '${TextByNation.getStringByKey('by')} ${controller.pinList[index].fullName}',
+                                          style: TextStyle(fontWeight: FontWeight.w400, fontSize: 12, color: Colors.grey),
+                                          overflow: TextOverflow.ellipsis,
+                                        )
+                                      ],
+                                    ),
+                                  ),
+                                  SizedBox(
+                                    width: 10,
+                                  ),
+                                  GestureDetector(
+                                    onTap: () async {
+                                      controller.selectedItems.add(controller.pinList[index].uuid!);
+                                      await controller.pinMessage(
+                                        state: 0,
+                                      );
+                                    },
+                                    child: Container(
+                                      padding: EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                                      decoration: BoxDecoration(
+                                          color: Get.isDarkMode ? Color.fromRGBO(152, 152, 152, 1.0) : Color.fromRGBO(228, 230, 236, 1),
+                                          borderRadius: BorderRadius.circular(20)),
+                                      child: Row(
+                                        children: [
+                                          SvgPicture.asset(
+                                            'asset/icons/un_pin.svg',
+                                            color: Get.isDarkMode ? Colors.white : Colors.black,
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            );
                           },
-                          icon: Icon(Icons.close_rounded))
+                        ),
+                      ),
+                      SizedBox(
+                        height: 16,
+                      )
                     ],
                   ),
-                  Container(
-                    constraints: BoxConstraints(
-                      maxHeight: size.height * 0.5,
-                    ),
-                    child: ListView.separated(
-                      itemCount: controller.pinList.length,
-                      separatorBuilder: (context, index) => SizedBox(
-                        height: 4,
-                      ),
-                      itemBuilder: (context, index) {
-                        return Container(
-                          padding: EdgeInsets.symmetric(
-                              vertical: 10, horizontal: 16),
-                          decoration: BoxDecoration(
-                              color: Get.isDarkMode
-                                  ? Color(0xff232323)
-                                  : Color.fromRGBO(240, 243, 251, 1),
-                              borderRadius: BorderRadius.circular(12)),
-                          child: Row(
-                            children: [
-                              Text(
-                                '${index + 1}',
-                                style: TextStyle(
-                                    fontWeight: FontWeight.w500,
-                                    fontSize: 20,
-                                    color: Color(controller.textColor)),
-                              ),
-                              SizedBox(
-                                width: 16,
-                              ),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    _chatContentType(
-                                        message: controller.pinList[index],
-                                        time:
-                                            DateFormat("yyyy-MM-dd'T'HH:mm:ss")
-                                                .parse(
-                                                    controller.pinList[index]
-                                                        .timeCreated
-                                                        .toString(),
-                                                    true)
-                                                .toLocal(),
-                                        pinType: 2),
-                                    SizedBox(height: 5),
-                                    Text(
-                                      '${TextByNation.getStringByKey('by')} ${controller.pinList[index].fullName}',
-                                      style: TextStyle(
-                                          fontWeight: FontWeight.w400,
-                                          fontSize: 12,
-                                          color: Colors.grey),
-                                      overflow: TextOverflow.ellipsis,
-                                    )
-                                  ],
-                                ),
-                              ),
-                              SizedBox(
-                                width: 10,
-                              ),
-                              GestureDetector(
-                                onTap: () async {
-                                  controller.selectedItems
-                                      .add(controller.pinList[index].uuid!);
-                                  await controller.pinMessage(
-                                    state: 0,
-                                  );
-                                },
-                                child: Container(
-                                  padding: EdgeInsets.symmetric(
-                                      horizontal: 8, vertical: 6),
-                                  decoration: BoxDecoration(
-                                      color: Get.isDarkMode
-                                          ? Color.fromRGBO(152, 152, 152, 1.0)
-                                          : Color.fromRGBO(228, 230, 236, 1),
-                                      borderRadius: BorderRadius.circular(20)),
-                                  child: Row(
-                                    children: [
-                                      SvgPicture.asset(
-                                        'asset/icons/un_pin.svg',
-                                        color: Get.isDarkMode
-                                            ? Colors.white
-                                            : Colors.black,
-                                      ),
-                                      // SizedBox(width: 8),
-                                      // Text(
-                                      //   'Unpin',
-                                      //   style: TextStyle(
-                                      //       fontWeight: FontWeight.w400,
-                                      //       fontSize: 16),
-                                      // )
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-                  SizedBox(
-                    height: 16,
-                  )
-                ],
-              ),
-            ),
-          )),
-    );
+                )),
+          );
+        });
   }
 
   Padding emptyChat() {
@@ -3637,9 +2862,7 @@ class _ChatBoxDetailState extends State<ChatBoxDetail>
         children: [
           Center(
             child: Image.asset(
-              Get.isDarkMode
-                  ? 'asset/images/empty_chat_darkmode.png'
-                  : 'asset/images/empty_chat_lightmode.png',
+              Get.isDarkMode ? 'asset/images/empty_chat_darkmode.png' : 'asset/images/empty_chat_lightmode.png',
               width: 250,
               height: 250,
               fit: BoxFit.cover,
@@ -3650,10 +2873,7 @@ class _ChatBoxDetailState extends State<ChatBoxDetail>
           ),
           Text(
             TextByNation.getStringByKey('welcome_chat'),
-            style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.w500,
-                color: ColorValue.colorPrimary),
+            style: TextStyle(fontSize: 24, fontWeight: FontWeight.w500, color: ColorValue.colorPrimary),
           ),
           SizedBox(
             height: 6,
@@ -3664,9 +2884,7 @@ class _ChatBoxDetailState extends State<ChatBoxDetail>
             style: TextStyle(
               fontWeight: FontWeight.w400,
               fontSize: 12,
-              color: Get.isDarkMode
-                  ? ColorValue.colorTextDark
-                  : ColorValue.textColor,
+              color: Get.isDarkMode ? ColorValue.colorTextDark : ColorValue.textColor,
             ),
           ),
           SizedBox(
@@ -3681,18 +2899,13 @@ class _ChatBoxDetailState extends State<ChatBoxDetail>
               ));
             },
             child: Container(
-              decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(12),
-                  gradient: LinearGradient(
-                      colors: [Color(0xff0CBE8C), Color(0xff5B72DE)])),
+              decoration:
+                  BoxDecoration(borderRadius: BorderRadius.circular(12), gradient: LinearGradient(colors: [Color(0xff0CBE8C), Color(0xff5B72DE)])),
               child: Padding(
                   padding: EdgeInsets.symmetric(vertical: 12, horizontal: 20),
                   child: Text(
                     TextByNation.getStringByKey('create_chat'),
-                    style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.white),
+                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.white),
                   )),
             ),
           )
@@ -3701,12 +2914,7 @@ class _ChatBoxDetailState extends State<ChatBoxDetail>
     );
   }
 
-  Widget showImage(
-      {required String url,
-      double? height,
-      double? width,
-      BoxFit? fit,
-      Widget? errorWidget}) {
+  Widget showImage({required String url, double? height, double? width, BoxFit? fit, Widget? errorWidget}) {
     return CachedNetworkImage(
       imageUrl: url,
       width: width,

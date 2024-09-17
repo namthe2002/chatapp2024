@@ -25,6 +25,7 @@ import 'package:live_yoko/View/Login/login_qr.dart';
 import 'package:live_yoko/View/Register/register.dart';
 
 import '../Utils/Utils.dart';
+import '../View/Chat/ProfileChatDetail2.dart';
 import '../View/Chat/home_chat.dart';
 import '../View/Chat/theme_mode_page.dart';
 

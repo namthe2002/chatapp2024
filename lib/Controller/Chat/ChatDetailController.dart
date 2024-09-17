@@ -102,7 +102,6 @@ class ChatDetailController extends GetxController {
   final AppController appController = Get.find();
   bool isClickLoading = true;
   bool isAppResume = false;
-  RxBool isShowGroupInfo = false.obs;
   var chatRoomData = {}.obs;
   final SocketManager _socketManager = SocketManager();
   var capturedImage = Rxn<XFile>();
@@ -1138,13 +1137,7 @@ class ChatDetailController extends GetxController {
         roomUuid: roomUuid, type: type, userName: userName);
   }
 
-  void showGroupInfoMode() {
-    if (isShowGroupInfo.value == true) {
-      isShowGroupInfo.value = !isShowGroupInfo.value;
-    } else {
-      isShowGroupInfo.value = !isShowGroupInfo.value;
-    }
-  }
+
 
   String decodedName(String name) {
     String decoded = name;

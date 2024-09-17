@@ -55,7 +55,7 @@ class ChatController extends GetxController {
   bool isClickLoading = true;
   RxInt selectedChatItemIndex = (-1).obs;
   Rx<Widget?> widgetFeature = Rx<Widget?>(null);
-
+  RxBool isShowGroupInfo = false.obs;
   Rx<Widget?> constHomeWidget = Rx<Widget?>(Container());
   final SocketManager _socketManager = SocketManager();
 
@@ -284,6 +284,15 @@ class ChatController extends GetxController {
       }
     }
     listChat.refresh();
+  }
+
+
+  void showGroupInfoMode() {
+    if (isShowGroupInfo.value == true) {
+      isShowGroupInfo.value = !isShowGroupInfo.value;
+    } else {
+      isShowGroupInfo.value = !isShowGroupInfo.value;
+    }
   }
 
   setRead(dynamic message) {

@@ -19,5 +19,14 @@ class ColorValue {
   static const Color colorTextDark_2 = Color(0xff677183);
   static const Color colorFilledBox = Color(0xFFC9FAD9);
   static const Color white = Color(0xFFFFFFFF);
-// static const Color colorNeutralWeb = Color( 0xFF595E69);
+  static const Color colorAmber = Color(0xffFD7A1B);
+  static const Color f9fafb = Color(0xfff9fafb);
+  static const Color fc9fad9 = Color(0xffC9FAD9);
+  static const Color fffecbb = Color(0xffFFECBB);
+
+  static const Color f0cbe8c = Color(0xff0CBE8C);
+  static const Color f5b72de = Color(0xff5B72DE);
+  static const Color f6c7994 = Color(0xff6C7994);
+  static const Color f0fad86 = Color(0xFF0fad86);
+  static const Color spacingColorNeutralNotifyError = Color(0xFFF85050);
 }

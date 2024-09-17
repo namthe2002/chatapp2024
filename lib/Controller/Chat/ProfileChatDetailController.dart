@@ -54,7 +54,6 @@ class ProfileChatDetailController extends GetxController {
   RxString chatAvatar = ''.obs;
   TextEditingController textNameController = TextEditingController();
   int makeFriendState = 0;
-  int IsGroupAdmin = 0;
   File file = File('');
   String responseFile = '';
   RxInt memberLength = 0.obs;
@@ -64,12 +63,27 @@ class ProfileChatDetailController extends GetxController {
   bool isDialogLoading = true;
   RxBool showButton = true.obs;
 
+  // merge từ nhánh q_p
+  RxBool isDeleteMember = false.obs;
+  RxBool isDeleteConversation = false.obs;
+  GlobalKey<FormState> formState = GlobalKey<FormState>();
+  Rx<ChatDetailMember> adminChat = Rx<ChatDetailMember>(ChatDetailMember());
+  bool? isListMemberLocked;
+  RxInt tabSelected = 1.obs;
+  RxBool isLockMember = false.obs;
+  RxInt isGroupAdmin = 0.obs;
+
+  RxList<ChatDetailMember> memberListLocked = RxList<ChatDetailMember>();
+  RxInt memberLockedLength = 0.obs;
+
   @override
   void onInit() async {
     super.onInit();
+  }
+
+  void initData() async {
     scrollController.addListener(() {
-      if (scrollController.position.pixels ==
-          scrollController.position.maxScrollExtent) {
+      if (scrollController.position.pixels == scrollController.position.maxScrollExtent) {
         print(hasMoreData.value);
         linkPreviewList.refresh();
         memberList.refresh();
@@ -83,21 +97,18 @@ class ProfileChatDetailController extends GetxController {
         }
       }
 
-      if (scrollController.position.userScrollDirection ==
-          ScrollDirection.reverse) {
+      if (scrollController.position.userScrollDirection == ScrollDirection.reverse) {
         if (showButton.value) {
           showButton.value = false;
         }
-      } else if (scrollController.position.userScrollDirection ==
-          ScrollDirection.forward) {
+      } else if (scrollController.position.userScrollDirection == ScrollDirection.forward) {
         if (!showButton.value) {
           showButton.value = true;
         }
       }
     });
     friendScrollController.addListener(() {
-      if (friendScrollController.position.pixels ==
-          friendScrollController.position.maxScrollExtent) {
+      if (friendScrollController.position.pixels == friendScrollController.position.maxScrollExtent) {
         if (!isFriendLoading.value && hasMoreDataFriend.value) {
           page++;
           getFriend();
@@ -128,6 +139,7 @@ class ProfileChatDetailController extends GetxController {
     tabIndex.value = chatType == 2 ? 5 : 3;
     await groupInfo();
     if (chatType == 2) {
+      isListMemberLocked = false;
       await getMember();
     } else {
       await getMedia();
@@ -176,10 +188,47 @@ class ProfileChatDetailController extends GetxController {
     return fileSize;
   }
 
+  // deleteChat() async {
+  //   String formattedTime = DateFormat('MM/dd/yyyy HH:mm:ss').format(timeNow);
+  //   try {
+  //     var param = {
+  //       "keyCert":
+  //       Utils.generateMd5(Constant.NEXT_PUBLIC_KEY_CERT + formattedTime),
+  //       "time": formattedTime,
+  //       "uuid": uuidChat
+  //     };
+  //     var data =
+  //     await APICaller.delete(ApiAddress.delete_conversation, body: param);
+  //     if (data != null) {
+  //       //Get.close(2);
+  //       if (Get.isRegistered<ChatDetailController>()) {
+  //         Get.delete<ChatDetailController>();
+  //         _listMessageLocal.deleteListMessage([uuidChat]);
+  //       }
+  //       if (Get.isRegistered<ChatController>()) {
+  //         final controllerChat = Get.find<ChatController>();
+  //         int index = controllerChat.listChat
+  //             .indexWhere((element) => element.uuid! == uuidChat);
+  //         if (index != -1) {
+  //           controllerChat.listChat.removeAt(index);
+  //           _listConversationLocal.deleteConversation(uuidChat);
+  //         }
+  //       }
+  //       Utils.showSnackBar(
+  //           title: TextByNation.getStringByKey(KeyByNation.notification),
+  //           message: TextByNation.getStringByKey(KeyByNation.delete_message));
+  //       Get.delete<ProfileChatDetailController>();
+  //     }
+  //   } catch (e) {
+  //     Utils.showSnackBar(
+  //         title: TextByNation.getStringByKey(KeyByNation.notification),
+  //         message: '$e');
+  //   }
+  // }
+
   String getLink(String text) {
     String link = '';
-    RegExp linkRegExp = RegExp(
-        r'http(s)?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\\(\\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+');
+    RegExp linkRegExp = RegExp(r'http(s)?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\\(\\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+');
     Iterable<Match> matches = linkRegExp.allMatches(text);
 
     for (Match match in matches) {
@@ -204,9 +253,7 @@ class ProfileChatDetailController extends GetxController {
         print('$e');
       }
     } else {
-      Utils.showSnackBar(
-          title: TextByNation.getStringByKey('notification'),
-          message: TextByNation.getStringByKey('no_access'));
+      Utils.showSnackBar(title: TextByNation.getStringByKey('notification'), message: TextByNation.getStringByKey('no_access'));
     }
   }
 
@@ -241,26 +288,40 @@ class ProfileChatDetailController extends GetxController {
         isLoading.value = true;
       }
       String formattedTime = DateFormat('MM/dd/yyyy HH:mm:ss').format(timeNow);
-      var param = {
-        "keyCert":
-            Utils.generateMd5(Constant.NEXT_PUBLIC_KEY_CERT + formattedTime),
-        "time": formattedTime,
-        "pageSize": pageSize,
-        "page": page,
-        "keyword": "",
-        "uuid": ownerUuid
-      };
-      var data =
-          await APICaller.getInstance().post('v1/Group/list-member', param);
-      print('---------------------------- ' + data.toString());
+      var param;
+      if (isListMemberLocked == true) {
+        param = {
+          "keyCert": Utils.generateMd5(Constant.NEXT_PUBLIC_KEY_CERT + formattedTime),
+          "time": formattedTime,
+          "pageSize": pageSize,
+          "page": page,
+          "keyword": "",
+          "uuid": ownerUuid,
+          "IsLock": 1
+        };
+      } else {
+        param = {
+          "keyCert": Utils.generateMd5(Constant.NEXT_PUBLIC_KEY_CERT + formattedTime),
+          "time": formattedTime,
+          "pageSize": pageSize,
+          "page": page,
+          "keyword": "",
+          "uuid": ownerUuid
+        };
+      }
+      var data;
+      if (isListMemberLocked == true && memberLockedLength.value == 0) {
+      } else {
+        if (memberList.isNotEmpty && page == 1) {}
+        data = await APICaller.getInstance().post('v1/Group/list-member', param);
+      }
+      debugPrint('---------------------------- $data');
       if (data != null) {
         makeFriendState = data['makeFriendState'];
-        IsGroupAdmin = data['isGroupAdmin'];
+        isGroupAdmin.value = data['isGroupAdmin'];
         List<dynamic> list = data['items'];
 
-        var listItem = list
-            .map((dynamic json) => ChatDetailMember.fromJson(json))
-            .toList();
+        var listItem = list.map((dynamic json) => ChatDetailMember.fromJson(json)).toList();
         if (listItem.isNotEmpty) {
           var myName = await Utils.getStringValueWithKey(Constant.USERNAME);
           for (var mem in listItem) {
@@ -269,7 +330,41 @@ class ProfileChatDetailController extends GetxController {
               break;
             }
           }
-          memberList.addAll(listItem);
+          if (adminChat.value.uuid == null) {
+            adminChat = ChatDetailMember.fromJson(data['leader']).obs;
+          }
+
+          if (isListMemberLocked == true) {
+            if (memberListLocked.isEmpty) {
+              memberListLocked.addAll(listItem);
+            } else {
+              for (var item in listItem) {
+                for (var it in memberListLocked) {
+                  if (it.uuid != item.uuid) {
+                    memberListLocked.add(item);
+                  }
+                }
+              }
+            }
+          } else {
+            if (memberList.isEmpty) {
+              memberList.addAll(listItem);
+            } else {
+              for (var item in listItem) {
+                for (var it in memberList) {
+                  if (it.uuid != item.uuid && item.uuid != adminChat.value.uuid) {
+                    memberList.add(item);
+                  }
+                }
+              }
+            }
+          }
+          memberLength.value = data['totalCount'];
+          memberLockedLength.value = data['totalBlock'];
+          var index = memberList.indexWhere((e) => e.uuid == adminChat.value.uuid);
+          if (index != -1) {
+            memberList.removeWhere((e) => e.uuid == adminChat.value.uuid);
+          }
         } else {
           hasMoreData.value = false;
         }
@@ -280,8 +375,7 @@ class ProfileChatDetailController extends GetxController {
         isLoading.value = false;
       }
     } catch (e) {
-      Utils.showSnackBar(
-          title: TextByNation.getStringByKey('error_message'), message: '$e');
+      Utils.showSnackBar(title: 'Error Message: ', message: '$e');
       isLoading.value = false;
     }
   }
@@ -293,20 +387,17 @@ class ProfileChatDetailController extends GetxController {
       }
       String formattedTime = DateFormat('MM/dd/yyyy HH:mm:ss').format(timeNow);
       var param = {
-        "keyCert":
-            Utils.generateMd5(Constant.NEXT_PUBLIC_KEY_CERT + formattedTime),
+        "keyCert": Utils.generateMd5(Constant.NEXT_PUBLIC_KEY_CERT + formattedTime),
         "time": formattedTime,
         "pageSize": pageSize,
         "page": page,
         "type": tabIndex.value,
         "uuid": uuidChat
       };
-      var data =
-          await APICaller.getInstance().post('v1/Group/list-media', param);
+      var data = await APICaller.getInstance().post('v1/Group/list-media', param);
       if (data != null) {
         List<dynamic> list = data['items'];
-        var listItem =
-            list.map((dynamic json) => ChatDetail.fromJson(json)).toList();
+        var listItem = list.map((dynamic json) => ChatDetail.fromJson(json)).toList();
         if (listItem.isNotEmpty) {
           mediaList.addAll(listItem);
 
@@ -341,8 +432,7 @@ class ProfileChatDetailController extends GetxController {
         isLoading.value = false;
       }
     } catch (e) {
-      Utils.showSnackBar(
-          title: TextByNation.getStringByKey('error_message'), message: '$e');
+      Utils.showSnackBar(title: TextByNation.getStringByKey('error_message'), message: '$e');
       isLoading.value = false;
     }
   }
@@ -350,14 +440,8 @@ class ProfileChatDetailController extends GetxController {
   deleteMessage() async {
     String formattedTime = DateFormat('MM/dd/yyyy HH:mm:ss').format(timeNow);
     try {
-      var param = {
-        "keyCert":
-            Utils.generateMd5(Constant.NEXT_PUBLIC_KEY_CERT + formattedTime),
-        "time": formattedTime,
-        "uuid": uuidChat
-      };
-      var data = await APICaller.getInstance()
-          .delete('v1/Chat/delete-message-room', body: param);
+      var param = {"keyCert": Utils.generateMd5(Constant.NEXT_PUBLIC_KEY_CERT + formattedTime), "time": formattedTime, "uuid": uuidChat};
+      var data = await APICaller.getInstance().delete('v1/Chat/delete-message-room', body: param);
       if (data != null) {
         //Get.close(2);
         if (Get.isRegistered<ChatDetailController>()) {
@@ -365,34 +449,24 @@ class ProfileChatDetailController extends GetxController {
         }
         if (Get.isRegistered<ChatController>()) {
           final controllerChat = Get.find<ChatController>();
-          int index = controllerChat.listChat
-              .indexWhere((element) => element.uuid! == uuidChat);
+          int index = controllerChat.listChat.indexWhere((element) => element.uuid! == uuidChat);
           if (index != -1) {
             controllerChat.listChat.removeAt(index);
           }
         }
-        Utils.showSnackBar(
-            title: TextByNation.getStringByKey('notification'),
-            message: TextByNation.getStringByKey('delete_message'));
+        Utils.showSnackBar(title: TextByNation.getStringByKey('notification'), message: TextByNation.getStringByKey('delete_message'));
         Get.delete<ProfileChatDetailController>();
       }
     } catch (e) {
-      Utils.showSnackBar(
-          title: TextByNation.getStringByKey('notification'), message: '$e');
+      Utils.showSnackBar(title: TextByNation.getStringByKey('notification'), message: '$e');
     }
   }
 
   clearMessage() async {
     String formattedTime = DateFormat('MM/dd/yyyy HH:mm:ss').format(timeNow);
     try {
-      var param = {
-        "keyCert":
-            Utils.generateMd5(Constant.NEXT_PUBLIC_KEY_CERT + formattedTime),
-        "time": formattedTime,
-        "uuid": uuidChat
-      };
-      var data = await APICaller.getInstance()
-          .delete('v1/Chat/delete-history-message-room', body: param);
+      var param = {"keyCert": Utils.generateMd5(Constant.NEXT_PUBLIC_KEY_CERT + formattedTime), "time": formattedTime, "uuid": uuidChat};
+      var data = await APICaller.getInstance().delete('v1/Chat/delete-history-message-room', body: param);
       if (data != null) {
         //Get.close(2);
         if (Get.isRegistered<ChatDetailController>()) {
@@ -401,14 +475,11 @@ class ProfileChatDetailController extends GetxController {
         if (Get.isRegistered<ChatController>()) {
           Get.find<ChatController>().refreshListChat();
         }
-        Utils.showSnackBar(
-            title: TextByNation.getStringByKey('notification'),
-            message: TextByNation.getStringByKey('delete_message'));
+        Utils.showSnackBar(title: TextByNation.getStringByKey('notification'), message: TextByNation.getStringByKey('delete_message'));
         Get.delete<ProfileChatDetailController>();
       }
     } catch (e) {
-      Utils.showSnackBar(
-          title: TextByNation.getStringByKey('notification'), message: '$e');
+      Utils.showSnackBar(title: TextByNation.getStringByKey('notification'), message: '$e');
     }
   }
 
@@ -416,24 +487,21 @@ class ProfileChatDetailController extends GetxController {
     String formattedTime = DateFormat('MM/dd/yyyy HH:mm:ss').format(timeNow);
     try {
       var param = {
-        "keyCert":
-            Utils.generateMd5(Constant.NEXT_PUBLIC_KEY_CERT + formattedTime),
+        "keyCert": Utils.generateMd5(Constant.NEXT_PUBLIC_KEY_CERT + formattedTime),
         "time": formattedTime,
         "groupUuid": ownerUuid,
         "newMemberUuid": uuid.isNotEmpty ? uuid : uuidUser,
         "roleId": 0,
         "Type": isAddMember == true ? 1 : 0
       };
-      var data = await APICaller.getInstance()
-          .post('v1/Group/upsert-group-member', param);
+      var data = await APICaller.getInstance().post('v1/Group/upsert-group-member', param);
       if (data != null) {
         if (uuid.isNotEmpty) {
           if (!isAddMember) {
             memberList.removeAt(index!);
             memberLength.value--;
             if (Get.isRegistered<ChatDetailController>()) {
-              ChatDetailController controller =
-                  Get.find<ChatDetailController>();
+              ChatDetailController controller = Get.find<ChatDetailController>();
               controller.memberLength.value--;
             }
           } else {
@@ -441,8 +509,7 @@ class ProfileChatDetailController extends GetxController {
             resetData();
             memberLength.value++;
             if (Get.isRegistered<ChatDetailController>()) {
-              ChatDetailController controller =
-                  Get.find<ChatDetailController>();
+              ChatDetailController controller = Get.find<ChatDetailController>();
               controller.memberLength.value++;
             }
           }
@@ -455,15 +522,12 @@ class ProfileChatDetailController extends GetxController {
             final controllerChat = Get.find<ChatController>();
             controllerChat.refreshListChat();
           }
-          Utils.showSnackBar(
-              title: TextByNation.getStringByKey('notification'),
-              message: TextByNation.getStringByKey('leave_group'));
+          Utils.showSnackBar(title: TextByNation.getStringByKey('notification'), message: TextByNation.getStringByKey('leave_group'));
           Get.delete<ProfileChatDetailController>();
         }
       }
     } catch (e) {
-      Utils.showSnackBar(
-          title: TextByNation.getStringByKey('notification'), message: '$e');
+      Utils.showSnackBar(title: TextByNation.getStringByKey('notification'), message: '$e');
     }
   }
 
@@ -471,22 +535,17 @@ class ProfileChatDetailController extends GetxController {
     String formattedTime = DateFormat('MM/dd/yyyy HH:mm:ss').format(timeNow);
     try {
       var param = {
-        "keyCert":
-            Utils.generateMd5(Constant.NEXT_PUBLIC_KEY_CERT + formattedTime),
+        "keyCert": Utils.generateMd5(Constant.NEXT_PUBLIC_KEY_CERT + formattedTime),
         "time": formattedTime,
         "uuid": uuid,
       };
       print(param);
-      var data = await APICaller.getInstance()
-          .post('v1/Friend/request-add-friend', param);
+      var data = await APICaller.getInstance().post('v1/Friend/request-add-friend', param);
       if (data != null) {
-        Utils.showSnackBar(
-            title: TextByNation.getStringByKey('notification'),
-            message: TextByNation.getStringByKey('friend_sent'));
+        Utils.showSnackBar(title: TextByNation.getStringByKey('notification'), message: TextByNation.getStringByKey('friend_sent'));
       }
     } catch (e) {
-      Utils.showSnackBar(
-          title: TextByNation.getStringByKey('notification'), message: '$e');
+      Utils.showSnackBar(title: TextByNation.getStringByKey('notification'), message: '$e');
     }
   }
 
@@ -498,23 +557,20 @@ class ProfileChatDetailController extends GetxController {
     }
     try {
       var param = {
-        "keyCert":
-            Utils.generateMd5(Constant.NEXT_PUBLIC_KEY_CERT + formattedTime),
+        "keyCert": Utils.generateMd5(Constant.NEXT_PUBLIC_KEY_CERT + formattedTime),
         "time": formattedTime,
         "uuid": ownerUuid,
         "memberUuid": memberList[index].uuid,
         "state": status
       };
       print(param);
-      var data = await APICaller.getInstance()
-          .post('v1/Group/change-make-friend-state', param);
+      var data = await APICaller.getInstance().post('v1/Group/change-make-friend-state', param);
       if (data != null) {
         memberList[index].canMakeFriend = status;
         memberList.refresh();
       }
     } catch (e) {
-      Utils.showSnackBar(
-          title: TextByNation.getStringByKey('notification'), message: '$e');
+      Utils.showSnackBar(title: TextByNation.getStringByKey('notification'), message: '$e');
     }
   }
 
@@ -526,19 +582,16 @@ class ProfileChatDetailController extends GetxController {
       }
       String formattedTime = DateFormat('MM/dd/yyyy HH:mm:ss').format(timeNow);
       var param = {
-        "keyCert":
-            Utils.generateMd5(Constant.NEXT_PUBLIC_KEY_CERT + formattedTime),
+        "keyCert": Utils.generateMd5(Constant.NEXT_PUBLIC_KEY_CERT + formattedTime),
         "time": formattedTime,
         "pageSize": pageSize,
         "page": page,
         "keyword": textSearchController.text
       };
-      var data =
-          await APICaller.getInstance().post('v1/Member/find-member', param);
+      var data = await APICaller.getInstance().post('v1/Member/find-member', param);
       if (data != null) {
         List<dynamic> list = data['items'];
-        var listItem =
-            list.map((dynamic json) => Contact.fromJson(json)).toList();
+        var listItem = list.map((dynamic json) => Contact.fromJson(json)).toList();
         if (listItem.isNotEmpty) {
           // List<Contact> listItem2 =
           //     listItem.where((item) => !uuidSet.contains(item.uuid)).toList();
@@ -553,8 +606,7 @@ class ProfileChatDetailController extends GetxController {
         isFriendLoading.value = false;
       }
     } catch (e) {
-      Utils.showSnackBar(
-          title: TextByNation.getStringByKey('error_message'), message: '$e');
+      Utils.showSnackBar(title: TextByNation.getStringByKey('error_message'), message: '$e');
       isFriendLoading.value = false;
     }
   }
@@ -563,15 +615,13 @@ class ProfileChatDetailController extends GetxController {
     String formattedTime = DateFormat('MM/dd/yyyy HH:mm:ss').format(timeNow);
     try {
       var param = {
-        "keyCert":
-            Utils.generateMd5(Constant.NEXT_PUBLIC_KEY_CERT + formattedTime),
+        "keyCert": Utils.generateMd5(Constant.NEXT_PUBLIC_KEY_CERT + formattedTime),
         "time": formattedTime,
         "uuid": ownerUuid,
         "groupName": textNameController.text,
         "groupAvatar": responseFile.isNotEmpty ? responseFile : chatAvatar.value
       };
-      var data = await APICaller.getInstance()
-          .post('v1/Group/change-group-info', param);
+      var data = await APICaller.getInstance().post('v1/Group/change-group-info', param);
       if (data != null) {
         chatName.value = textNameController.text;
         chatAvatar.value = chatAvatar.value.isNotEmpty && responseFile.isEmpty
@@ -582,32 +632,28 @@ class ProfileChatDetailController extends GetxController {
         if (Get.isRegistered<ChatDetailController>()) {
           ChatDetailController controller = Get.find<ChatDetailController>();
           controller.chatName.value = textNameController.text;
-          controller.chatAvatar.value =
-              chatAvatar.value.isNotEmpty && responseFile.isEmpty
-                  ? chatAvatar.value
-                  : responseFile.isNotEmpty
-                      ? responseFile
-                      : '';
+          controller.chatAvatar.value = chatAvatar.value.isNotEmpty && responseFile.isEmpty
+              ? chatAvatar.value
+              : responseFile.isNotEmpty
+                  ? responseFile
+                  : '';
         }
         if (Get.isRegistered<ChatController>()) {
           ChatController controller = Get.find<ChatController>();
-          int index = controller.listChat
-              .indexWhere((element) => element.uuid! == uuidChat);
+          int index = controller.listChat.indexWhere((element) => element.uuid! == uuidChat);
           if (index != -1) {
             controller.listChat[index].ownerName = textNameController.text;
-            controller.listChat[index].avatar =
-                chatAvatar.value.isNotEmpty && responseFile.isEmpty
-                    ? chatAvatar.value
-                    : responseFile.isNotEmpty
-                        ? responseFile
-                        : '';
+            controller.listChat[index].avatar = chatAvatar.value.isNotEmpty && responseFile.isEmpty
+                ? chatAvatar.value
+                : responseFile.isNotEmpty
+                    ? responseFile
+                    : '';
             controller.listChat.refresh();
           }
         }
       }
     } catch (e) {
-      Utils.showSnackBar(
-          title: TextByNation.getStringByKey('notification'), message: '$e');
+      Utils.showSnackBar(title: TextByNation.getStringByKey('notification'), message: '$e');
     }
   }
 
@@ -619,8 +665,7 @@ class ProfileChatDetailController extends GetxController {
             endpoint: 'v1/Upload/upload-image',
             filePath: file,
             type: 1,
-            keyCert: Utils.generateMd5(
-                Constant.NEXT_PUBLIC_KEY_CERT + formattedTime),
+            keyCert: Utils.generateMd5(Constant.NEXT_PUBLIC_KEY_CERT + formattedTime),
             time: formattedTime);
         if (data != null) {
           List<dynamic> list = data['items'];
@@ -628,8 +673,7 @@ class ProfileChatDetailController extends GetxController {
           responseFile = jsonDecode(listItem[0]);
         } else {}
       } catch (e) {
-        Utils.showSnackBar(
-            title: TextByNation.getStringByKey('error_file'), message: '$e');
+        Utils.showSnackBar(title: TextByNation.getStringByKey('error_file'), message: '$e');
       }
     }
   }
@@ -645,44 +689,34 @@ class ProfileChatDetailController extends GetxController {
 
   groupInfo() async {
     String formattedTime = DateFormat('MM/dd/yyyy HH:mm:ss').format(timeNow);
-    var param = {
-      "keyCert":
-          Utils.generateMd5(Constant.NEXT_PUBLIC_KEY_CERT + formattedTime),
-      "time": formattedTime,
-      "uuid": uuidChat
-    };
+    var param = {"keyCert": Utils.generateMd5(Constant.NEXT_PUBLIC_KEY_CERT + formattedTime), "time": formattedTime, "uuid": uuidChat};
     try {
-      var response =
-          await APICaller.getInstance().post('v1/Chat/group-info', param);
+      var response = await APICaller.getInstance().post('v1/Chat/group-info', param);
       if (response != null) {
         memberLength.value = response['data']['memCount'];
         autoDeleteData = response['data']['autoDelete'];
       }
     } catch (e) {
-      Utils.showSnackBar(
-          title: TextByNation.getStringByKey('notification'), message: '$e');
+      Utils.showSnackBar(title: TextByNation.getStringByKey('notification'), message: '$e');
     }
   }
 
   autoDelete({required int day}) async {
     String formattedTime = DateFormat('MM/dd/yyyy HH:mm:ss').format(timeNow);
     var param = {
-      "keyCert":
-          Utils.generateMd5(Constant.NEXT_PUBLIC_KEY_CERT + formattedTime),
+      "keyCert": Utils.generateMd5(Constant.NEXT_PUBLIC_KEY_CERT + formattedTime),
       "time": formattedTime,
       "roomUuid": uuidChat,
       "period": day
     };
     print(param);
     try {
-      var response = await APICaller.getInstance()
-          .post('v1/Chat/auto-delete-message', param);
+      var response = await APICaller.getInstance().post('v1/Chat/auto-delete-message', param);
       if (response != null) {
         autoDeleteData = day;
       }
     } catch (e) {
-      Utils.showSnackBar(
-          title: TextByNation.getStringByKey('notification'), message: '$e');
+      Utils.showSnackBar(title: TextByNation.getStringByKey('notification'), message: '$e');
     }
   }
 }
