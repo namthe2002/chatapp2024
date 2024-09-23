@@ -13,45 +13,47 @@ import 'package:live_yoko/Utils/Utils.dart';
 
 import '../../Controller/Chat/SearchChatController.dart';
 import '../../Models/Chat/Chat.dart';
+import '../../Navigation/RouteDefine.dart';
 
 class SearchChat extends StatelessWidget {
   var delete = Get.delete<SearchChatController>();
   SearchChatController controller = Get.put(SearchChatController());
 
+  SearchChat({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Obx(() => (Scaffold(
-          appBar: PreferredSize(
-            preferredSize: Size.fromHeight(70),
-            child: AppBar(
-                elevation: 0.2,
-                automaticallyImplyLeading: false,
-                flexibleSpace: Container(
-                  margin: EdgeInsets.only(top: 32),
-                  decoration: BoxDecoration(
-                      border: Border(
-                        bottom: BorderSide(
-                          color: ColorValue.colorTextDark
-                              .withOpacity(0.2), // Màu của đường viền dưới
-                          width: 2, // Độ dày của đường viền
-                        ),
-                      ),
-                      color: Get.isDarkMode
-                          ? ColorValue.colorAppBar
-                          : Colors.white),
-                  child: search(),
-                )),
-          ),
+          // appBar: PreferredSize(
+          //   preferredSize: Size.fromHeight(70),
+          //   child: AppBar(
+          //       elevation: 0.2,
+          //       automaticallyImplyLeading: false,
+          //       flexibleSpace: Container(
+          //         margin: EdgeInsets.only(top: 32),
+          //         decoration: BoxDecoration(
+          //             border: Border(
+          //               bottom: BorderSide(
+          //                 color: ColorValue.colorTextDark
+          //                     .withOpacity(0.2), // Màu của đường viền dưới
+          //                 width: 2, // Độ dày của đường viền
+          //               ),
+          //             ),
+          //             color: Get.isDarkMode
+          //                 ? ColorValue.colorAppBar
+          //                 : Colors.white),
+          //         child: search(),
+          //       )),
+          // ),
+
           body: controller.isLoadState.value
               ? Center(
                   child: CircularProgressIndicator(),
                 )
-              : SafeArea(
-                  child: Container(
-                  width: Get.width,
+              : Container(
+                  // width: Get.width,
                   height: Get.height,
-                  color:
-                      Get.isDarkMode ? ColorValue.neutralColor : Colors.white,
+                  color: Get.isDarkMode ? ColorValue.neutralColor : Colors.white,
                   child: Column(
                     children: [
                       Expanded(
@@ -71,18 +73,12 @@ class SearchChat extends StatelessWidget {
                                         shrinkWrap: true,
                                         itemCount: controller.listChat.length,
                                         itemBuilder: (context, index) {
-                                          if (index <
-                                              controller.listChat.length) {
+                                          if (index < controller.listChat.length) {
                                             return chatItem(context, index);
                                           } else {
                                             return Padding(
-                                              padding: EdgeInsets.symmetric(
-                                                  vertical: 30),
-                                              child: Center(
-                                                  child: controller
-                                                          .hasMore.value
-                                                      ? CircularProgressIndicator()
-                                                      : Container()),
+                                              padding: EdgeInsets.symmetric(vertical: 30),
+                                              child: Center(child: controller.hasMore.value ? CircularProgressIndicator() : Container()),
                                             );
                                           }
                                         })
@@ -96,39 +92,22 @@ class SearchChat extends StatelessWidget {
                                   children: [
                                     controller.listUserRecent.length > 0
                                         ? Padding(
-                                            padding: EdgeInsets.symmetric(
-                                                horizontal: 20,
-                                                vertical: 12),
+                                            padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                                             child: Row(
                                               children: [
                                                 Text(
-                                                  TextByNation.getStringByKey(
-                                                      'recent'),
-                                                  style: TextStyle(
-                                                      fontSize: 12,
-                                                      fontWeight:
-                                                          FontWeight.w600,
-                                                      color: ColorValue
-                                                          .colorBorder),
+                                                  TextByNation.getStringByKey('recent'),
+                                                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: ColorValue.colorBorder),
                                                 ),
                                                 Spacer(),
                                                 InkWell(
                                                   onTap: () async {
-                                                    controller.listUserRecent
-                                                        .value = await [];
-                                                    await Utils
-                                                        .saveListToSharedPreferences(
-                                                            []);
+                                                    controller.listUserRecent.value = await [];
+                                                    await Utils.saveListToSharedPreferences([]);
                                                   },
                                                   child: Text(
-                                                    TextByNation.getStringByKey(
-                                                        'clear'),
-                                                    style: TextStyle(
-                                                        fontSize: 12,
-                                                        fontWeight:
-                                                            FontWeight.w600,
-                                                        color: ColorValue
-                                                            .colorBorder),
+                                                    TextByNation.getStringByKey('clear'),
+                                                    style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: ColorValue.colorBorder),
                                                   ),
                                                 )
                                               ],
@@ -138,13 +117,11 @@ class SearchChat extends StatelessWidget {
 
                                     controller.listUserRecent.length > 0
                                         ? Padding(
-                                            padding: EdgeInsets.symmetric(
-                                                horizontal: 20),
+                                            padding: EdgeInsets.symmetric(horizontal: 20),
                                             child: Wrap(
                                                 runSpacing: 10,
                                                 children: List.generate(
-                                                  controller
-                                                      .listUserRecent.length,
+                                                  controller.listUserRecent.length,
                                                   (index) => chatRecnet(index),
                                                 )),
                                           )
@@ -172,7 +149,7 @@ class SearchChat extends StatelessWidget {
                       )
                     ],
                   ),
-                )),
+                ),
         )));
   }
 
@@ -182,7 +159,7 @@ class SearchChat extends StatelessWidget {
         if (controller.listUserRecent.length > 1) {
           Chat itemchat = await controller.listUserRecent[index];
           if (!Get.isRegistered<ChatDetailController>()) {
-            Navigation.navigateTo(page: 'ChatDetail', arguments: {
+            Navigation.navigateTo(page: RouteDefine.chatBoxDetail, arguments: {
               'uuid': controller.listUserRecent[index].uuid,
               'name': controller.listUserRecent[index].ownerName,
               'type': controller.listUserRecent[index].type,
@@ -200,23 +177,18 @@ class SearchChat extends StatelessWidget {
         width: (Get.width - 40) / 4,
         child: Column(
           children: [
-            controller.listUserRecent[index].avatar != null &&
-                    controller.listUserRecent[index].avatar!.isNotEmpty
+            controller.listUserRecent[index].avatar != null && controller.listUserRecent[index].avatar!.isNotEmpty
                 ? ClipOval(
                     child: Container(
                       width: 48,
                       height: 48,
                       decoration: BoxDecoration(),
                       child: Image.network(
-                        Constant.BASE_URL_IMAGE +
-                            controller.listUserRecent[index].avatar.toString(),
+                        Constant.BASE_URL_IMAGE + controller.listUserRecent[index].avatar.toString(),
                         fit: BoxFit.cover,
-                        errorBuilder: (BuildContext context, Object exception,
-                            StackTrace? stackTrace) {
+                        errorBuilder: (BuildContext context, Object exception, StackTrace? stackTrace) {
                           return Container(
-                            decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: ColorValue.colorBorder),
+                            decoration: BoxDecoration(shape: BoxShape.circle, color: ColorValue.colorBorder),
                             width: 48,
                             height: 48,
                           );
@@ -228,21 +200,12 @@ class SearchChat extends StatelessWidget {
                     width: 48,
                     height: 48,
                     decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        gradient: Utils.getGradientForLetter(controller
-                            .listUserRecent[index].ownerName!
-                            .toString())),
+                        shape: BoxShape.circle, gradient: Utils.getGradientForLetter(controller.listUserRecent[index].ownerName!.toString())),
                     child: Center(
                         child: Text(
-                      Utils.getInitialsName(controller
-                              .listUserRecent[index].ownerName!
-                              .toString())
-                          .toUpperCase(),
+                      Utils.getInitialsName(controller.listUserRecent[index].ownerName!.toString()).toUpperCase(),
                       textAlign: TextAlign.center,
-                      style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.white),
+                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: Colors.white),
                     )),
                   ),
             SizedBox(
@@ -254,32 +217,23 @@ class SearchChat extends StatelessWidget {
                 controller.listUserRecent[index].ownerName.toString(),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w500,
-                    color: ColorValue.textColor),
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500, color: ColorValue.textColor),
               ),
             ),
             Visibility(
               visible: controller.forward.uuid != null,
               child: GestureDetector(
                 onTap: () async {
-                  await controller.forwardMessage(
-                      uuid: controller.listUserRecent[index].uuid!);
+                  await controller.forwardMessage(uuid: controller.listUserRecent[index].uuid!);
                 },
                 child: Container(
                   margin: EdgeInsets.only(top: 5),
                   padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  decoration: BoxDecoration(
-                      color: Get.isDarkMode ? Colors.white70 : Colors.black26,
-                      borderRadius: BorderRadius.circular(20)),
+                  decoration: BoxDecoration(color: Get.isDarkMode ? Colors.white70 : Colors.black26, borderRadius: BorderRadius.circular(20)),
                   child: Text(
                     TextByNation.getStringByKey('send'),
                     overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        color: ColorValue.textColor),
+                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: ColorValue.textColor),
                   ),
                 ),
               ),
@@ -330,10 +284,8 @@ class SearchChat extends StatelessWidget {
                           controller.isSearch.value = await true;
                         }
 
-                        if (controller.debounce?.isActive ?? false)
-                          controller.debounce?.cancel();
-                        controller.debounce =
-                            Timer(Duration(milliseconds: 2000), () async {
+                        if (controller.debounce?.isActive ?? false) controller.debounce?.cancel();
+                        controller.debounce = Timer(Duration(milliseconds: 2000), () async {
                           await controller.refreshData();
                         });
                       },
@@ -342,20 +294,11 @@ class SearchChat extends StatelessWidget {
                         isDense: true,
                         contentPadding: EdgeInsets.fromLTRB(0, 10, 0, 10),
                         hintText: TextByNation.getStringByKey('search_chat'),
-                        hintStyle: TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w400,
-                            color: Get.isDarkMode
-                                ? Colors.white
-                                : ColorValue.colorBorder),
+                        hintStyle:
+                            TextStyle(fontSize: 13, fontWeight: FontWeight.w400, color: Get.isDarkMode ? Colors.white : ColorValue.colorBorder),
                         border: InputBorder.none,
                       ),
-                      style: TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w400,
-                          color: Get.isDarkMode
-                              ? Colors.white
-                              : ColorValue.textColor)),
+                      style: TextStyle(fontSize: 13, fontWeight: FontWeight.w400, color: Get.isDarkMode ? Colors.white : ColorValue.textColor)),
                 ),
                 controller.isSearch.value == false
                     ? SizedBox()
@@ -382,8 +325,7 @@ class SearchChat extends StatelessWidget {
           controller.listUserRecent.insert(0, controller.listChat[index]);
           Utils.saveListToSharedPreferences(controller.listUserRecent);
         } else {
-          int indexItem = controller.listUserRecent.indexWhere(
-              (element) => controller.listChat[index].uuid == element.uuid);
+          int indexItem = controller.listUserRecent.indexWhere((element) => controller.listChat[index].uuid == element.uuid);
           if (indexItem == -1) {
             controller.listUserRecent.insert(0, controller.listChat[index]);
             await Utils.saveListToSharedPreferences(controller.listUserRecent);
@@ -394,8 +336,7 @@ class SearchChat extends StatelessWidget {
             await Utils.saveListToSharedPreferences(controller.listUserRecent);
           }
           if (controller.listUserRecent.length == 9) {
-            controller.listUserRecent
-                .removeAt(controller.listUserRecent.length - 1);
+            controller.listUserRecent.removeAt(controller.listUserRecent.length - 1);
             await Utils.saveListToSharedPreferences(controller.listUserRecent);
           }
         }
@@ -417,23 +358,18 @@ class SearchChat extends StatelessWidget {
             children: [
               Stack(
                 children: [
-                  controller.listChat[index].avatar != null &&
-                          controller.listChat[index].avatar!.isNotEmpty
+                  controller.listChat[index].avatar != null && controller.listChat[index].avatar!.isNotEmpty
                       ? ClipOval(
                           child: Container(
                             width: 48,
                             height: 48,
                             decoration: BoxDecoration(),
                             child: Image.network(
-                              Constant.BASE_URL_IMAGE +
-                                  controller.listChat[index].avatar.toString(),
+                              Constant.BASE_URL_IMAGE + controller.listChat[index].avatar.toString(),
                               fit: BoxFit.cover,
-                              errorBuilder: (BuildContext context,
-                                  Object exception, StackTrace? stackTrace) {
+                              errorBuilder: (BuildContext context, Object exception, StackTrace? stackTrace) {
                                 return Container(
-                                  decoration: BoxDecoration(
-                                      shape: BoxShape.circle,
-                                      color: ColorValue.colorBorder),
+                                  decoration: BoxDecoration(shape: BoxShape.circle, color: ColorValue.colorBorder),
                                   width: 48,
                                   height: 48,
                                 );
@@ -445,21 +381,12 @@ class SearchChat extends StatelessWidget {
                           width: 48,
                           height: 48,
                           decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              gradient: Utils.getGradientForLetter(controller
-                                  .listChat[index].ownerName!
-                                  .toString())),
+                              shape: BoxShape.circle, gradient: Utils.getGradientForLetter(controller.listChat[index].ownerName!.toString())),
                           child: Center(
                               child: Text(
-                            Utils.getInitialsName(controller
-                                    .listChat[index].ownerName!
-                                    .toString())
-                                .toUpperCase(),
+                            Utils.getInitialsName(controller.listChat[index].ownerName!.toString()).toUpperCase(),
                             textAlign: TextAlign.center,
-                            style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.w600,
-                                color: Colors.white),
+                            style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: Colors.white),
                           )),
                         ),
                   // Positioned(
@@ -493,12 +420,8 @@ class SearchChat extends StatelessWidget {
                     controller.listChat[index].ownerName.toString(),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w500,
-                        color: Get.isDarkMode
-                            ? ColorValue.colorTextDark
-                            : ColorValue.textColor),
+                    style:
+                        TextStyle(fontSize: 16, fontWeight: FontWeight.w500, color: Get.isDarkMode ? ColorValue.colorTextDark : ColorValue.textColor),
                   ),
                   // Text(
                   //   'Last seen recently',
@@ -515,22 +438,15 @@ class SearchChat extends StatelessWidget {
                 visible: controller.forward.uuid != null,
                 child: GestureDetector(
                   onTap: () async {
-                    await controller.forwardMessage(
-                        uuid: controller.listChat[index].uuid!);
+                    await controller.forwardMessage(uuid: controller.listChat[index].uuid!);
                   },
                   child: Container(
-                    padding:
-                        EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    decoration: BoxDecoration(
-                        color: Get.isDarkMode ? Colors.white70 : Colors.black26,
-                        borderRadius: BorderRadius.circular(20)),
+                    padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(color: Get.isDarkMode ? Colors.white70 : Colors.black26, borderRadius: BorderRadius.circular(20)),
                     child: Text(
                       TextByNation.getStringByKey('send'),
                       overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                          color: ColorValue.textColor),
+                      style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: ColorValue.textColor),
                     ),
                   ),
                 ),

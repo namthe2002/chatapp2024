@@ -1,20 +1,20 @@
 import 'dart:convert';
 import 'dart:io';
-
-import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:image_picker_web/image_picker_web.dart';
 import 'package:intl/intl.dart';
 import 'package:live_yoko/Controller/Chat/ChatController.dart';
+import 'package:live_yoko/Controller/Chat/ChatDetailController.dart';
 import 'package:live_yoko/Global/Constant.dart';
 import 'package:live_yoko/Global/TextByNation.dart';
 import 'package:live_yoko/Service/APICaller.dart';
 import 'package:live_yoko/Utils/Utils.dart';
 import 'package:http/http.dart' as http;
 import "dart:html" as html;
+
+import '../../Utils/enum.dart';
 
 class UpdateProfileController extends GetxController {
   DateTime timeNow = DateTime.now();
@@ -31,7 +31,6 @@ class UpdateProfileController extends GetxController {
   void onInit() async {
     firstName.text = await Utils.getStringValueWithKey(Constant.FULL_NAME);
     avatarUser.value = await Utils.getStringValueWithKey(Constant.AVATAR_USER);
-    print('avatarinit${avatarUser.value}');
     userName.value = await Utils.getStringValueWithKey(Constant.FULL_NAME);
 
     if (firstName.text.trim() != '') {
@@ -60,31 +59,24 @@ class UpdateProfileController extends GetxController {
   }
 
   checkBrightnessChange() {
-    Brightness currentBrightness =
-        MediaQuery.platformBrightnessOf(Get.context!);
+    Brightness currentBrightness = MediaQuery.platformBrightnessOf(Get.context!);
 
     if (previousBrightness != currentBrightness) {
       // Chế độ đã thay đổi
-      MediaQuery.platformBrightnessOf(Get.context!) == Brightness.light
-          ? Get.changeThemeMode(ThemeMode.light)
-          : Get.changeThemeMode(ThemeMode.dark);
+      MediaQuery.platformBrightnessOf(Get.context!) == Brightness.light ? Get.changeThemeMode(ThemeMode.light) : Get.changeThemeMode(ThemeMode.dark);
 
       // Thực hiện các hành động cần thiết
     }
   }
 
-
-
   pushFileWeb({required int type, required List<html.File> fileData}) async {
-    String formattedTime =
-    DateFormat('MM/dd/yyyy HH:mm:ss').format(DateTime.now());
+    String formattedTime = DateFormat('MM/dd/yyyy HH:mm:ss').format(DateTime.now());
     try {
       var data = await APICaller.getInstance().putFilesWeb(
         endpoint: 'v1/Upload/upload-image',
         fileData: fileData,
         type: 1,
-        keyCert:
-        Utils.generateMd5(Constant.NEXT_PUBLIC_KEY_CERT + formattedTime),
+        keyCert: Utils.generateMd5(Constant.NEXT_PUBLIC_KEY_CERT + formattedTime),
         time: formattedTime,
       );
       if (data != null) {
@@ -99,21 +91,28 @@ class UpdateProfileController extends GetxController {
         // isImageLoading.value = false;
       }
     } catch (e) {
-      Utils.showSnackBar(
-          title: TextByNation.getStringByKey('error_file'), message: '$e');
+      // Utils.showSnackBar(title: TextByNation.getStringByKey('error_file'), message: '$e');
+      Utils.showToast(
+        Get.overlayContext!,
+        TextByNation.getStringByKey('file_size'),
+        type: ToastType.INFORM,
+      );
     }
   }
 
   getImageFiles({required bool isCamera}) async {
     final html.File? images = await ImagePickerWeb.getImageAsFile();
-    if (images != null ) {
+    if (images != null) {
       List<html.File> fileData = [];
-        fileData.add(images);
-      await pushFileWeb(type:1, fileData: fileData);
+      fileData.add(images);
+      await pushFileWeb(type: 1, fileData: fileData);
     } else {
-      Utils.showSnackBar(
-          title: TextByNation.getStringByKey('notification'),
-          message: TextByNation.getStringByKey('file_size'));
+      // Utils.showSnackBar(title: TextByNation.getStringByKey('notification'), message: TextByNation.getStringByKey('file_size'));
+      Utils.showToast(
+        Get.overlayContext!,
+        TextByNation.getStringByKey('file_size'),
+        type: ToastType.INFORM,
+      );
     }
   }
 
@@ -126,8 +125,7 @@ class UpdateProfileController extends GetxController {
             endpoint: 'v1/Upload/upload-image',
             filePath: imageAvatar.value,
             type: 1,
-            keyCert: Utils.generateMd5(
-                Constant.NEXT_PUBLIC_KEY_CERT + formattedTime),
+            keyCert: Utils.generateMd5(Constant.NEXT_PUBLIC_KEY_CERT + formattedTime),
             time: formattedTime);
         if (data != null) {
           List<dynamic> list = data['items'];
@@ -141,8 +139,13 @@ class UpdateProfileController extends GetxController {
           // isImageLoading.value = false;
         }
       } catch (e) {
-        Utils.showSnackBar(
-            title: TextByNation.getStringByKey('error_file'), message: '$e');
+        // Utils.showSnackBar(title: TextByNation.getStringByKey('error_file'), message: '$e');
+
+        Utils.showToast(
+          Get.overlayContext!,
+          '$e',
+          type: ToastType.ERROR,
+        );
         // isImageLoading.value = false;
       }
     }
@@ -150,15 +153,9 @@ class UpdateProfileController extends GetxController {
 
   updateAvatar(String pathAvatar) async {
     String formattedTime = DateFormat('MM/dd/yyyy HH:mm:ss').format(timeNow);
-    var param = {
-      "keyCert": await Utils.generateMd5(
-          Constant.NEXT_PUBLIC_KEY_CERT + formattedTime),
-      "time": formattedTime,
-      "avatarPath": pathAvatar
-    };
+    var param = {"keyCert": await Utils.generateMd5(Constant.NEXT_PUBLIC_KEY_CERT + formattedTime), "time": formattedTime, "avatarPath": pathAvatar};
     try {
-      var data =
-          await APICaller.getInstance().post('v1/Account/update-avatar', param);
+      var data = await APICaller.getInstance().post('v1/Account/update-avatar', param);
       if (data != null) {
         await Utils.saveStringWithKey(Constant.AVATAR_USER, pathAvatar);
         if (Get.isRegistered<ChatController>()) {
@@ -166,13 +163,19 @@ class UpdateProfileController extends GetxController {
           controller.avatarUser.value = await pathAvatar;
           avatarUser.refresh();
         }
-        Utils.showSnackBar(
-            title: TextByNation.getStringByKey('notification'),
-            message: TextByNation.getStringByKey('name_ss'));
+        // Utils.showSnackBar(title: TextByNation.getStringByKey('notification'), message: TextByNation.getStringByKey('name_ss'));
+        Utils.showToast(
+          Get.overlayContext!,
+          TextByNation.getStringByKey('name_ss'),
+          type: ToastType.SUCCESS,
+        );
       }
     } catch (e) {
-      Utils.showSnackBar(
-          title: TextByNation.getStringByKey('notification'), message: '$e');
+     Utils.showToast(
+        Get.overlayContext!,
+        '$e',
+        type: ToastType.ERROR,
+      );
     }
   }
 
@@ -180,33 +183,41 @@ class UpdateProfileController extends GetxController {
     isLoading.value = true;
     String formattedTime = DateFormat('MM/dd/yyyy HH:mm:ss').format(timeNow);
     var param = {
-      "keyCert": await Utils.generateMd5(
-          Constant.NEXT_PUBLIC_KEY_CERT + formattedTime),
+      "keyCert": await Utils.generateMd5(Constant.NEXT_PUBLIC_KEY_CERT + formattedTime),
       "time": formattedTime,
       "fullName": firstName.text,
     };
     try {
-      var data = await APICaller.getInstance()
-          .post('v1/Account/update-fullname', param);
+      var data = await APICaller.getInstance().post('v1/Account/update-fullname', param);
       if (data != null) {
         Utils.saveStringWithKey(Constant.FULL_NAME, firstName.text);
         isLoading.value = false;
         if (Get.isRegistered<ChatController>()) {
           var controller = Get.find<ChatController>();
           controller.userName.value = firstName.text;
-          controller.userName.refresh();
+          controller.refresh();
+          controller.update();
+        }
+        if (Get.isRegistered<ChatDetailController>()) {
+          var controller = Get.find<ChatDetailController>();
+          controller.userName = firstName.text;
+          controller.refresh();
         }
 
-        Utils.showSnackBar(
-            title: TextByNation.getStringByKey('notification'),
-            message: TextByNation.getStringByKey('name_ss'));
+        // Utils.showSnackBar(title: TextByNation.getStringByKey('notification'), message: TextByNation.getStringByKey('name_ss'));
+        Utils.showToast(
+          Get.overlayContext!,
+          TextByNation.getStringByKey('name_ss'),
+          type: ToastType.SUCCESS,
+        );
         Get.find<ChatController>().refresh();
-
-        // Get.close(1);
       }
     } catch (e) {
-      Utils.showSnackBar(
-          title: TextByNation.getStringByKey('notification'), message: '$e');
+     Utils.showToast(
+        Get.overlayContext!,
+        '$e',
+        type: ToastType.ERROR,
+      );
     }
   }
 }

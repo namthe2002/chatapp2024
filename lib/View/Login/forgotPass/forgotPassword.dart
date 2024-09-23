@@ -370,7 +370,8 @@ class _ForgotPasswordState extends State<ForgotPassword> {
                       SizedBox(
                         height: 28,
                       ),
-                      GestureDetector(
+                      SingleTapDetector(
+                        delayTimeInMillisecond: 2000,
                         onTap: () async {
                           print("================== " +
                               controller.forgotPassState.value.toString());

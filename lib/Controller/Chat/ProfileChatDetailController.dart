@@ -7,6 +7,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/rendering.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
+import 'package:image_picker_web/image_picker_web.dart';
 import 'package:intl/intl.dart';
 import 'package:live_yoko/Controller/Chat/ChatController.dart';
 import 'package:live_yoko/Controller/Chat/ChatCreateController.dart';
@@ -21,8 +22,10 @@ import 'package:live_yoko/Service/APICaller.dart';
 import 'package:live_yoko/Utils/Utils.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'dart:html' as html;
 
 import '../../Models/Chat/Chat.dart';
+import '../../Utils/enum.dart';
 
 class ProfileChatDetailController extends GetxController {
   RxInt tabIndex = 3.obs;
@@ -137,6 +140,8 @@ class ProfileChatDetailController extends GetxController {
     // ownerUuid = Get.arguments['ownerUuid'];
     // chatAvatar.value = Get.arguments['avatar'] ?? '';
     tabIndex.value = chatType == 2 ? 5 : 3;
+    textNameController.text = chatName.value;
+    print('textNameController ${textNameController}');
     await groupInfo();
     if (chatType == 2) {
       isListMemberLocked = false;
@@ -253,7 +258,12 @@ class ProfileChatDetailController extends GetxController {
         print('$e');
       }
     } else {
-      Utils.showSnackBar(title: TextByNation.getStringByKey('notification'), message: TextByNation.getStringByKey('no_access'));
+      Utils.showToast(
+        Get.overlayContext!,
+        TextByNation.getStringByKey('no_access'),
+        type: ToastType.ERROR,
+      );
+      // Utils.showSnackBar(title: TextByNation.getStringByKey('notification'), message: TextByNation.getStringByKey('no_access'));
     }
   }
 
@@ -375,7 +385,12 @@ class ProfileChatDetailController extends GetxController {
         isLoading.value = false;
       }
     } catch (e) {
-      Utils.showSnackBar(title: 'Error Message: ', message: '$e');
+      Utils.showToast(
+        Get.overlayContext!,
+        '$e',
+        type: ToastType.ERROR,
+      );
+      // Utils.showSnackBar(title: 'Error Message: ', message: '$e');
       isLoading.value = false;
     }
   }
@@ -432,7 +447,12 @@ class ProfileChatDetailController extends GetxController {
         isLoading.value = false;
       }
     } catch (e) {
-      Utils.showSnackBar(title: TextByNation.getStringByKey('error_message'), message: '$e');
+      Utils.showToast(
+        Get.overlayContext!,
+        '$e',
+        type: ToastType.ERROR,
+      );
+      // Utils.showSnackBar(title: TextByNation.getStringByKey('error_message'), message: '$e');
       isLoading.value = false;
     }
   }
@@ -454,11 +474,20 @@ class ProfileChatDetailController extends GetxController {
             controllerChat.listChat.removeAt(index);
           }
         }
-        Utils.showSnackBar(title: TextByNation.getStringByKey('notification'), message: TextByNation.getStringByKey('delete_message'));
+        Utils.showToast(
+          Get.overlayContext!,
+          TextByNation.getStringByKey('delete_message'),
+          type: ToastType.SUCCESS,
+        );
+        // Utils.showSnackBar(title: TextByNation.getStringByKey('notification'), message: TextByNation.getStringByKey('delete_message'));
         Get.delete<ProfileChatDetailController>();
       }
     } catch (e) {
-      Utils.showSnackBar(title: TextByNation.getStringByKey('notification'), message: '$e');
+      Utils.showToast(
+        Get.overlayContext!,
+        '$e',
+        type: ToastType.ERROR,
+      );
     }
   }
 
@@ -475,11 +504,20 @@ class ProfileChatDetailController extends GetxController {
         if (Get.isRegistered<ChatController>()) {
           Get.find<ChatController>().refreshListChat();
         }
-        Utils.showSnackBar(title: TextByNation.getStringByKey('notification'), message: TextByNation.getStringByKey('delete_message'));
+        Utils.showToast(
+          Get.overlayContext!,
+          TextByNation.getStringByKey('delete_message'),
+          type: ToastType.SUCCESS,
+        );
+        // Utils.showSnackBar(title: TextByNation.getStringByKey('notification'), message: TextByNation.getStringByKey('delete_message'));
         Get.delete<ProfileChatDetailController>();
       }
     } catch (e) {
-      Utils.showSnackBar(title: TextByNation.getStringByKey('notification'), message: '$e');
+      Utils.showToast(
+        Get.overlayContext!,
+        '$e',
+        type: ToastType.ERROR,
+      );
     }
   }
 
@@ -522,12 +560,23 @@ class ProfileChatDetailController extends GetxController {
             final controllerChat = Get.find<ChatController>();
             controllerChat.refreshListChat();
           }
-          Utils.showSnackBar(title: TextByNation.getStringByKey('notification'), message: TextByNation.getStringByKey('leave_group'));
+
+          Utils.showToast(
+            Get.overlayContext!,
+            TextByNation.getStringByKey('leave_group'),
+            type: ToastType.SUCCESS,
+          );
+
+          // Utils.showSnackBar(title: TextByNation.getStringByKey('notification'), message: TextByNation.getStringByKey('leave_group'));
           Get.delete<ProfileChatDetailController>();
         }
       }
     } catch (e) {
-      Utils.showSnackBar(title: TextByNation.getStringByKey('notification'), message: '$e');
+      Utils.showToast(
+        Get.overlayContext!,
+        '$e',
+        type: ToastType.ERROR,
+      );
     }
   }
 
@@ -542,10 +591,15 @@ class ProfileChatDetailController extends GetxController {
       print(param);
       var data = await APICaller.getInstance().post('v1/Friend/request-add-friend', param);
       if (data != null) {
-        Utils.showSnackBar(title: TextByNation.getStringByKey('notification'), message: TextByNation.getStringByKey('friend_sent'));
+        Utils.showToast(Get.overlayContext!, TextByNation.getStringByKey('friend_sent'), type: ToastType.SUCCESS);
+        // Utils.showSnackBar(title: TextByNation.getStringByKey('notification'), message: TextByNation.getStringByKey('friend_sent'));
       }
     } catch (e) {
-      Utils.showSnackBar(title: TextByNation.getStringByKey('notification'), message: '$e');
+      Utils.showToast(
+        Get.overlayContext!,
+        '$e',
+        type: ToastType.ERROR,
+      );
     }
   }
 
@@ -570,7 +624,11 @@ class ProfileChatDetailController extends GetxController {
         memberList.refresh();
       }
     } catch (e) {
-      Utils.showSnackBar(title: TextByNation.getStringByKey('notification'), message: '$e');
+      Utils.showToast(
+        Get.overlayContext!,
+        '$e',
+        type: ToastType.ERROR,
+      );
     }
   }
 
@@ -606,6 +664,7 @@ class ProfileChatDetailController extends GetxController {
         isFriendLoading.value = false;
       }
     } catch (e) {
+      Utils.showToast(Get.overlayContext!, '$e', type: ToastType.ERROR);
       Utils.showSnackBar(title: TextByNation.getStringByKey('error_message'), message: '$e');
       isFriendLoading.value = false;
     }
@@ -653,37 +712,67 @@ class ProfileChatDetailController extends GetxController {
         }
       }
     } catch (e) {
-      Utils.showSnackBar(title: TextByNation.getStringByKey('notification'), message: '$e');
+      Utils.showToast(
+        Get.overlayContext!,
+        '$e',
+        type: ToastType.ERROR,
+      );
     }
   }
 
-  pushFile() async {
-    if (file.path != '') {
-      String formattedTime = DateFormat('MM/dd/yyyy HH:mm:ss').format(timeNow);
-      try {
-        var data = await APICaller.getInstance().putFile(
-            endpoint: 'v1/Upload/upload-image',
-            filePath: file,
-            type: 1,
-            keyCert: Utils.generateMd5(Constant.NEXT_PUBLIC_KEY_CERT + formattedTime),
-            time: formattedTime);
-        if (data != null) {
-          List<dynamic> list = data['items'];
-          var listItem = list.map((dynamic json) => '"$json"').toList();
-          responseFile = jsonDecode(listItem[0]);
-        } else {}
-      } catch (e) {
-        Utils.showSnackBar(title: TextByNation.getStringByKey('error_file'), message: '$e');
+  getImageFiles({required bool isCamera}) async {
+    if (!Get.isRegistered<ProfileChatDetailController>()) {
+      Get.put(ProfileChatDetailController());
+    }
+    final List<html.File>? images = await ImagePickerWeb.getMultiImagesAsFile();
+    if (images != null && images.isNotEmpty) {
+      List<html.File> fileData = [];
+      for (var img in images) {
+        fileData.add(img);
       }
+      String type = 'Image';
+      await pushFileWeb(type: type == 'Image' || type == 'Video' ? 1 : 4, fileData: fileData);
+    } else {
+      Utils.showToast(
+        Get.overlayContext!,
+        TextByNation.getStringByKey('file_size'),
+        type: ToastType.INFORM,
+      );
+      // Utils.showSnackBar(title: TextByNation.getStringByKey('notification'), message: TextByNation.getStringByKey('file_size'));
     }
   }
 
-  getImage() async {
-    file = await Utils.getImage();
-    if (file.path != '') {
-      await pushFile();
-      await changeGroupInfo();
-      isEditGroup.value = !isEditGroup.value;
+  pushFileWeb({required int type, required List<html.File> fileData}) async {
+    String formattedTime = DateFormat('MM/dd/yyyy HH:mm:ss').format(DateTime.now());
+    try {
+      var data = await APICaller.getInstance().putFilesWeb(
+        endpoint: 'v1/Upload/upload-image',
+        fileData: fileData,
+        type: type,
+        keyCert: Utils.generateMd5(Constant.NEXT_PUBLIC_KEY_CERT + formattedTime),
+        time: formattedTime,
+      );
+
+      if (data != null) {
+        List<dynamic> list = data['items'];
+        var listItem = list.map((dynamic json) => '"$json"').toList();
+        chatAvatar.value = jsonDecode(listItem[0]);
+        chatAvatar.refresh();
+      } else {
+        Utils.showToast(
+          Get.overlayContext!,
+          'Upload file failed',
+          type: ToastType.ERROR,
+        );
+        // Utils.showSnackBar(title: TextByNation.getStringByKey('error_file'), message: 'Upload file failed');
+      }
+    } catch (e) {
+      Utils.showToast(
+        Get.overlayContext!,
+        '$e',
+        type: ToastType.ERROR,
+      );
+      // Utils.showSnackBar(title: TextByNation.getStringByKey('error_file'), message: '$e');
     }
   }
 
@@ -697,7 +786,11 @@ class ProfileChatDetailController extends GetxController {
         autoDeleteData = response['data']['autoDelete'];
       }
     } catch (e) {
-      Utils.showSnackBar(title: TextByNation.getStringByKey('notification'), message: '$e');
+      Utils.showToast(
+        Get.overlayContext!,
+        '$e',
+        type: ToastType.ERROR,
+      );
     }
   }
 
@@ -716,7 +809,11 @@ class ProfileChatDetailController extends GetxController {
         autoDeleteData = day;
       }
     } catch (e) {
-      Utils.showSnackBar(title: TextByNation.getStringByKey('notification'), message: '$e');
+      Utils.showToast(
+        Get.overlayContext!,
+        '$e',
+        type: ToastType.ERROR,
+      );
     }
   }
 }

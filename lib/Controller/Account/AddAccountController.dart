@@ -11,6 +11,8 @@ import 'package:live_yoko/Models/Chat/PositionType.dart';
 import 'package:live_yoko/Service/APICaller.dart';
 import 'package:live_yoko/Utils/Utils.dart';
 
+import '../../Utils/enum.dart';
+
 class AddAccountController extends GetxController {
   List<PositionType> positionList = [
     PositionType(value: 2, title: TextByNation.getStringByKey('admin')),
@@ -76,8 +78,13 @@ class AddAccountController extends GetxController {
         Get.close(1);
       }
     } catch (e) {
-      Utils.showSnackBar(
-          title: TextByNation.getStringByKey('notification'), message: '$e');
+      // Utils.showSnackBar(
+      //     title: TextByNation.getStringByKey('notification'), message: '$e');
+      Utils.showToast(
+        Get.overlayContext!,
+        '$e',
+        type: ToastType.ERROR,
+      );
     }
   }
 }

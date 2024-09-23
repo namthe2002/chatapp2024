@@ -1,3 +1,4 @@
+import 'package:cached_video_player_plus/cached_video_player_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/framework.dart';
 import 'package:get/get.dart';
@@ -5,49 +6,65 @@ import 'package:live_yoko/Controller/Chat/MediaChatDetailController.dart';
 import 'package:live_yoko/Utils/Utils.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:photo_view/photo_view_gallery.dart';
-import 'package:video_player/video_player.dart';
 
-class MediaChatDetail extends StatelessWidget {
+class MediaChatDetail extends StatefulWidget {
   MediaChatDetail({Key? key}) : super(key: key);
 
+  @override
+  State<MediaChatDetail> createState() => _MediaChatDetailState();
+}
+
+class _MediaChatDetailState extends State<MediaChatDetail> {
   Size size = const Size(0, 0);
 
   final controller = Get.put(MediaChatDetailController());
 
   @override
+  void dispose() {
+    Get.delete<MediaChatDetailController>();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     size = MediaQuery.of(context).size;
-    return WillPopScope(
-      onWillPop: () async {
-        Get.delete<MediaChatDetailController>();
-        return true;
-      },
-      child: Scaffold(
-        resizeToAvoidBottomInset: false,
-        appBar: AppBar(
-          backgroundColor: Colors.black,
-          iconTheme: IconThemeData(
-            color: Colors.white,
-          ),
-          elevation: 0,
-          actions: [
-            IconButton(
-              onPressed: () async {
-                await controller.saveImage(controller.urlString);
-              },
-              icon: Icon(
-                Icons.download_outlined,
-              ),
+    return Scaffold(
+      resizeToAvoidBottomInset: false,
+      appBar: AppBar(
+        backgroundColor: Colors.black,
+        iconTheme: IconThemeData(
+          color: Colors.white,
+        ),
+        leading: IconButton(
+            onPressed: () {
+              Get.delete<MediaChatDetailController>();
+              return Navigator.pop(context, true);
+            },
+            icon: Icon(
+              Icons.arrow_back,
+              size: 42,
+            )),
+        leadingWidth: 70,
+        elevation: 0,
+        actions: [
+          IconButton(
+            onPressed: () async {
+              await controller.saveFile(controller.urlString);
+            },
+            icon: Icon(
+              Icons.download_outlined,
+              size: 42,
             ),
-          ],
-        ),
-        body: Container(
-          color: Colors.black,
-          child: Obx(() => controller.isLoading.value ? Center(
-              child: CircularProgressIndicator()
-          ) : Utils.getFileType(controller.urlString) == 'Video' ?
-          _videoPlay() : _viewPhoto()),
-        ),
+          ),
+        ],
+      ),
+      body: Container(
+        color: Colors.black,
+        child: Obx(() => controller.isLoading.value
+            ? Center(child: CircularProgressIndicator())
+            : Utils.getFileType(controller.urlString) == 'Video'
+                ? _videoPlay()
+                : _viewPhoto()),
       ),
     );
   }
@@ -73,74 +90,122 @@ class MediaChatDetail extends StatelessWidget {
   }
 
   _videoPlay() {
-    controller.playerController  = VideoPlayerController.networkUrl(Uri.parse(controller.urlString))
+    controller.videoController = CachedVideoPlayerPlusController.networkUrl(Uri.parse(controller.urlString))
       ..initialize().then((_) {
-        controller.playerController!.play();
-        controller.playerController!.setLooping(true);
+        controller.videoController!.play();
+        controller.videoController!.setLooping(true);
         controller.update();
       });
     return GestureDetector(
       onTap: () {
         if (controller.isPlaying.value) {
-          controller.playerController!.pause();
+          controller.videoController!.pause();
         } else {
-          controller.playerController!.play();
+          controller.videoController!.play();
         }
         controller.isPlaying.value = !controller.isPlaying.value;
       },
       child: GetBuilder<MediaChatDetailController>(
         builder: (controller) {
-          if (controller.playerController!.value.isInitialized) {
-            final videoWidth = controller.playerController!.value.size.width;
-            final videoHeight = controller.playerController!.value.size.height;
+          if (controller.videoController!.value.isInitialized) {
+            final videoWidth = controller.videoController!.value.size.width;
+            final videoHeight = controller.videoController!.value.size.height;
             return Stack(
               children: [
-                Center(
-                  child: videoWidth / videoHeight < 1.0 ? SizedBox.expand(
-                    child: FittedBox(
-                      fit: BoxFit.cover,
-                      child: SizedBox(
-                        width: videoWidth,
-                        height: videoHeight,
-                        child: VideoPlayer(controller.playerController!),
+                Positioned.fill(
+                    child: AspectRatio(
+                  aspectRatio: controller.videoController!.value.aspectRatio,
+                  child: Stack(
+                    children: [
+                      CachedVideoPlayerPlus(controller.videoController!),
+                      Align(
+                        alignment: Alignment.center,
+                        child: IconButton(
+                          icon: Icon(
+                            controller.videoController!.value.isPlaying ? Icons.pause : Icons.play_arrow,
+                            color: Colors.white,
+                            size: 50,
+                          ),
+                          onPressed: () {
+                            if (controller.videoController!.value.isPlaying) {
+                              controller.videoController!.pause();
+                            } else {
+                              controller.videoController!.play();
+                            }
+                          },
+                        ),
                       ),
-                    ),
-                  ) :
-                  AspectRatio(
-                    aspectRatio: controller.playerController!.value.aspectRatio,
-                    child: VideoPlayer(controller.playerController!),
+
+                      // Thanh tua video
+                      Align(
+                        alignment: Alignment.bottomCenter,
+                        child: VideoProgressIndicator(
+                          controller.videoController!,
+                          allowScrubbing: true,
+                          colors: VideoProgressColors(
+                            playedColor: Colors.red,
+                            backgroundColor: Colors.grey,
+                          ),
+                        ),
+                      ),
+                      Positioned(
+                        top: 0,
+                        bottom: 0,
+                        right: Get.width / 4,
+                        child: IconButton(
+                          icon: Icon(Icons.fast_forward, color: Colors.white, size: 30),
+                          onPressed: () {
+                            final position = controller.videoController!.value.position;
+                            final duration = controller.videoController!.value.duration;
+                            if (position + Duration(seconds: 5) < duration) {
+                              controller.videoController!.seekTo(position + Duration(seconds: 5));
+                            } else {
+                              controller.videoController!.seekTo(duration);
+                            }
+                          },
+                        ),
+                      ),
+                      Positioned(
+                        top: 0,
+                        bottom: 0,
+                        left: Get.width / 4,
+                        child: IconButton(
+                          icon: Icon(Icons.fast_rewind, color: Colors.white, size: 30),
+                          onPressed: () {
+                            final position = controller.videoController!.value.position;
+                            if (position - Duration(seconds: 5) > Duration.zero) {
+                              controller.videoController!.seekTo(position - Duration(seconds: 5));
+                            } else {
+                              controller.videoController!.seekTo(Duration.zero);
+                            }
+                          },
+                        ),
+                      ),
+                      // Positioned(
+                      //   top: 0,
+                      //   left: 0,
+                      //   right: 0,
+                      //   bottom: 0,
+                      //   child: Obx(() => controller.isPlaying.value
+                      //       ? Container()
+                      //       : Icon(
+                      //     Icons.play_arrow_rounded,
+                      //     color: Colors.white54,
+                      //     size: 60,
+                      //   )),
+                      // ),
+                    ],
                   ),
-                ),
-                Positioned(
-                  top: 0,
-                  left: 0,
-                  right: 0,
-                  bottom: 0,
-                  child: Obx(() => controller.isPlaying.value ? Container() : Icon(Icons.play_arrow_rounded, color: Colors.white54, size: 60,)),
-                ),
-                Positioned(
-                  left: 0,
-                  right: 0,
-                  bottom: 0,
-                  child: VideoProgressIndicator(
-                    controller.playerController!,
-                    allowScrubbing: true,
-                    padding: const EdgeInsets.symmetric(vertical: 10),
-                    colors: const VideoProgressColors(
-                      playedColor: Colors.white,
-                      bufferedColor: Colors.white12,
-                      backgroundColor: Colors.white12,
-                    ),
-                  ),
-                ),
+                )),
               ],
             );
           } else {
-            return const Center(child: CircularProgressIndicator(),);
+            return const Center(
+              child: CircularProgressIndicator(),
+            );
           }
         },
       ),
     );
   }
-
 }

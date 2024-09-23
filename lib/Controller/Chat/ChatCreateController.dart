@@ -11,7 +11,7 @@ import 'package:live_yoko/Service/APICaller.dart';
 
 import '../../Models/Chat/Chat.dart';
 import '../../Utils/Utils.dart';
-import '../../View/Chat/home_chat.dart';
+import '../../Utils/enum.dart';
 import 'ChatController.dart';
 import 'ProfileChatDetailController.dart';
 
@@ -109,8 +109,13 @@ class ChatCreateController extends GetxController {
         // });
       }
     } catch (e) {
-      Utils.showSnackBar(
-          title: TextByNation.getStringByKey('notification'), message: '$e');
+      Utils.showToast(
+        Get.overlayContext!,
+        '$e',
+        type: ToastType.ERROR,
+      );
+      // Utils.showSnackBar(
+      //     title: TextByNation.getStringByKey('notification'), message: '$e');
     } finally {
       isLoangding.value = await false;
     }
@@ -145,8 +150,13 @@ class ChatCreateController extends GetxController {
         }
       }
     } catch (e) {
-      Utils.showSnackBar(
-          title: TextByNation.getStringByKey('notification'), message: '$e');
+      Utils.showToast(
+        Get.overlayContext!,
+        '$e',
+        type: ToastType.ERROR,
+      );
+      // Utils.showSnackBar(
+      //     title: TextByNation.getStringByKey('notification'), message: '$e');
     } finally {
       isLoangding.value = await false;
     }

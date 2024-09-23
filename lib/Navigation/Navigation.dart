@@ -5,15 +5,25 @@ import 'RouteDefine.dart';
 class Navigation {
   static String currentPageName = '';
   static dynamic currentParam;
-  static Future<dynamic>? navigateTo(
-      {required String page, dynamic arguments, Transition? transition}) {
+
+  static Future<dynamic>? navigateTo({required String page, dynamic arguments, Transition? transition}) {
     currentParam = null;
     if (arguments != null) {
       currentParam = arguments;
     }
     currentPageName = page;
-    return Get.to(RouteDefine.getPageByName(page),
-        transition: transition ?? Transition.rightToLeft, arguments: arguments);
+    return Get.toNamed(page, arguments: arguments);
+  }
+
+  static Future<dynamic>? navigateTo1({
+    required String page,
+    dynamic arguments,
+    Transition? transition,
+  }) {
+    currentParam = arguments;
+    currentPageName = page;
+
+    return Get.toNamed(page, arguments: arguments);
   }
 
   static void goBack({Object? result, dynamic arguments}) {
@@ -24,13 +34,22 @@ class Navigation {
     Get.back(result: result);
   }
 
-  /* ====== delete previous route and routes*/
-  static void navigateGetxOff({required String routeName, dynamic arguments}) {
-    Get.offNamed(routeName, arguments: arguments);
+  static void goBack2({Object? result, dynamic arguments}) {
+    currentParam = null;
+    if (arguments != null) {
+      currentParam = arguments;
+    }
   }
 
-  static void navigateGetxOffAll(
-      {required String routeName, dynamic arguments}) {
+  // static void navigateGetxOff({required String routeName, dynamic arguments}) {
+  //   Get.offNamed(routeName, arguments: arguments);
+  // }
+
+  static void navigateGetxOff({required String routeName, String? conversationId, dynamic arguments}) {
+    Get.offNamed('$routeName/${conversationId ?? ''}', arguments: arguments);
+  }
+
+  static void navigateGetxOffAll({required String routeName, dynamic arguments}) {
     Get.offAllNamed(routeName, arguments: arguments);
   }
 
@@ -39,7 +58,6 @@ class Navigation {
     if (arguments != null) {
       currentParam = arguments;
     }
-    Get.offAll(() => RouteDefine.getPageByName(page),
-        transition: Transition.rightToLeft, arguments: arguments);
+    Get.offAll(() => RouteDefine.getPageByName(page), transition: Transition.rightToLeft, arguments: arguments);
   }
 }

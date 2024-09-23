@@ -20,6 +20,7 @@ import 'package:live_yoko/Service/SocketManager.dart';
 import 'package:live_yoko/Utils/Utils.dart';
 
 import '../../Service/APICaller.dart';
+import '../../Utils/enum.dart';
 
 class ThemeControler extends GetxController {
   RxBool isSelected = false.obs;
@@ -60,7 +61,7 @@ class ThemeControler extends GetxController {
 
   @override
   void onInit() async {
-   // gọi hàm sendState
+    // gọi hàm sendState
 
     ever(appController.appState, (state) async {
       if (state == AppLifecycleState.resumed) {
@@ -101,14 +102,12 @@ class ThemeControler extends GetxController {
     await getChat();
     await sendListOnline();
     scrollController.addListener(() {
-      if (scrollController.position.userScrollDirection ==
-          ScrollDirection.reverse) {
+      if (scrollController.position.userScrollDirection == ScrollDirection.reverse) {
         if (isVisible == true) {
           isVisible.value = false;
         }
       } else {
-        if (scrollController.position.userScrollDirection ==
-            ScrollDirection.forward) {
+        if (scrollController.position.userScrollDirection == ScrollDirection.forward) {
           if (isVisible == false) {
             isVisible.value = true;
           }
@@ -124,8 +123,7 @@ class ThemeControler extends GetxController {
     });
 
     scrollController.addListener(() {
-      if (scrollController.position.maxScrollExtent ==
-          scrollController.offset) {
+      if (scrollController.position.maxScrollExtent == scrollController.offset) {
         if (hasMore.value) {
           page++;
           getChat();
@@ -135,16 +133,11 @@ class ThemeControler extends GetxController {
       }
     });
 
-    timer = await Timer.periodic(Duration(seconds: 10),
-            (timer) => sendListOnline());
+    timer = await Timer.periodic(Duration(seconds: 10), (timer) => sendListOnline());
     super.onInit();
   }
 
-
-  void initData() async {
-
-
-  }
+  void initData() async {}
 
   @override
   void onClose() {
@@ -173,8 +166,7 @@ class ThemeControler extends GetxController {
   String getTimeMessage(String time) {
     DateFormat originalFormat = DateFormat("yyyy-MM-dd'T'HH:mm:ss");
 
-    final DateTime messageDateTime =
-        originalFormat.parse(time.toString(), true).toLocal();
+    final DateTime messageDateTime = originalFormat.parse(time.toString(), true).toLocal();
     DateTime now = DateTime.now();
     DateTime today = DateTime(now.year, now.month, now.day);
     String timeUpadte;
@@ -193,8 +185,7 @@ class ThemeControler extends GetxController {
   }
 
   deleteContent(dynamic message) {
-    int index = listChat.indexWhere(
-        (element) => message['ListMsgUuid'].contains(element.lastMsgLineUuid));
+    int index = listChat.indexWhere((element) => message['ListMsgUuid'].contains(element.lastMsgLineUuid));
     if (index != -1) {
       listChat[index].status = 4;
       listChat.refresh();
@@ -203,14 +194,12 @@ class ThemeControler extends GetxController {
 
   resetListOnline(dynamic listOnline) async {
     List<dynamic> listItem = listOnline;
-    List<Work> listItemWork =
-        await listItem.map((dynamic json) => Work.fromJson(json)).toList();
+    List<Work> listItemWork = await listItem.map((dynamic json) => Work.fromJson(json)).toList();
     listWork.addAll(listItemWork);
 
     for (var itemChat in listChat) {
       for (var itemWork in listWork) {
-        if (itemWork.userName == itemChat.partnerUuid &&
-            itemWork.onlineState == true) {
+        if (itemWork.userName == itemChat.partnerUuid && itemWork.onlineState == true) {
           itemChat.isActive = true;
           break; // Thoát vòng lặp khi tìm thấy UUID khớp
         }
@@ -220,8 +209,7 @@ class ThemeControler extends GetxController {
   }
 
   setRead(dynamic message) {
-    int index =
-        listChat.indexWhere((element) => element.uuid == message['RoomUuid']);
+    int index = listChat.indexWhere((element) => element.uuid == message['RoomUuid']);
     if (index != -1) {
       listChat[index].readCounter = 1;
       listChat.refresh();
@@ -229,14 +217,12 @@ class ThemeControler extends GetxController {
   }
 
   setTyping(dynamic message) {
-    int index =
-        listChat.indexWhere((element) => element.uuid == message['RoomUuid']);
+    int index = listChat.indexWhere((element) => element.uuid == message['RoomUuid']);
 
     if (index != -1) {
       String fullNamedecoded = message['FullName'] ?? '';
       try {
-        fullNamedecoded =
-            utf8.decode(base64Url.decode(message['FullName'] ?? ''));
+        fullNamedecoded = utf8.decode(base64Url.decode(message['FullName'] ?? ''));
       } catch (e) {
         fullNamedecoded = message['FullName'] ?? '';
       }
@@ -255,9 +241,7 @@ class ThemeControler extends GetxController {
   }
 
   remoteChat(dynamic message) async {
-    int index = listChat.indexWhere((element) =>
-        element.ownerUuid == message['RoomUuid'] ||
-        element.uuid == message['RoomUuid']);
+    int index = listChat.indexWhere((element) => element.ownerUuid == message['RoomUuid'] || element.uuid == message['RoomUuid']);
     if (index != -1) {
       listChat.removeAt(index);
       // isUnPin.value = true;
@@ -293,8 +277,7 @@ class ThemeControler extends GetxController {
   updateChat(dynamic message) async {
     newMessage = ChatDetailItem.fromJson(message);
 
-    int index = listChat
-        .indexWhere((element) => element.uuid == newMessage.msgRoomUuid);
+    int index = listChat.indexWhere((element) => element.uuid == newMessage.msgRoomUuid);
     String decoded = newMessage.content ?? '';
     // String userSentdecode = newMessage.userSent!;
     // String rooomeNamedecode = newMessage.roomName!;
@@ -314,9 +297,7 @@ class ThemeControler extends GetxController {
     if (index != -1) {
       if (index == 0) {
         listChat[index].type = newMessage.type;
-        listChat[index].content = newMessage.type == 5 || newMessage.type == 3
-            ? Constant.BASE_URL_IMAGE + decoded.toString()
-            : decoded.toString();
+        listChat[index].content = newMessage.type == 5 || newMessage.type == 3 ? Constant.BASE_URL_IMAGE + decoded.toString() : decoded.toString();
         if (userNameAcount.value != newMessage.userSent) {
           if (Get.isRegistered<ChatDetailController>() == false) {
             listChat[index].unreadCount = listChat[index].unreadCount! + 1;
@@ -376,11 +357,9 @@ class ThemeControler extends GetxController {
         }
         uuidRoomnew = listChat[index].uuid!;
         uuidLastMessageNew = newMessage.uuid!;
-        listChat[isPin == false ? pinLength : 0].forwardFrom =
-            newMessage.forwardFrom;
+        listChat[isPin == false ? pinLength : 0].forwardFrom = newMessage.forwardFrom;
         listChat[isPin == false ? pinLength : 0].status = 0;
-        listChat[isPin == false ? pinLength : 0].lastMsgLineUuid =
-            newMessage.uuid;
+        listChat[isPin == false ? pinLength : 0].lastMsgLineUuid = newMessage.uuid;
         listChat.refresh();
       }
       // update tin nhắn
@@ -428,14 +407,11 @@ class ThemeControler extends GetxController {
   }
 
   checkBrightnessChange() {
-    Brightness currentBrightness =
-        MediaQuery.platformBrightnessOf(Get.context!);
+    Brightness currentBrightness = MediaQuery.platformBrightnessOf(Get.context!);
 
     if (previousBrightness != currentBrightness) {
       // Chế độ đã thay đổi
-      MediaQuery.platformBrightnessOf(Get.context!) == Brightness.light
-          ? Get.changeThemeMode(ThemeMode.light)
-          : Get.changeThemeMode(ThemeMode.dark);
+      MediaQuery.platformBrightnessOf(Get.context!) == Brightness.light ? Get.changeThemeMode(ThemeMode.light) : Get.changeThemeMode(ThemeMode.dark);
 
       // Thực hiện các hành động cần thiết
     }
@@ -443,41 +419,34 @@ class ThemeControler extends GetxController {
 
   changeTheme(int index, BuildContext context) async {
     if (index == 0) {
-      // await Utils.saveBoolWithKey(Constant.DARK_MODE, false);
-      // await Utils.saveBoolWithKey(Constant.AUTO_MODE, false);
+      await Utils.saveBoolWithKey(Constant.DARK_MODE, false);
+      await Utils.saveBoolWithKey(Constant.AUTO_MODE, false);
       Get.changeThemeMode(ThemeMode.light);
       // isRegime.value = true;
     } else if (index == 1) {
-      // await Utils.saveBoolWithKey(Constant.DARK_MODE, true);
-      // await Utils.saveBoolWithKey(Constant.AUTO_MODE, false);
+      await Utils.saveBoolWithKey(Constant.DARK_MODE, true);
+      await Utils.saveBoolWithKey(Constant.AUTO_MODE, false);
       Get.changeThemeMode(ThemeMode.dark);
-
     } else {
-      // await Utils.saveBoolWithKey(Constant.AUTO_MODE, true);
-      MediaQuery.platformBrightnessOf(context) == Brightness.light
-          ? Get.changeThemeMode(ThemeMode.light)
-          : Get.changeThemeMode(ThemeMode.dark);
-
+      await Utils.saveBoolWithKey(Constant.AUTO_MODE, true);
+      MediaQuery.platformBrightnessOf(context) == Brightness.light ? Get.changeThemeMode(ThemeMode.light) : Get.changeThemeMode(ThemeMode.dark);
     }
     Get.appUpdate();
   }
 
   Future getChat() async {
     DateTime timeNow = DateTime.now();
-    String formattedTime =
-        DateFormat('MM/dd/yyyy HH:mm:ss').format(timeNow.toLocal());
+    String formattedTime = DateFormat('MM/dd/yyyy HH:mm:ss').format(timeNow.toLocal());
     try {
       var param = {
-        "keyCert":
-            Utils.generateMd5(Constant.NEXT_PUBLIC_KEY_CERT + formattedTime),
+        "keyCert": Utils.generateMd5(Constant.NEXT_PUBLIC_KEY_CERT + formattedTime),
         "time": formattedTime,
         "pageSize": pageSize,
         "page": page,
         "type": 0
       };
 
-      var response =
-          await APICaller.getInstance().post('v1/Chat/message-room', param);
+      var response = await APICaller.getInstance().post('v1/Chat/message-room', param);
       if (response != null) {
         List<dynamic> list = response['items'];
         var listItem = list.map((dynamic json) => Chat.fromJson(json)).toList();
@@ -492,8 +461,11 @@ class ThemeControler extends GetxController {
         }
       }
     } catch (e) {
-      Utils.showSnackBar(
-          title: TextByNation.getStringByKey('notification'), message: '$e');
+      Utils.showToast(
+        Get.overlayContext!,
+        '$e',
+        type: ToastType.ERROR,
+      );
     } finally {
       isLoading.value = false;
       isUnPin.value = await false;
@@ -501,18 +473,15 @@ class ThemeControler extends GetxController {
   }
 
   Future pinMessage(int index, bool isPin) async {
-    String formattedTime =
-        DateFormat('MM/dd/yyyy HH:mm:ss').format(timeNow.toLocal());
+    String formattedTime = DateFormat('MM/dd/yyyy HH:mm:ss').format(timeNow.toLocal());
     try {
       var param = {
-        "keyCert":
-            Utils.generateMd5(Constant.NEXT_PUBLIC_KEY_CERT + formattedTime),
+        "keyCert": Utils.generateMd5(Constant.NEXT_PUBLIC_KEY_CERT + formattedTime),
         "time": formattedTime,
         "roomUuid": listChat[index].uuid,
         "state": isPin == true ? 0 : 1
       };
-      var response =
-          await APICaller.getInstance().post('v1/Chat/pin-message', param);
+      var response = await APICaller.getInstance().post('v1/Chat/pin-message', param);
       if (response != null) {
         if (isPin == false) // pin
         {
@@ -524,35 +493,37 @@ class ThemeControler extends GetxController {
         }
       }
     } catch (e) {
-      Utils.showSnackBar(
-          title: TextByNation.getStringByKey('notification'), message: '$e');
+      Utils.showToast(
+        Get.overlayContext!,
+        '$e',
+        type: ToastType.ERROR,
+      );
     } finally {
       // isLoading.value = false;
     }
   }
 
   Future deleteMessage(int index) async {
-    String formattedTime =
-        DateFormat('MM/dd/yyyy HH:mm:ss').format(timeNow.toLocal());
+    String formattedTime = DateFormat('MM/dd/yyyy HH:mm:ss').format(timeNow.toLocal());
     try {
-      var param = {
-        "keyCert":
-            Utils.generateMd5(Constant.NEXT_PUBLIC_KEY_CERT + formattedTime),
-        "time": formattedTime,
-        "uuid": listChat[index].uuid
-      };
-      var response = await APICaller.getInstance()
-          .delete('v1/Chat/delete-message-room', body: param);
+      var param = {"keyCert": Utils.generateMd5(Constant.NEXT_PUBLIC_KEY_CERT + formattedTime), "time": formattedTime, "uuid": listChat[index].uuid};
+      var response = await APICaller.getInstance().delete('v1/Chat/delete-message-room', body: param);
       if (response != null) {
         Get.close(1);
         listChat.removeAt(index);
-        Utils.showSnackBar(
-            title: TextByNation.getStringByKey('notification'),
-            message: TextByNation.getStringByKey('delete_message'));
+        Utils.showToast(
+          Get.overlayContext!,
+          TextByNation.getStringByKey('delete_message'),
+          type: ToastType.SUCCESS,
+        );
+        // Utils.showSnackBar(title: TextByNation.getStringByKey('notification'), message: TextByNation.getStringByKey('delete_message'));
       }
     } catch (e) {
-      Utils.showSnackBar(
-          title: TextByNation.getStringByKey('notification'), message: '$e');
+      Utils.showToast(
+        Get.overlayContext!,
+        '$e',
+        type: ToastType.ERROR,
+      );
     } finally {
       isLoading.value = false;
     }
@@ -563,26 +534,29 @@ class ThemeControler extends GetxController {
   }
 
   clearMessage({required int index}) async {
-    String formattedTime =
-        DateFormat('MM/dd/yyyy HH:mm:ss').format(timeNow.toLocal());
+    String formattedTime = DateFormat('MM/dd/yyyy HH:mm:ss').format(timeNow.toLocal());
     try {
-      var param = {
-        "keyCert":
-            Utils.generateMd5(Constant.NEXT_PUBLIC_KEY_CERT + formattedTime),
-        "time": formattedTime,
-        "uuid": listChat[index].uuid
-      };
-      var data = await APICaller.getInstance()
-          .delete('v1/Chat/delete-history-message-room', body: param);
+      var param = {"keyCert": Utils.generateMd5(Constant.NEXT_PUBLIC_KEY_CERT + formattedTime), "time": formattedTime, "uuid": listChat[index].uuid};
+      var data = await APICaller.getInstance().delete('v1/Chat/delete-history-message-room', body: param);
       if (data != null) {
-        Utils.showSnackBar(
-            title: TextByNation.getStringByKey('notification'),
-            message: TextByNation.getStringByKey('delete_message'));
+        Utils.showToast(
+          Get.overlayContext!,
+          TextByNation.getStringByKey('delete_message'),
+          type: ToastType.SUCCESS,
+        );
+        //  Utils.showToast(
+        //         Get.overlayContext!,
+        //       '$e',
+        //         type: ToastType.ERROR,
+        //       );title: TextByNation.getStringByKey('notification'), message: TextByNation.getStringByKey('delete_message'));
         refreshListChat();
       }
     } catch (e) {
-      Utils.showSnackBar(
-          title: TextByNation.getStringByKey('notification'), message: '$e');
+      Utils.showToast(
+        Get.overlayContext!,
+        '$e',
+        type: ToastType.ERROR,
+      );
     }
   }
 
@@ -593,8 +567,7 @@ class ThemeControler extends GetxController {
   ];
 
   forwardMessage({required String uuid}) async {
-    await _socketManager.forwardMessage(
-        roomUuid: uuid, msgLineUuid: forward.uuid!);
+    await _socketManager.forwardMessage(roomUuid: uuid, msgLineUuid: forward.uuid!);
   }
 
 // Khởi tạo với giá trị -1 nghĩa là chưa có icon nào được chọn.

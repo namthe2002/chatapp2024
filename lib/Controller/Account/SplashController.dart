@@ -1,6 +1,7 @@
 import 'package:get/get.dart';
 import 'package:live_yoko/Global/Constant.dart';
 import 'package:live_yoko/Navigation/Navigation.dart';
+import 'package:live_yoko/Navigation/RouteDefine.dart';
 import 'package:live_yoko/Utils/Utils.dart';
 
 class SplashController extends GetxController {
@@ -9,14 +10,13 @@ class SplashController extends GetxController {
     super.onInit();
     _init();
   }
+
   void _init() async {
-    await Future.delayed(
-        Duration(seconds: 3)); // Increased to 7 seconds for testing
-    String accessToken =
-        await Utils.getStringValueWithKey(Constant.ACCESS_TOKEN);
+    await Future.delayed(Duration(seconds: 3)); // Increased to 7 seconds for testing
+    String accessToken = await Utils.getStringValueWithKey(Constant.ACCESS_TOKEN);
     print('Access Token: $accessToken');
     if (accessToken.isEmpty) {
-      Navigation.navigateGetOffAll(page: 'Login');
+      Navigation.navigateGetxOff(routeName: RouteDefine.login);
     } else {
       await Utils.login();
     }

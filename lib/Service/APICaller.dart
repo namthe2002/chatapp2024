@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 import "dart:html" as html;
 import 'dart:typed_data';
+import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:http_parser/http_parser.dart';
 import 'package:live_yoko/Global/TextByNation.dart';
@@ -10,11 +11,10 @@ import 'package:live_yoko/Utils/Translator.dart';
 
 import '../Global/GlobalValue.dart';
 import '../Utils/Utils.dart';
+import '../Utils/enum.dart';
 
 class APICaller {
   static APICaller _apiCaller = APICaller();
-
-
 
   final String BASE_URL = "https://tw-apimaster-v2.anbeteam.io.vn/api/";
   final String BASE_URL_MEDIA = "https://livestreammedia.funcasino.vip/";
@@ -36,23 +36,22 @@ class APICaller {
     Uri uri = Uri.parse(BASE_URL + endpoint);
     final finalUri = uri.replace(queryParameters: body);
 
-    final response = await http
-        .get(finalUri, headers: requestHeaders)
-        .timeout(const Duration(seconds: 30), onTimeout: () {
-      return http.Response(
-          TextByNation.getStringByKey('error_api_no_connect'), 408);
+    final response = await http.get(finalUri, headers: requestHeaders).timeout(const Duration(seconds: 30), onTimeout: () {
+      return http.Response(TextByNation.getStringByKey('error_api_no_connect'), 408);
     });
     Utils.backLogin(response.statusCode == 401);
     if (response.statusCode != 200) {
       return null;
     }
     if (jsonDecode(response.body)['error']['code'] != 0) {
-      translator.init2();
-      String translateData = await translator
-          .translate(jsonDecode(response.body)['error']['message']);
-      Utils.showSnackBar(
-          title: TextByNation.getStringByKey('notification'),
-          message: translateData);
+      // translator.init2();
+      // String translateData = await translator.translate(jsonDecode(response.body)['error']['message']);
+      // Utils.showSnackBar(title: TextByNation.getStringByKey('notification'), message: jsonDecode(response.body)['error']['message']);
+      Utils.showToast(
+        Get.overlayContext!,
+        jsonDecode(response.body)['error']['message'],
+        type: ToastType.ERROR,
+      );
       return null;
     }
     return jsonDecode(response.body);
@@ -66,28 +65,28 @@ class APICaller {
     };
     final uri = Uri.parse(BASE_URL + endpoint);
 
-    final response = await http
-        .post(uri, headers: requestHeaders, body: jsonEncode(body))
-        .timeout(
+    final response = await http.post(uri, headers: requestHeaders, body: jsonEncode(body)).timeout(
       const Duration(seconds: 30),
       onTimeout: () {
-        return http.Response(
-            TextByNation.getStringByKey('error_api_no_connect'), 408);
+        return http.Response(TextByNation.getStringByKey('error_api_no_connect'), 408);
       },
     );
     Utils.backLogin(response.statusCode == 401);
     if (response.statusCode != 200) {
       return null;
     }
-    if (jsonDecode(response.body)['error']['code'] != 0) {
-      translator.init2();
-      String translateData = await translator
-          .translate(jsonDecode(response.body)['error']['message']);
-      Utils.showSnackBar(
-          title: TextByNation.getStringByKey('notification'),
-          message: translateData);
-      return null;
-    }
+    // if (jsonDecode(response.body)['error']['code'] != 0) {
+    //   // translator.init2();
+    //   // String translateData = await translator.translate(jsonDecode(response.body)['error']['message']);
+    //   // Utils.showSnackBar(title: TextByNation.getStringByKey('notification'), message: jsonDecode(response.body)['error']['message']);
+    //   // Utils.showToast(
+    //   //   Get.context!,
+    //   //   jsonDecode(response.body)['error']['message'],
+    //   //   type: ToastType.ERROR,
+    //
+    //   // );
+    //   return jsonDecode(response.body);
+    // }
     return jsonDecode(response.body);
   }
 
@@ -107,8 +106,7 @@ class APICaller {
     var response = await http.Response.fromStream(streamedResponse).timeout(
       const Duration(seconds: 30),
       onTimeout: () {
-        return http.Response(
-            TextByNation.getStringByKey('error_api_no_connect'), 408);
+        return http.Response(TextByNation.getStringByKey('error_api_no_connect'), 408);
       },
     );
     Utils.backLogin(response.statusCode == 401);
@@ -116,23 +114,21 @@ class APICaller {
       return null;
     }
     if (jsonDecode(response.body)['error']['code'] != 0) {
-      translator.init2();
-      String translateData = await translator
-          .translate(jsonDecode(response.body)['error']['message']);
-      Utils.showSnackBar(
-          title: TextByNation.getStringByKey('notification'),
-          message: translateData);
+      // translator.init2();
+      // String translateData = await translator.translate(jsonDecode(response.body)['error']['message']);
+      // Utils.showSnackBar(title: TextByNation.getStringByKey('notification'), message: jsonDecode(response.body)['error']['message']);
+      Utils.showToast(
+        Get.context!,
+        jsonDecode(response.body)['error']['message'],
+        type: ToastType.ERROR,
+      );
       return null;
     }
     return jsonDecode(response.body);
   }
 
   Future<dynamic> putFile(
-      {required String endpoint,
-      required File filePath,
-      required int type,
-      required String keyCert,
-      required String time}) async {
+      {required String endpoint, required File filePath, required int type, required String keyCert, required String time}) async {
     Map<String, String> requestHeaders = {
       'Content-type': 'multipart/form-data',
       'Authorization': GlobalValue.getInstance().getToken(),
@@ -140,8 +136,7 @@ class APICaller {
     final uri = Uri.parse(BASE_URL + endpoint);
 
     final request = http.MultipartRequest('PUT', uri);
-    request.files
-        .add(await http.MultipartFile.fromPath('ImageFile', filePath.path));
+    request.files.add(await http.MultipartFile.fromPath('ImageFile', filePath.path));
     request.fields['Type'] = '$type';
     request.fields['KeyCert'] = '$keyCert';
     request.fields['Time'] = '$time';
@@ -151,35 +146,34 @@ class APICaller {
     var response = await http.Response.fromStream(streamedResponse).timeout(
       const Duration(seconds: 30),
       onTimeout: () {
-        return http.Response(
-            TextByNation.getStringByKey('error_api_no_connect'), 408);
+        return http.Response(TextByNation.getStringByKey('error_api_no_connect'), 408);
       },
     );
     Utils.backLogin(response.statusCode == 401);
     if (response.statusCode != 200) {
-
       return null;
     }
     if (jsonDecode(response.body)['error']['code'] != 0) {
       translator.init2();
-      String translateData = await translator
-          .translate(jsonDecode(response.body)['error']['message']);
-      Utils.showSnackBar(
-          title: TextByNation.getStringByKey('notification'),
-          message: translateData);
+      String translateData = await translator.translate(jsonDecode(response.body)['error']['message']);
+      Utils.showToast(
+        Get.overlayContext!,
+        translateData,
+        type: ToastType.ERROR,
+      );
+      // Utils.showSnackBar(title: TextByNation.getStringByKey('notification'), message: translateData);
       return null;
     }
     return jsonDecode(response.body);
   }
 
-
-
   Future<dynamic> putFilesWeb2(
       {required String endpoint,
-        required List<Uint8List> fileData,
-        required int type,
-        required String keyCert,
-        required String time,required String fileName}) async {
+      required List<Uint8List> fileData,
+      required int type,
+      required String keyCert,
+      required String time,
+      required String fileName}) async {
     Map<String, String> requestHeaders = {
       'Content-type': 'multipart/form-data',
       'Authorization': GlobalValue.getInstance().getToken(),
@@ -192,11 +186,10 @@ class APICaller {
       var f = http.MultipartFile.fromBytes(
         'ImageFile',
         file,
-        filename:fileName,
+        filename: fileName,
       );
       files.add(f);
     }
-
 
     request.files.addAll(files);
     request.fields['Type'] = '$type';
@@ -208,8 +201,7 @@ class APICaller {
     var response = await http.Response.fromStream(streamedResponse).timeout(
       const Duration(seconds: 30),
       onTimeout: () {
-        return http.Response(
-            TextByNation.getStringByKey('error_api_no_connect'), 408);
+        return http.Response(TextByNation.getStringByKey('error_api_no_connect'), 408);
       },
     );
 
@@ -219,23 +211,21 @@ class APICaller {
     }
     if (jsonDecode(response.body)['error']['code'] != 0) {
       translator.init2();
-      String translateData = await translator
-          .translate(jsonDecode(response.body)['error']['message']);
-      Utils.showSnackBar(
-          title: TextByNation.getStringByKey('notification'),
-          message: translateData);
+      String translateData = await translator.translate(jsonDecode(response.body)['error']['message']);
+
+      Utils.showToast(
+        Get.overlayContext!,
+        translateData,
+        type: ToastType.ERROR,
+      );
+      // Utils.showSnackBar(title: TextByNation.getStringByKey('notification'), message: translateData);
       return null;
     }
     return jsonDecode(response.body);
   }
 
-
   Future<dynamic> putFilesWeb(
-      {required String endpoint,
-      required List<html.File> fileData,
-      required int type,
-      required String keyCert,
-      required String time}) async {
+      {required String endpoint, required List<html.File> fileData, required int type, required String keyCert, required String time}) async {
     Map<String, String> requestHeaders = {
       'Content-type': 'multipart/form-data',
       'Authorization': GlobalValue.getInstance().getToken(),
@@ -257,7 +247,6 @@ class APICaller {
       files.add(f);
     }
 
-
     request.files.addAll(files);
     request.fields['Type'] = '$type';
     request.fields['KeyCert'] = '$keyCert';
@@ -268,8 +257,7 @@ class APICaller {
     var response = await http.Response.fromStream(streamedResponse).timeout(
       const Duration(seconds: 30),
       onTimeout: () {
-        return http.Response(
-            TextByNation.getStringByKey('error_api_no_connect'), 408);
+        return http.Response(TextByNation.getStringByKey('error_api_no_connect'), 408);
       },
     );
 
@@ -279,22 +267,20 @@ class APICaller {
     }
     if (jsonDecode(response.body)['error']['code'] != 0) {
       translator.init2();
-      String translateData = await translator
-          .translate(jsonDecode(response.body)['error']['message']);
-      Utils.showSnackBar(
-          title: TextByNation.getStringByKey('notification'),
-          message: translateData);
+      String translateData = await translator.translate(jsonDecode(response.body)['error']['message']);
+      Utils.showToast(
+        Get.overlayContext!,
+        translateData,
+        type: ToastType.ERROR,
+      );
+      // Utils.showSnackBar(title: TextByNation.getStringByKey('notification'), message: translateData);
       return null;
     }
     return jsonDecode(response.body);
   }
 
   Future<dynamic> putFiles(
-      {required String endpoint,
-      required List<File> filePath,
-      required int type,
-      required String keyCert,
-      required String time}) async {
+      {required String endpoint, required List<File> filePath, required int type, required String keyCert, required String time}) async {
     Map<String, String> requestHeaders = {
       'Content-type': 'multipart/form-data',
       'Authorization': GlobalValue.getInstance().getToken(),
@@ -317,8 +303,7 @@ class APICaller {
     var response = await http.Response.fromStream(streamedResponse).timeout(
       const Duration(seconds: 30),
       onTimeout: () {
-        return http.Response(
-            TextByNation.getStringByKey('error_api_no_connect'), 408);
+        return http.Response(TextByNation.getStringByKey('error_api_no_connect'), 408);
       },
     );
 
@@ -331,11 +316,13 @@ class APICaller {
     }
     if (jsonDecode(response.body)['error']['code'] != 0) {
       translator.init2();
-      String translateData = await translator
-          .translate(jsonDecode(response.body)['error']['message']);
-      Utils.showSnackBar(
-          title: TextByNation.getStringByKey('notification'),
-          message: translateData);
+      String translateData = await translator.translate(jsonDecode(response.body)['error']['message']);
+      Utils.showToast(
+        Get.overlayContext!,
+        translateData,
+        type: ToastType.ERROR,
+      );
+      // Utils.showSnackBar(title: TextByNation.getStringByKey('notification'), message: translateData);
       return null;
     }
     return jsonDecode(response.body);
@@ -363,8 +350,7 @@ class APICaller {
     var response = await http.Response.fromStream(streamedResponse).timeout(
       const Duration(seconds: 30),
       onTimeout: () {
-        return http.Response(
-            TextByNation.getStringByKey('error_api_no_connect'), 408);
+        return http.Response(TextByNation.getStringByKey('error_api_no_connect'), 408);
       },
     );
     Utils.backLogin(response.statusCode == 401);
@@ -376,11 +362,14 @@ class APICaller {
     }
     if (jsonDecode(response.body)['error']['code'] != 0) {
       translator.init2();
-      String translateData = await translator
-          .translate(jsonDecode(response.body)['error']['message']);
-      Utils.showSnackBar(
-          title: TextByNation.getStringByKey('notification'),
-          message: translateData);
+      String translateData = await translator.translate(jsonDecode(response.body)['error']['message']);
+      Utils.showToast(
+        Get.overlayContext!,
+        translateData,
+        type: ToastType.ERROR,
+      );
+
+      // Utils.showSnackBar(title: TextByNation.getStringByKey('notification'), message: translateData);
       return null;
     }
     return jsonDecode(response.body);
@@ -392,20 +381,15 @@ class APICaller {
       'Accept': 'application/json',
       'Authorization': GlobalValue.getInstance().getToken(),
       'AccountUuid': GlobalValue.getInstance().getUuid(),
-      'token': GlobalValue.getInstance()
-          .getToken()
-          .substring(GlobalValue.getInstance().getToken().indexOf(' ') + 1),
+      'token': GlobalValue.getInstance().getToken().substring(GlobalValue.getInstance().getToken().indexOf(' ') + 1),
       'Product': 'User'
     };
     final uri = Uri.parse(BASE_URL + endpoint);
 
-    final response = await http
-        .put(uri, headers: requestHeaders, body: jsonEncode(body))
-        .timeout(
+    final response = await http.put(uri, headers: requestHeaders, body: jsonEncode(body)).timeout(
       const Duration(seconds: 30),
       onTimeout: () {
-        return http.Response(
-            TextByNation.getStringByKey('error_api_no_connect'), 408);
+        return http.Response(TextByNation.getStringByKey('error_api_no_connect'), 408);
       },
     );
     Utils.backLogin(response.statusCode == 401);
@@ -417,11 +401,13 @@ class APICaller {
     }
     if (jsonDecode(response.body)['error']['code'] != 0) {
       translator.init2();
-      String translateData = await translator
-          .translate(jsonDecode(response.body)['error']['message']);
-      Utils.showSnackBar(
-          title: TextByNation.getStringByKey('notification'),
-          message: translateData);
+      String translateData = await translator.translate(jsonDecode(response.body)['error']['message']);
+      // Utils.showSnackBar(title: TextByNation.getStringByKey('notification'), message: translateData);
+      Utils.showToast(
+        Get.overlayContext!,
+        translateData,
+        type: ToastType.ERROR,
+      );
       return null;
     }
     return jsonDecode(response.body);
@@ -437,13 +423,10 @@ class APICaller {
     };
     final uri = Uri.parse(BASE_URL + endpoint);
 
-    final response = await http
-        .delete(uri, headers: requestHeaders, body: jsonEncode(body))
-        .timeout(
+    final response = await http.delete(uri, headers: requestHeaders, body: jsonEncode(body)).timeout(
       const Duration(seconds: 30),
       onTimeout: () {
-        return http.Response(
-            TextByNation.getStringByKey('error_api_no_connect'), 408);
+        return http.Response(TextByNation.getStringByKey('error_api_no_connect'), 408);
       },
     );
     Utils.backLogin(response.statusCode == 401);
@@ -455,11 +438,13 @@ class APICaller {
     }
     if (jsonDecode(response.body)['error']['code'] != 0) {
       translator.init2();
-      String translateData = await translator
-          .translate(jsonDecode(response.body)['error']['message']);
-      Utils.showSnackBar(
-          title: TextByNation.getStringByKey('notification'),
-          message: translateData);
+      String translateData = await translator.translate(jsonDecode(response.body)['error']['message']);
+      Utils.showToast(
+        Get.overlayContext!,
+        translateData,
+        type: ToastType.ERROR,
+      );
+      // Utils.showSnackBar(title: TextByNation.getStringByKey('notification'), message: translateData);
       return null;
     }
     return jsonDecode(response.body);

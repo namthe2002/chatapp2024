@@ -1,6 +1,7 @@
 class Images {
   static const String _img_ = 'asset/images/';
   static const String _ic_ = 'asset/icons/';
+
   // static const String _sticker_ = 'asset/sticker/';
 
   ///icon
@@ -55,14 +56,11 @@ class Images {
   static const String lock_message_ic = _ic_ + 'lock_message.svg';
   static const String lock_message_chat_ic = _ic_ + 'lock_message_chat.svg';
 
-  static const String face_with_tears_of_joy_ic =
-      _ic_ + 'face_with_tears_of_joy.svg';
+  static const String face_with_tears_of_joy_ic = _ic_ + 'face_with_tears_of_joy.svg';
   static const String fire_ic = _ic_ + 'fire.svg';
   static const String loudly_crying_face_ic = _ic_ + 'loudly_crying_face.svg';
-  static const String smiling_face_with_heart_eyes_ic =
-      _ic_ + 'smiling_face_with_heart_eyes.svg';
-  static const String smiling_face_with_sunglasses_ic =
-      _ic_ + 'smiling_face_with_sunglasses.svg';
+  static const String smiling_face_with_heart_eyes_ic = _ic_ + 'smiling_face_with_heart_eyes.svg';
+  static const String smiling_face_with_sunglasses_ic = _ic_ + 'smiling_face_with_sunglasses.svg';
   static const String like_ic = _ic_ + 'like.svg';
   static const String auto_delete_ic = _ic_ + 'auto_delete.svg';
   static const String clear_history_ic = _ic_ + 'clear_history.svg';
@@ -76,8 +74,7 @@ class Images {
   static const String role_ic = _ic_ + 'role.svg';
   static const String add_member_ic = _ic_ + 'add_member.svg';
   static const String pencil_edit_ic = _ic_ + 'pencil_edit.svg';
-  static const String three_dot_horizontal_ic =
-      _ic_ + 'three_dot_horizontal.svg';
+  static const String three_dot_horizontal_ic = _ic_ + 'three_dot_horizontal.svg';
 
   static const String back_arrow_ic = _ic_ + 'back_arrow.svg';
   static const String emoji_ic = _ic_ + 'emoji.svg';
@@ -90,14 +87,16 @@ class Images {
   ///image
   static const String bg_dark_img = _img_ + 'bg_dark.png';
   static const String bg_light_img = _img_ + 'bg_light.png';
-  static const String empty_chat_dark_mode_img =
-      _img_ + 'empty_chat_darkmode.png';
-  static const String empty_chat_light_mode_img =
-      _img_ + 'empty_chat_lightmode.png';
+  static const String empty_chat_dark_mode_img = _img_ + 'empty_chat_darkmode.png';
+  static const String empty_chat_light_mode_img = _img_ + 'empty_chat_lightmode.png';
   static const String unilink_ic = _ic_ + 'unilink.svg';
   static const String promote_role_ic = _ic_ + 'promote_role.svg';
 
-  static const String no_member_locked = _img_ + 'no_member_locked.png';
+  static const String no_member_locked = _ic_ + 'no_member_locked.png';
+  static const String ic_warning = _ic_ + 'ic_warning.png';
+  static const String ic_notification = _ic_ + 'ic_notification.png';
+  static const String ic = _img_ + 'ic_notification.png';
+  static const String ic_tick_circle = _ic_ + 'ic_tick_circle.png';
 
-///sticker
+  ///sticker
 }

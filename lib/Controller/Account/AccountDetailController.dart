@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:live_yoko/Controller/Account/AdminAccountController.dart';
@@ -7,6 +9,8 @@ import 'package:live_yoko/Models/Account/Account.dart';
 import 'package:live_yoko/Models/Chat/PositionType.dart';
 import 'package:live_yoko/Service/APICaller.dart';
 import 'package:live_yoko/Utils/Utils.dart';
+
+import '../../Utils/enum.dart';
 
 class AccountDetailController extends GetxController {
   List<PositionType> positionList = [
@@ -51,13 +55,25 @@ class AccountDetailController extends GetxController {
       if (data != null) {
         account.value.roleId = positionList[index].value!;
         account.refresh();
-        Utils.showSnackBar(
-            title: TextByNation.getStringByKey('notification'),
-            message: TextByNation.getStringByKey('permission_successfully'));
+        // Utils.showSnackBar(
+        //     title: TextByNation.getStringByKey('notification'),
+        //     message: );
+        Utils.showToast(
+          Get.overlayContext!,
+          TextByNation.getStringByKey('permission_successfully'),
+          type: ToastType.ERROR,
+        );
       }
     } catch (e) {
-      Utils.showSnackBar(
-          title: TextByNation.getStringByKey('notification'), message: '$e');
+      // Utils.showSnackBar(
+      //     title: TextByNation.getStringByKey('notification'), message: '$e');
+
+      Utils.showToast(
+        Get.overlayContext!,
+        '$e',
+        type: ToastType.ERROR,
+      );
+
     }
   }
 
@@ -74,14 +90,26 @@ class AccountDetailController extends GetxController {
           .post('v1/Account/reset-password', param);
 
       if (data != null) {
-        Utils.showSnackBar(
-            title: TextByNation.getStringByKey('notification'),
-            message: TextByNation.getStringByKey('reset_pass_ss'));
+        // Utils.showSnackBar(
+        //     title: TextByNation.getStringByKey('notification'),
+        //     message: TextByNation.getStringByKey('reset_pass_ss'));
+
+        Utils.showToast(
+          Get.overlayContext!,
+          TextByNation.getStringByKey('reset_pass_ss'),
+          type: ToastType.SUCCESS,
+        );
+
         // Get.close(1);
       }
     } catch (e) {
-      Utils.showSnackBar(
-          title: TextByNation.getStringByKey('notification'), message: '$e');
+      // Utils.showSnackBar(
+      //     title: TextByNation.getStringByKey('notification'), message: '$e');
+      Utils.showToast(
+        Get.overlayContext!,
+        '$e',
+        type: ToastType.ERROR,
+      );
     } finally {
       isLoading.value = false;
     }
@@ -111,13 +139,23 @@ class AccountDetailController extends GetxController {
         controller.listContact.clear();
         await controller.getFriend(
             controller.selectPosition.value, controller.selectStatus.value + 1);
-        Utils.showSnackBar(
-            title: TextByNation.getStringByKey('notification'),
-            message: TextByNation.getStringByKey('status_successfully'));
+        // Utils.showSnackBar(
+        //     title: TextByNation.getStringByKey('notification'),
+        //     message: TextByNation.getStringByKey('status_successfully'));
+        Utils.showToast(
+          Get.overlayContext!,
+          TextByNation.getStringByKey('status_successfully'),
+          type: ToastType.SUCCESS,
+        );
       }
     } catch (e) {
-      Utils.showSnackBar(
-          title: TextByNation.getStringByKey('notification'), message: '$e');
+      // Utils.showSnackBar(
+      //     title: TextByNation.getStringByKey('notification'), message: '$e');
+      Utils.showToast(
+        Get.overlayContext!,
+        '$e',
+        type: ToastType.ERROR,
+      );
     }
   }
 }

@@ -4,7 +4,8 @@ import 'package:get/get.dart';
 import 'package:live_yoko/Controller/Account/SplashController.dart';
 
 class Splash extends StatelessWidget {
-  // final delete = Get.delete<SplashController>();
+  Splash({super.key});
+
   final controller = Get.put(SplashController());
 
   @override

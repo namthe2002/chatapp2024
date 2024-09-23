@@ -6,7 +6,8 @@ import 'package:live_yoko/Global/TextByNation.dart';
 import 'package:live_yoko/Service/APICaller.dart';
 import 'package:live_yoko/Utils/Utils.dart';
 
-import '../../Navigation/Navigation.dart';
+import '../../Utils/enum.dart';
+
 
 class ChangePasswordController extends GetxController {
   Rx<TextEditingController> passOld = TextEditingController().obs;
@@ -19,7 +20,6 @@ class ChangePasswordController extends GetxController {
   RxBool isHidePassNewEn = true.obs;
   DateTime timeNow = DateTime.now();
   RxBool isActive = false.obs;
-  @override
 
 
   void initData() async {
@@ -60,19 +60,34 @@ class ChangePasswordController extends GetxController {
 
   changePassWord() async {
     if (passOld.value.text == passNew.value.text) {
-      Utils.showSnackBar(
-          title: TextByNation.getStringByKey('notification'),
-          message: TextByNation.getStringByKey('pass_valiate_distinctive'));
+      // Utils.showSnackBar(
+      //     title: TextByNation.getStringByKey('notification'),
+      //     message: TextByNation.getStringByKey('pass_valiate_distinctive'));
+      Utils.showToast(
+        Get.overlayContext!,
+        TextByNation.getStringByKey('pass_valiate_distinctive'),
+        type: ToastType.WARNING,
+      );
       return;
     } else if (passNewRe.value.text != passNew.value.text) {
-      Utils.showSnackBar(
-          title: TextByNation.getStringByKey('notification'),
-          message: TextByNation.getStringByKey('pass_valiate_overlap'));
+      // Utils.showSnackBar(
+      //     title: TextByNation.getStringByKey('notification'),
+      //     message: TextByNation.getStringByKey('pass_valiate_overlap'));
+      Utils.showToast(
+        Get.overlayContext!,
+        TextByNation.getStringByKey('pass_valiate_overlap'),
+        type: ToastType.ERROR,
+      );
       return;
     } else if (passNew.value.text.length < 8) {
-      Utils.showSnackBar(
-          title: TextByNation.getStringByKey('notification'),
-          message: TextByNation.getStringByKey('pass_validate'));
+      // Utils.showSnackBar(
+      //     title: TextByNation.getStringByKey('notification'),
+      //     message: TextByNation.getStringByKey('pass_validate'));
+      Utils.showToast(
+        Get.overlayContext!,
+        TextByNation.getStringByKey('pass_validate'),
+        type: ToastType.ERROR,
+      );
       return;
     } else {
       isLoading.value = true;
@@ -92,14 +107,25 @@ class ChangePasswordController extends GetxController {
             .post('v1/Account/change-password', param);
         if (data != null) {
           await Utils.saveStringWithKey(Constant.PASSWORD, passNew.value.text);
-          Utils.showSnackBar(
-              title: TextByNation.getStringByKey('notification'),
-              message: TextByNation.getStringByKey('pass_ss'));
+          // Utils.showSnackBar(
+          //     title: TextByNation.getStringByKey('notification'),
+          //     message: TextByNation.getStringByKey('pass_ss'));
+          Utils.showToast(
+            Get.overlayContext!,
+            TextByNation.getStringByKey('pass_ss'),
+            type: ToastType.SUCCESS,
+          );
           Get.close(1);
         }
       } catch (e) {
-        Utils.showSnackBar(
-            title: TextByNation.getStringByKey('notification'), message: '$e');
+        //
+        // Utils.showSnackBar(
+        //     title: TextByNation.getStringByKey('notification'), message: '$e');
+        Utils.showToast(
+          Get.overlayContext!,
+          '$e',
+          type: ToastType.ERROR,
+        );
       } finally {
         isLoading.value = false;
       }

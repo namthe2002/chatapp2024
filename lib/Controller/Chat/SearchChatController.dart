@@ -12,6 +12,8 @@ import 'package:live_yoko/Service/APICaller.dart';
 import 'package:live_yoko/Service/SocketManager.dart';
 import 'package:live_yoko/Utils/Utils.dart';
 
+import '../../Utils/enum.dart';
+
 class SearchChatController extends GetxController {
   Rx<TextEditingController> filterController = TextEditingController().obs;
   RxBool isSearch = false.obs;
@@ -84,7 +86,12 @@ class SearchChatController extends GetxController {
         }
       }
     } catch (e) {
-      Utils.showSnackBar(title: 'Thông báo', message: '$e');
+      Utils.showToast(
+        Get.overlayContext!,
+        '$e',
+        type: ToastType.ERROR,
+      );
+      // Utils.showSnackBar(title: 'Thông báo', message: '$e');
     } finally {
       isLoading.value = await false;
     }

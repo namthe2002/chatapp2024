@@ -1,7 +1,9 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:html' as html;
 
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -10,6 +12,7 @@ import 'package:get/get.dart';
 import 'package:get_thumbnail_video/index.dart';
 import 'package:live_yoko/Controller/Chat/ChatController.dart';
 import 'package:live_yoko/Controller/Chat/ProfileChatDetailController.dart';
+import 'package:live_yoko/Controller/Chat/SearchChatController.dart';
 import 'package:live_yoko/Global/ColorValue.dart';
 import 'package:live_yoko/Global/Constant.dart';
 import 'package:live_yoko/Global/TextByNation.dart';
@@ -33,7 +36,8 @@ import '../../core/constant/sticker/sticker.dart';
 import '../../widget/my_entry.dart';
 import '../Account/Friend.dart';
 import '../Account/NotificationSetting.dart';
-import 'ProfileChatDetail2.dart';
+import 'ProfileChatDetail.dart';
+import 'SearchChat.dart';
 
 class HomeChatWebsite extends StatefulWidget {
   @override
@@ -41,7 +45,7 @@ class HomeChatWebsite extends StatefulWidget {
 }
 
 class _HomeChatWebsiteState extends State<HomeChatWebsite> {
-  final _homeController = Get.put(ChatController());
+  late final ChatController _homeController;
   var delete = Get.delete<ChatController>();
 
   final ValueNotifier<double> progress = ValueNotifier(0.0); // Initialize progress notifier
@@ -57,6 +61,7 @@ class _HomeChatWebsiteState extends State<HomeChatWebsite> {
 
   @override
   void initState() {
+    _homeController = Get.put(ChatController());
     _homeController.selectedChatItemIndex.value = 1;
     _homeController.onInitData();
     simulateLoading();
@@ -67,12 +72,6 @@ class _HomeChatWebsiteState extends State<HomeChatWebsite> {
   void dispose() {
     Get.delete<ChatController>();
     super.dispose();
-  }
-
-  void didChangeDependencies() {
-    // TODO: implement didChangeDependencies
-    // _homeController.updateConstHomeWidget(widget: homeChatWidget());
-    super.didChangeDependencies();
   }
 
   @override
@@ -910,13 +909,48 @@ class _HomeChatWebsiteState extends State<HomeChatWebsite> {
               ),
               Container(
                 margin: EdgeInsets.symmetric(horizontal: 24),
-                height: 40,
+                height: 48,
                 decoration: BoxDecoration(
                   color: Get.isDarkMode ? ColorValue.colorBrSearch : ColorValue.colorBrSearch,
                   borderRadius: BorderRadius.circular(20),
                 ),
-                child: TextField(
-                  onChanged: (value) {},
+                child:
+                TextField(
+                  controller: _homeController.searchController,
+                  focusNode: _homeController.searchNode,
+                  onTap: () async {
+                    if (_homeController.searchController.text.isEmpty) {
+                      _homeController.startTimer();
+                    }
+                  },
+                  onChanged: (value) async {
+                    if (Get.isRegistered<SearchChatController>() == false) {
+                      SearchChatController controller = Get.put(SearchChatController());
+                      if (value.trim() == '') {
+                        controller.isSearch.value = await false;
+                      } else {
+                        controller.isSearch.value = await true;
+                      }
+
+                      if (controller.debounce?.isActive ?? false) controller.debounce?.cancel();
+                      controller.debounce = Timer(Duration(milliseconds: 2000), () async {
+                        await controller.refreshData();
+                      });
+                    } else {
+                      SearchChatController controller = Get.find<SearchChatController>();
+                      if (value.trim() == '') {
+                        controller.isSearch.value = await false;
+                      } else {
+                        controller.isSearch.value = await true;
+                      }
+
+                      if (controller.debounce?.isActive ?? false) controller.debounce?.cancel();
+                      controller.debounce = Timer(Duration(milliseconds: 2000), () async {
+                        await controller.refreshData();
+                      });
+                    }
+                  },
+                  keyboardType: TextInputType.text,
                   decoration: InputDecoration(
                     labelText: AppLocalizations.of(context)!.search,
                     floatingLabelStyle: TextStyle(color: Color.fromRGBO(17, 185, 145, 1)),
@@ -926,62 +960,60 @@ class _HomeChatWebsiteState extends State<HomeChatWebsite> {
                   ),
                   style: TextStyle(fontSize: 14, fontWeight: FontWeight.w400),
                 ),
+                // TextFormField(
+                //     controller: _homeController.searchController,
+                //     focusNode: _homeController.searchNode,
+                //     onTap: () async {
+                //       if (_homeController.searchController.text.isEmpty) {
+                //         _homeController.startTimer();
+                //       }
+                //     },
+                //     onChanged: (value) async {
+                //       if (Get.isRegistered<SearchChatController>() == false) {
+                //         SearchChatController controller = Get.put(SearchChatController());
+                //         if (value.trim() == '') {
+                //           controller.isSearch.value = await false;
+                //         } else {
+                //           controller.isSearch.value = await true;
+                //         }
+                //
+                //         if (controller.debounce?.isActive ?? false) controller.debounce?.cancel();
+                //         controller.debounce = Timer(Duration(milliseconds: 2000), () async {
+                //           await controller.refreshData();
+                //         });
+                //       } else {
+                //         SearchChatController controller = Get.find<SearchChatController>();
+                //         if (value.trim() == '') {
+                //           controller.isSearch.value = await false;
+                //         } else {
+                //           controller.isSearch.value = await true;
+                //         }
+                //
+                //         if (controller.debounce?.isActive ?? false) controller.debounce?.cancel();
+                //         controller.debounce = Timer(Duration(milliseconds: 2000), () async {
+                //           await controller.refreshData();
+                //         });
+                //       }
+                //     },
+                //     keyboardType: TextInputType.text,
+                //     decoration: InputDecoration(
+                //       isDense: true,
+                //       contentPadding: EdgeInsets.fromLTRB(0, 10, 0, 10),
+                //       hintText: TextByNation.getStringByKey('search_chat'),
+                //       hintStyle: TextStyle(fontSize: 13, fontWeight: FontWeight.w400, color: Get.isDarkMode ? Colors.white : ColorValue.colorBorder),
+                //       border: InputBorder.none,
+                //     ),
+                //     style: TextStyle(fontSize: 13, fontWeight: FontWeight.w400, color: Get.isDarkMode ? Colors.white : ColorValue.textColor)),/**/
               ),
               SizedBox(
                 height: 12,
               ),
               Expanded(
-                child: null == _homeController.listChat.length
-                    ? RefreshIndicator(
-                        onRefresh: _homeController.refreshListChat,
-                        child: Padding(
-                          padding: const EdgeInsets.only(top: 200),
-                          child: Align(
-                            alignment: Alignment.center,
-                            child: Column(
-                              children: [
-                                Image.asset(
-                                  'asset/images/listchat_empty.png',
-                                  width: 160,
-                                  height: 128,
-                                ),
-                                SizedBox(
-                                  height: 15,
-                                ),
-                                Text(
-                                  AppLocalizations.of(context)!.label_no_dialog,
-                                  textAlign: TextAlign.center,
-                                  style: TextStyle(
-                                    color: Color(0xFF101114),
-                                    fontSize: 16,
-                                    fontFamily: 'SF Pro Display',
-                                    fontWeight: FontWeight.w400,
-                                    height: 0.09,
-                                  ),
-                                )
-                              ],
-                            ),
-                          ),
-                        ),
-                      )
-                    : RefreshIndicator(
-                        onRefresh: _homeController.refreshListChat,
-                        child: ListView.builder(
-                          controller: _homeController.scrollController,
-                          physics: AlwaysScrollableScrollPhysics(),
-                          itemCount: _homeController.listChat.length + 1,
-                          itemBuilder: (context, index) {
-                            if (index < _homeController.listChat.length) {
-                              return chatItem(context, index);
-                            } else {
-                              return Padding(
-                                padding: EdgeInsets.symmetric(vertical: 30),
-                                child: _homeController.hasMore.value ? CircularProgressIndicator() : const SizedBox(),
-                              );
-                            }
-                          },
-                        ),
-                      ),
+                child: _homeController.showCustomContainer.value
+                    ? SearchChat()
+                    : _homeController.listChat.length == 0
+                        ? _buildEmptyChatList()
+                        : _buildChatList(),
               ),
             ],
           ),
@@ -994,6 +1026,72 @@ class _HomeChatWebsiteState extends State<HomeChatWebsite> {
                 child: buttonAddChat(),
               ),
       ],
+    );
+  }
+
+  Widget _buildEmptyChatList() {
+    return ScrollConfiguration(
+      behavior: ScrollConfiguration.of(context).copyWith(
+        physics: const BouncingScrollPhysics(),
+        dragDevices: {PointerDeviceKind.touch, PointerDeviceKind.mouse, PointerDeviceKind.trackpad},
+      ),
+      child: RefreshIndicator(
+        onRefresh: _homeController.refreshListChat2,
+        child: Padding(
+          padding: const EdgeInsets.only(top: 200),
+          child: Align(
+            alignment: Alignment.center,
+            child: Column(
+              children: [
+                Image.asset(
+                  'asset/images/listchat_empty.png',
+                  width: 160,
+                  height: 128,
+                ),
+                SizedBox(height: 15),
+                Text(
+                  AppLocalizations.of(context)!.label_no_dialog,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: Color(0xFF101114),
+                    fontSize: 16,
+                    fontFamily: 'SF Pro Display',
+                    fontWeight: FontWeight.w400,
+                    height: 0.09,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildChatList() {
+    return ScrollConfiguration(
+      behavior: ScrollConfiguration.of(context).copyWith(
+        physics: const BouncingScrollPhysics(),
+        dragDevices: {PointerDeviceKind.touch, PointerDeviceKind.mouse, PointerDeviceKind.trackpad},
+      ),
+      child: RefreshIndicator(
+        onRefresh: _homeController.refreshListChat2,
+        child: ListView.builder(
+          controller: _homeController.scrollController,
+          physics: AlwaysScrollableScrollPhysics(),
+          itemCount: _homeController.listChat.length + 1,
+          itemBuilder: (context, index) {
+            if (index < _homeController.listChat.length) {
+              return chatItem(context, index);
+            } else {
+              return Padding(
+                padding: EdgeInsets.symmetric(vertical: 30),
+                child: _homeController.hasMore.value ? SizedBox() : const SizedBox(),
+              );
+            }
+          },
+        ),
+      ),
     );
   }
 
@@ -1029,6 +1127,7 @@ class _HomeChatWebsiteState extends State<HomeChatWebsite> {
                 Get.delete<ChatDetailController>();
                 _homeController.selectItem(index);
                 _homeController.selectChatItem(_homeController.listChat[index]);
+                // await Get.toNamed('/chat/${_homeController.selectedChatItem.value?.uuid ?? '1'}',arguments: _homeController.listChat[index]);
               } else {
                 if (_homeController.listChatSelect.contains(_homeController.listChat[index].uuid)) {
                   _homeController.listChatSelect.remove(_homeController.listChat[index].uuid!);
@@ -1041,9 +1140,9 @@ class _HomeChatWebsiteState extends State<HomeChatWebsite> {
             }
           },
           onSecondaryTap: () {
-            html.window.document.onContextMenu.listen((event) {
-              event.preventDefault();
-            });
+            // html.window.document.onContextMenu.listen((event) {
+            //   event.preventDefault();
+            // });
             if (_homeController.forward.uuid == null) {
               showPopupselect(context, index);
             }
@@ -1126,11 +1225,6 @@ class _HomeChatWebsiteState extends State<HomeChatWebsite> {
                                         width: 2, // Độ dày của viền
                                       ),
                                       shape: BoxShape.circle,
-                                      // gradient: LinearGradient(colors: [
-                                      //   Color(0xff39EFA2),
-                                      //   Color(0xff39EFA2),
-                                      //   // Color(0xff48C6D7)
-                                      // ]
                                       color: Color(0xff39EFA2),
                                     )),
                               )
@@ -1787,6 +1881,7 @@ class _HomeChatWebsiteState extends State<HomeChatWebsite> {
                   width: 24,
                   child: Utils.getFileType(Constant.BASE_URL_IMAGE + jsonDecode(_homeController.listChat[index].content.toString())[0]) == "Video"
                       ? GenThumbnailImage(
+                          videoUrl: Constant.BASE_URL_IMAGE + jsonDecode(_homeController.listChat[index].content.toString())[0],
                           thumbnailRequest: ThumbnailRequest(
                             video: Constant.BASE_URL_IMAGE + jsonDecode(_homeController.listChat[index].content.toString())[0],
                             thumbnailPath: null,

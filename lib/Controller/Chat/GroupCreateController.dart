@@ -15,6 +15,8 @@ import 'package:live_yoko/Navigation/Navigation.dart';
 import 'package:live_yoko/Service/APICaller.dart';
 import 'package:live_yoko/Utils/Utils.dart';
 import "dart:html" as html;
+import '../../Navigation/RouteDefine.dart';
+import '../../Utils/enum.dart';
 import '../../View/Chat/home_chat.dart';
 
 class GroupCreateController extends GetxController {
@@ -29,8 +31,7 @@ class GroupCreateController extends GetxController {
   ScrollController scrollController = ScrollController();
   Timer? debounce;
   Rx<File> imageAvatar = File('').obs;
-  Rx<TextEditingController> filterControllerName =
-      TextEditingController(text: '').obs;
+  Rx<TextEditingController> filterControllerName = TextEditingController(text: '').obs;
   List<String> itemList = [
     '1',
     '2',
@@ -46,16 +47,13 @@ class GroupCreateController extends GetxController {
   RxString avatarUser = ''.obs;
   String uuidAcount = '';
   RxBool isClick = false.obs;
+
   @override
-
-
-  void initData() async{
-
+  void initData() async {
     uuidAcount = await Utils.getStringValueWithKey(Constant.UUID_USER);
     getFriend();
     scrollController.addListener(() {
-      if (scrollController.position.maxScrollExtent ==
-          scrollController.offset) {
+      if (scrollController.position.maxScrollExtent == scrollController.offset) {
         if (hasMore.value) {
           page++;
           getFriend();
@@ -83,7 +81,6 @@ class GroupCreateController extends GetxController {
     return selectedItems.map((item) => item.uuid).contains(uuid);
   }
 
-
   getImageFiles({required bool isCamera}) async {
     if (!Get.isRegistered<GroupCreateController>()) {
       Get.put(GroupCreateController());
@@ -95,43 +92,48 @@ class GroupCreateController extends GetxController {
         fileData.add(img);
       }
       String type = 'Image';
-      await pushFileWeb(
-          type: type == 'Image' || type == 'Video' ? 1 : 4, fileData: fileData);
+      await pushFileWeb(type: type == 'Image' || type == 'Video' ? 1 : 4, fileData: fileData);
     } else {
-      Utils.showSnackBar(
-          title: TextByNation.getStringByKey('notification'),
-          message: TextByNation.getStringByKey('file_size'));
+      // Utils.showSnackBar(title: TextByNation.getStringByKey('notification'), message: TextByNation.getStringByKey('file_size'));
+      Utils.showToast(
+        Get.overlayContext!,
+        TextByNation.getStringByKey('file_size'),
+        type: ToastType.INFORM,
+      );
     }
   }
 
-
   pushFileWeb({required int type, required List<html.File> fileData}) async {
-    String formattedTime =
-    DateFormat('MM/dd/yyyy HH:mm:ss').format(DateTime.now());
+    String formattedTime = DateFormat('MM/dd/yyyy HH:mm:ss').format(DateTime.now());
     try {
       var data = await APICaller.getInstance().putFilesWeb(
         endpoint: 'v1/Upload/upload-image',
         fileData: fileData,
         type: type,
-        keyCert:
-        Utils.generateMd5(Constant.NEXT_PUBLIC_KEY_CERT + formattedTime),
+        keyCert: Utils.generateMd5(Constant.NEXT_PUBLIC_KEY_CERT + formattedTime),
         time: formattedTime,
       );
 
       if (data != null) {
         List<dynamic> list = data['items'];
-                var listItem = list.map((dynamic json) => '"$json"').toList();
-                avatarUser.value = jsonDecode(listItem[0]);
-
-                avatarUser.refresh();
+        var listItem = list.map((dynamic json) => '"$json"').toList();
+        avatarUser.value = jsonDecode(listItem[0]);
+        avatarUser.refresh();
       } else {
-        Utils.showSnackBar(
-            title: TextByNation.getStringByKey('error_file'),
-            message: 'Upload file failed');
+        Utils.showToast(
+          Get.overlayContext!,
+          'Upload file failed',
+          type: ToastType.ERROR,
+        );
+        // Utils.showSnackBar(title: TextByNation.getStringByKey('error_file'), message: 'Upload file failed');
       }
     } catch (e) {
-      Utils.showSnackBar(
-          title: TextByNation.getStringByKey('error_file'), message: '$e');
+      Utils.showToast(
+        Get.overlayContext!,
+        '$e',
+        type: ToastType.ERROR,
+      );
+      // Utils.showSnackBar(title: TextByNation.getStringByKey('error_file'), message: '$e');
     }
   }
 
@@ -146,16 +148,14 @@ class GroupCreateController extends GetxController {
         });
         // listGrounpUuid.add(uuidAcount); // add chính mình
         var param = {
-          "keyCert":
-              Utils.generateMd5(Constant.NEXT_PUBLIC_KEY_CERT + formattedTime),
+          "keyCert": Utils.generateMd5(Constant.NEXT_PUBLIC_KEY_CERT + formattedTime),
           "time": formattedTime,
           "groupName": filterControllerName.value.text,
           "memberUuids": listGrounpUuid,
           "groupAvatar": avatarUser.value == "" ? "" : avatarUser.value,
         };
 
-        var response =
-            await APICaller.getInstance().post('v1/Group/create-group', param);
+        var response = await APICaller.getInstance().post('v1/Group/create-group', param);
         if (response != null) {
           // Get.close(3);
 
@@ -173,7 +173,7 @@ class GroupCreateController extends GetxController {
           //
           Get.find<ChatController>().update();
           Get.find<ChatController>().refresh();
-          Get.find<ChatController>().updateFeature(widget: null );
+          Get.find<ChatController>().updateFeature(widget: null);
           Get.find<ChatController>().refresh();
           if (Get.isRegistered<ChatController>()) {
             var controller = await Get.find<ChatController>();
@@ -183,16 +183,21 @@ class GroupCreateController extends GetxController {
           // goto new group
         }
       } catch (e) {
-        Utils.showSnackBar(
-            title: TextByNation.getStringByKey('notification'), message: '$e');
-      } finally {
+        Utils.showToast(
+        Get.overlayContext!,
+        '$e',
+        type: ToastType.ERROR,
+      );} finally {
         isClick.value = await false;
         // isLoangding.value = false;
       }
     } else {
-      Utils.showSnackBar(
-          title: TextByNation.getStringByKey('notification'),
-          message: TextByNation.getStringByKey('error_name'));
+      Utils.showToast(
+        Get.overlayContext!,
+        TextByNation.getStringByKey('error_name'),
+        type: ToastType.ERROR,
+      );
+      // Utils.showSnackBar(title: TextByNation.getStringByKey('notification'), message: TextByNation.getStringByKey('error_name'));
     }
   }
 
@@ -205,7 +210,7 @@ class GroupCreateController extends GetxController {
   }
 
   Future createGroundStep2() async {
-    await Navigation.navigateTo(page: 'GroupCreateStep2');
+    await Navigation.navigateTo(page: RouteDefine.groupCreateStep2);
   }
 
   Future getFriend() async {
@@ -214,8 +219,7 @@ class GroupCreateController extends GetxController {
     String formattedTime = DateFormat('MM/dd/yyyy HH:mm:ss').format(timeNow);
     try {
       var param = {
-        "keyCert":
-            Utils.generateMd5(Constant.NEXT_PUBLIC_KEY_CERT + formattedTime),
+        "keyCert": Utils.generateMd5(Constant.NEXT_PUBLIC_KEY_CERT + formattedTime),
         "time": formattedTime,
         "uuid": await Utils.getStringValueWithKey(Constant.UUID_USER),
         "pageSize": pageSize,
@@ -223,12 +227,10 @@ class GroupCreateController extends GetxController {
         "keyword": filterController.value.text
       };
 
-      var response =
-          await APICaller.getInstance().post('v1/Member/find-member', param);
+      var response = await APICaller.getInstance().post('v1/Member/find-member', param);
       if (response != null) {
         List<dynamic> list = response['items'];
-        var listItem =
-            list.map((dynamic json) => Contact.fromJson(json)).toList();
+        var listItem = list.map((dynamic json) => Contact.fromJson(json)).toList();
         for (Contact constant in listItem) {
           if (constant.uuid != uuidAcount) listContact.add(constant);
         }
@@ -242,8 +244,11 @@ class GroupCreateController extends GetxController {
         }
       }
     } catch (e) {
-      Utils.showSnackBar(
-          title: TextByNation.getStringByKey('notification'), message: '$e');
+      Utils.showToast(
+        Get.overlayContext!,
+        '$e',
+        type: ToastType.ERROR,
+      );
     } finally {
       isLoangding.value = false;
     }

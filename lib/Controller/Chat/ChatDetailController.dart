@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert' hide Codec;
 import 'dart:io';
 import 'dart:isolate';
+import 'dart:math';
 import 'dart:typed_data';
 import 'dart:ui';
 import 'package:audio_waveforms/audio_waveforms.dart';
@@ -36,10 +37,13 @@ import '../../Models/Chat/Chat.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'dart:js' as js;
 
+import '../../Utils/enum.dart';
+
 class ChatDetailController extends GetxController {
   String uuidUser = '';
   String userName = '';
   var selectedChatDetail = Rxn<Chat>();
+
   // RxList<ChatDetail> chatList = RxList<ChatDetail>();
   List<ChatDetail> chatList = [];
   RxBool isChatLoading = true.obs;
@@ -70,13 +74,12 @@ class ChatDetailController extends GetxController {
   List<File> file = [];
   String uuidChat = '';
   Rx<ChatDetail> replyChat = ChatDetail().obs;
-  int backgroundColor = 0xffc9fad9;
-  int textColor = 0xff11B991;
-  int sizeText = 14;
+  RxInt backgroundColor = 0xffc9fad9.obs;
+  RxInt textColor = 0xff11B991.obs;
+  RxInt sizeText = 14.obs;
   List<String> responseFile = [];
   final ItemScrollController itemScrollController = ItemScrollController();
-  final ItemPositionsListener itemPositionsListener =
-  ItemPositionsListener.create();
+  final ItemPositionsListener itemPositionsListener = ItemPositionsListener.create();
 
   // final focusNode = FocusNode();
   RxBool isSearch = false.obs;
@@ -118,11 +121,9 @@ class ChatDetailController extends GetxController {
 
   RxDouble tabHeight = 256.0.obs;
 
-
   @override
   void onInit() async {
     super.onInit();
-
   }
 
   void initChatData() async {
@@ -135,10 +136,9 @@ class ChatDetailController extends GetxController {
     });
     recorder = AudioRecorder();
     itemPositionsListener.itemPositions.addListener(loadMoreItems);
+
     textMessageController.addListener(() {
-      if (textMessageController.text
-          .trim()
-          .isNotEmpty) {
+      if (textMessageController.text.trim().isNotEmpty) {
         isTextFieldFocused.value = true;
         isVisible.value = false;
         _socketManager.sendTypingRequest(
@@ -154,8 +154,7 @@ class ChatDetailController extends GetxController {
       onSearchChanged();
     });
 
-    IsolateNameServer.registerPortWithName(
-        receivePort.sendPort, nameChanelDownload);
+    IsolateNameServer.registerPortWithName(receivePort.sendPort, nameChanelDownload);
     receivePort.listen((message) {
       progress.value = message;
       if (message == 100 || message == -1) {
@@ -169,26 +168,23 @@ class ChatDetailController extends GetxController {
     countryCode = GlobalValue.getInstance().getCountryCode();
 
     int sizeText = await Utils.getIntValueWithKey(Constant.SIZE_TEXT);
-    String backgroundColor =
-    await Utils.getStringValueWithKey(Constant.BR_COLOR);
+    String backgroundColor = await Utils.getStringValueWithKey(Constant.BR_COLOR);
     String textColor = await Utils.getStringValueWithKey(Constant.TEXT_COLOR);
+    print('textColor: ${textColor}');
     if (sizeText != 0) {
-      this.sizeText = sizeText;
+      this.sizeText.value = sizeText;
     }
     if (backgroundColor.isNotEmpty) {
-      this.backgroundColor = int.parse(backgroundColor);
+      this.backgroundColor.value = int.parse(backgroundColor);
     }
     if (textColor.isNotEmpty) {
-      this.textColor = int.parse(textColor);
+      this.textColor.value = int.parse(textColor);
     }
     // await SocketManager().connect();
     await translator.init();
     await speech2text.init();
-
   }
 
-  @override
-  @override
   @override
   void onReady() async {
     super.onReady();
@@ -225,27 +221,26 @@ class ChatDetailController extends GetxController {
     recorder.dispose();
   }
 
+
   loadMoreItems() async {
     final itemPositions = itemPositionsListener.itemPositions.value.toList();
-    final lastItemPosition =
-    itemPositions.isNotEmpty ? itemPositions.last : null;
+    final lastItemPosition = itemPositions.isNotEmpty ? itemPositions.last : null;
 
-    bool isIndexZeroVisible =
-    itemPositions.any((position) => position.index <= 1);
+    bool isIndexZeroVisible = itemPositions.any((position) => position.index <= 1);
     if (isIndexZeroVisible) {
       isAddNewMessage = false;
     } else {
       isAddNewMessage = true;
     }
 
-    if (lastItemPosition != null &&
-        lastItemPosition.index == chatList.length - 1) {
+    if (lastItemPosition != null && lastItemPosition.index == chatList.length - 1) {
       if (!isChatLoading.value && hasMoreData.value) {
         page++;
         await getMessage();
       }
     }
   }
+
   //
   // static downloadCallback(id, status, progress) {
   //   SendPort? sendPort = IsolateNameServer.lookupPortByName(nameChanelDownload);
@@ -315,19 +310,19 @@ class ChatDetailController extends GetxController {
           ..setAttribute('download', fileName.replaceAll(' ', '_'))
           ..style.display = 'none';
         html.document.body?.append(anchor);
-        js.context.callMethod('eval', [
-          'document.querySelector("a[download=\'${fileName.replaceAll(
-              ' ', '_')}\']").click()'
-        ]);
+        js.context.callMethod('eval', ['document.querySelector("a[download=\'${fileName.replaceAll(' ', '_')}\']").click()']);
         anchor.remove();
       } catch (e) {
         print('Download exception (web): $e');
       }
       return;
     } else {
-      Utils.showSnackBar(
-          title: TextByNation.getStringByKey('notification'),
-          message: TextByNation.getStringByKey('no_access'));
+      Utils.showToast(
+        Get.overlayContext!,
+        TextByNation.getStringByKey('no_access'),
+        type: ToastType.ERROR,
+      );
+      // Utils.showSnackBar(title: TextByNation.getStringByKey('notification'), message: TextByNation.getStringByKey('no_access'));
     }
   }
 
@@ -372,8 +367,7 @@ class ChatDetailController extends GetxController {
 
   String getLink(String text) {
     String link = '';
-    RegExp linkRegExp = RegExp(
-        r'http(s)?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\\(\\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+');
+    RegExp linkRegExp = RegExp(r'http(s)?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\\(\\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+');
     Iterable<Match> matches = linkRegExp.allMatches(text);
 
     for (Match match in matches) {
@@ -409,25 +403,21 @@ class ChatDetailController extends GetxController {
       }
       String formattedTime = DateFormat('MM/dd/yyyy HH:mm:ss').format(timeNow);
       var param = {
-        "keyCert":
-        Utils.generateMd5(Constant.NEXT_PUBLIC_KEY_CERT + formattedTime),
+        "keyCert": Utils.generateMd5(Constant.NEXT_PUBLIC_KEY_CERT + formattedTime),
         "time": formattedTime,
         "pageSize": pageSize,
         "page": page,
         "keyword": textSearchController.text,
         "msgGroupUuid": uuidChat
       };
-      var data =
-      await APICaller.getInstance().post('v1/Chat/message-line', param);
+      var data = await APICaller.getInstance().post('v1/Chat/message-line', param);
       if (data != null) {
         List<dynamic> list = data['items'];
-        var listItem =
-        list.map((dynamic json) => ChatDetail.fromJson(json)).toList();
+        var listItem = list.map((dynamic json) => ChatDetail.fromJson(json)).toList();
         bool reached = false;
         if (listItem.isNotEmpty) {
           for (int i = 0; i < listItem.length; i++) {
-            if (listItem[0].userSent != userName ||
-                listItem[i].uuid == data['lastMsgRead']) {
+            if (listItem[0].userSent != userName || listItem[i].uuid == data['lastMsgRead']) {
               reached = true;
             }
             if (reached || page != 1) {
@@ -445,8 +435,12 @@ class ChatDetailController extends GetxController {
         isChatLoading.value = false;
       }
     } catch (e) {
-      Utils.showSnackBar(
-          title: TextByNation.getStringByKey('error_message'), message: '$e');
+      Utils.showToast(
+        Get.overlayContext!,
+        e.toString(),
+        type: ToastType.ERROR,
+      );
+      // Utils.showSnackBar(title: TextByNation.getStringByKey('error_message'), message: '$e');
       isChatLoading.value = false;
     }
   }
@@ -463,7 +457,7 @@ class ChatDetailController extends GetxController {
         contentType: type,
         replyMsgUuid: replyChat.value.uuid,
         CountryCode: GlobalValue.getInstance().getCountryCode());
-    print('thecoicb $type');
+    // print('thecoicb $type');
     textMessageController.clear();
     replyChat.value = ChatDetail();
     responseFile.clear();
@@ -473,7 +467,6 @@ class ChatDetailController extends GetxController {
     String uuidChatCache = '';
     newMessage = cdi.ChatDetailItem.fromJson(message);
     if (newMessage.msgRoomUuid == uuidChat) {
-      // check duplicate socket
       if (newMessage.uuid == uuidChatCache) {
         return;
       }
@@ -506,23 +499,23 @@ class ChatDetailController extends GetxController {
             replyMsgUu: newMessage.replyMsgUu == null
                 ? null
                 : ReplyMsgUu(
-              userSent: newMessage.replyMsgUu!.userSent,
-              contentType: newMessage.replyMsgUu!.contentType,
-              content: newMessage.replyMsgUu!.content,
-              uuid: newMessage.replyMsgUu!.uuid,
-              timeCreated: newMessage.replyMsgUu!.timeCreated,
-              status: newMessage.replyMsgUu!.status,
-              lastEdited: newMessage.replyMsgUu!.lastEdited,
-              msgRoomUuid: newMessage.replyMsgUu!.msgRoomUuid,
-              readState: newMessage.replyMsgUu!.readState,
-              likeCount: newMessage.replyMsgUu!.likeCount,
-              countryCode: newMessage.replyMsgUu!.countryCode,
-              roomName: newMessage.replyMsgUu!.roomName,
-              fullName: newMessage.replyMsgUu!.fullName,
-              type: newMessage.replyMsgUu!.type,
-              avatar: newMessage.replyMsgUu!.avatar,
-              mediaName: newMessage.replyMsgUu!.mediaName,
-            ),
+                    userSent: newMessage.replyMsgUu!.userSent,
+                    contentType: newMessage.replyMsgUu!.contentType,
+                    content: newMessage.replyMsgUu!.content,
+                    uuid: newMessage.replyMsgUu!.uuid,
+                    timeCreated: newMessage.replyMsgUu!.timeCreated,
+                    status: newMessage.replyMsgUu!.status,
+                    lastEdited: newMessage.replyMsgUu!.lastEdited,
+                    msgRoomUuid: newMessage.replyMsgUu!.msgRoomUuid,
+                    readState: newMessage.replyMsgUu!.readState,
+                    likeCount: newMessage.replyMsgUu!.likeCount,
+                    countryCode: newMessage.replyMsgUu!.countryCode,
+                    roomName: newMessage.replyMsgUu!.roomName,
+                    fullName: newMessage.replyMsgUu!.fullName,
+                    type: newMessage.replyMsgUu!.type,
+                    avatar: newMessage.replyMsgUu!.avatar,
+                    mediaName: newMessage.replyMsgUu!.mediaName,
+                  ),
           ));
       if (newMessage.userSent != userName) {
         // readMessage();
@@ -556,9 +549,7 @@ class ChatDetailController extends GetxController {
         switch (newMessage.contentType) {
           case 3:
             List<dynamic> array = jsonDecode(decoded);
-            decoded = Utils.getFileType(array[0]) == 'Image'
-                ? TextByNation.getStringByKey('image')
-                : TextByNation.getStringByKey('video');
+            decoded = Utils.getFileType(array[0]) == 'Image' ? TextByNation.getStringByKey('image') : TextByNation.getStringByKey('video');
             break;
           case 4:
             decoded = TextByNation.getStringByKey('file');
@@ -567,7 +558,12 @@ class ChatDetailController extends GetxController {
             decoded = TextByNation.getStringByKey('audio');
             break;
         }
-        Utils.showSnackBar(title: decodedFullName, message: decoded);
+        Utils.showToast(
+          Get.overlayContext!,
+          decoded,
+          type: ToastType.SUCCESS,
+        );
+        // Utils.showSnackBar(title: decodedFullName, message: decoded);
       }
     }
   }
@@ -575,18 +571,7 @@ class ChatDetailController extends GetxController {
   Future<void> getFile() async {
     FilePickerResult? result = await FilePicker.platform.pickFiles(
       type: FileType.custom,
-      allowedExtensions: [
-        'pdf',
-        'doc',
-        'docx',
-        'xls',
-        'xlsx',
-        'ppt',
-        'pptx',
-        'txt',
-        'zip',
-        'rar'
-      ],
+      allowedExtensions: ['pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'txt', 'zip', 'rar'],
     );
     if (result != null && result.files.isNotEmpty) {
       Uint8List? bytes = result.files.single.bytes;
@@ -599,26 +584,28 @@ class ChatDetailController extends GetxController {
       if (responseFile.isNotEmpty) {
         await sendMessage(content: responseFile.toString(), type: 4);
       } else {
-        Utils.showSnackBar(
-          title: TextByNation.getStringByKey('notification'),
-          message: TextByNation.getStringByKey('unable_send'),
+
+        Utils.showToast(
+          Get.overlayContext!,
+          TextByNation.getStringByKey('unable_send'),
+          type: ToastType.ERROR,
         );
+        // Utils.showSnackBar(
+        //   title: TextByNation.getStringByKey('notification'),
+        //   message: TextByNation.getStringByKey('unable_send'),
+        // );
       }
     }
   }
 
-  pushFileWeb2({required int type,
-    required List<Uint8List> fileData,
-    required fileName}) async {
-    String formattedTime =
-    DateFormat('MM/dd/yyyy HH:mm:ss').format(DateTime.now());
+  pushFileWeb2({required int type, required List<Uint8List> fileData, required fileName}) async {
+    String formattedTime = DateFormat('MM/dd/yyyy HH:mm:ss').format(DateTime.now());
     try {
       var data = await APICaller.getInstance().putFilesWeb2(
         endpoint: 'v1/Upload/upload-image',
         fileData: fileData,
         type: type,
-        keyCert:
-        Utils.generateMd5(Constant.NEXT_PUBLIC_KEY_CERT + formattedTime),
+        keyCert: Utils.generateMd5(Constant.NEXT_PUBLIC_KEY_CERT + formattedTime),
         time: formattedTime,
         fileName: fileName,
       );
@@ -629,13 +616,20 @@ class ChatDetailController extends GetxController {
         responseFile = listItem;
         fileData.clear();
       } else {
-        Utils.showSnackBar(
-            title: TextByNation.getStringByKey('error_file'),
-            message: 'Upload file failed');
+        // Utils.showSnackBar(title: TextByNation.getStringByKey('error_file'), message: 'Upload file failed');
+        Utils.showToast(
+          Get.overlayContext!,
+          'Upload file failed',
+          type: ToastType.ERROR,
+        );
       }
     } catch (e) {
-      Utils.showSnackBar(
-          title: TextByNation.getStringByKey('error_file'), message: '$e');
+      // Utils.showSnackBar(title: TextByNation.getStringByKey('error_file'), message: '$e');
+      Utils.showToast(
+        Get.overlayContext!,
+        '$e',
+        type: ToastType.ERROR,
+      );
     }
   }
 
@@ -650,21 +644,25 @@ class ChatDetailController extends GetxController {
         fileData.add(img);
       }
       String type = 'Image';
-      await pushFileWeb(
-          type: type == 'Image' || type == 'Video' ? 1 : 4, fileData: fileData);
+      await pushFileWeb(type: type == 'Image' || type == 'Video' ? 1 : 4, fileData: fileData);
       if (responseFile.isNotEmpty) {
-        await sendMessage(
-            content: responseFile.toString(),
-            type: type == 'Image' || type == 'Video' ? 3 : 4);
+        await sendMessage(content: responseFile.toString(), type: type == 'Image' || type == 'Video' ? 3 : 4);
       } else {
-        Utils.showSnackBar(
-            title: TextByNation.getStringByKey('notification'),
-            message: TextByNation.getStringByKey('unable_send'));
+        // Utils.showSnackBar(title: TextByNation.getStringByKey('notification'), message: TextByNation.getStringByKey('unable_send'));
+
+        Utils.showToast(
+          Get.overlayContext!,
+          TextByNation.getStringByKey('unable_send'),
+          type: ToastType.ERROR,
+        );
       }
     } else {
-      Utils.showSnackBar(
-          title: TextByNation.getStringByKey('notification'),
-          message: TextByNation.getStringByKey('file_size'));
+      // Utils.showSnackBar(title: TextByNation.getStringByKey('notification'), message: TextByNation.getStringByKey('file_size'));
+      Utils.showToast(
+        Get.overlayContext!,
+        TextByNation.getStringByKey('file_size'),
+        type: ToastType.INFORM,
+      );
     }
   }
 
@@ -679,34 +677,35 @@ class ChatDetailController extends GetxController {
         fileData.add(img);
       }
       String type = 'Video';
-      await pushFileWeb(
-          type: type == 'Image' || type == 'Video' ? 1 : 4, fileData: fileData);
+      await pushFileWeb(type: type == 'Image' || type == 'Video' ? 1 : 4, fileData: fileData);
       if (responseFile.isNotEmpty) {
-        await sendMessage(
-            content: responseFile.toString(),
-            type: type == 'Image' || type == 'Video' ? 3 : 4);
+        await sendMessage(content: responseFile.toString(), type: type == 'Image' || type == 'Video' ? 3 : 4);
       } else {
-        Utils.showSnackBar(
-            title: TextByNation.getStringByKey('notification'),
-            message: TextByNation.getStringByKey('unable_send'));
+        // Utils.showSnackBar(title: TextByNation.getStringByKey('notification'), message: TextByNation.getStringByKey('unable_send'));
+        Utils.showToast(
+          Get.overlayContext!,
+          TextByNation.getStringByKey('unable_send'),
+          type: ToastType.ERROR,
+        );
       }
     } else {
-      Utils.showSnackBar(
-          title: TextByNation.getStringByKey('notification'),
-          message: TextByNation.getStringByKey('file_size'));
+      // Utils.showSnackBar(title: TextByNation.getStringByKey('notification'), message: TextByNation.getStringByKey('file_size'));
+      Utils.showToast(
+        Get.overlayContext!,
+        TextByNation.getStringByKey('file_size'),
+        type: ToastType.INFORM,
+      );
     }
   }
 
   pushFileWeb({required int type, required List<html.File> fileData}) async {
-    String formattedTime =
-    DateFormat('MM/dd/yyyy HH:mm:ss').format(DateTime.now());
+    String formattedTime = DateFormat('MM/dd/yyyy HH:mm:ss').format(DateTime.now());
     try {
       var data = await APICaller.getInstance().putFilesWeb(
         endpoint: 'v1/Upload/upload-image',
         fileData: fileData,
         type: type,
-        keyCert:
-        Utils.generateMd5(Constant.NEXT_PUBLIC_KEY_CERT + formattedTime),
+        keyCert: Utils.generateMd5(Constant.NEXT_PUBLIC_KEY_CERT + formattedTime),
         time: formattedTime,
       );
 
@@ -716,13 +715,19 @@ class ChatDetailController extends GetxController {
         responseFile = listItem;
         fileData.clear();
       } else {
-        Utils.showSnackBar(
-            title: TextByNation.getStringByKey('error_file'),
-            message: 'Upload file failed');
+        Utils.showToast(
+          Get.overlayContext!,
+          'Upload file failed',
+          type: ToastType.ERROR,
+        );
       }
     } catch (e) {
-      Utils.showSnackBar(
-          title: TextByNation.getStringByKey('error_file'), message: '$e');
+      // Utils.showSnackBar(title: TextByNation.getStringByKey('error_file'), message: '$e');
+      Utils.showToast(
+        Get.overlayContext!,
+        '$e',
+        type: ToastType.ERROR,
+      );
     }
   }
 
@@ -760,25 +765,25 @@ class ChatDetailController extends GetxController {
         isAppResume = false;
       }
 
-      await _socketManager.deleteMessage(
-          roomUuid: uuidChat, listMsgUuid: selectedItems);
+      await _socketManager.deleteMessage(roomUuid: uuidChat, listMsgUuid: selectedItems);
       selectedItems.clear();
     } else {
-      Utils.showSnackBar(
-          title: TextByNation.getStringByKey('notification'),
-          message: 'Chỉ được xóa tin nhắn của mình');
+      Utils.showToast(
+        Get.overlayContext!,
+        'Chỉ được xóa tin nhắn của mình',
+        type: ToastType.ERROR,
+      );
     }
     // chatList.removeWhere((element) => selectedItems.contains(element.uuid));
     // chatList.refresh();
     // selectedItems.clear();
     // if (Get.isRegistered<ChatContrller>()) {
-    //   Get.find<ChatContrller>().refreshListChat();
+    //   Get.find<ChatContrller>().refreshListChat();s
     // }
   }
 
   List<TextSpan> searchText(String text) {
-    final matches =
-    textSearchController.text.allMatches(text.toLowerCase()).toList();
+    final matches = textSearchController.text.allMatches(text.toLowerCase()).toList();
     final spans = <TextSpan>[];
 
     if (matches.isEmpty) {
@@ -810,38 +815,6 @@ class ChatDetailController extends GetxController {
     return spans;
   }
 
-  Future<void> saveImage(String imageUrl) async {
-    http.Response response = await http.get(Uri.parse(imageUrl));
-    if (response.statusCode == 200) {
-      Uint8List bytes = response.bodyBytes;
-      Directory tempDir = await getTemporaryDirectory();
-      String tempPath = tempDir.path;
-      String fileName = Uri
-          .parse(imageUrl)
-          .pathSegments
-          .last;
-      String filePath = '$tempPath/$fileName';
-      File file = File(filePath);
-      await file.writeAsBytes(bytes);
-
-      // Lưu ảnh vào thư viện ảnh
-      final result = await ImageGallerySaver.saveFile(filePath);
-
-      if (result['isSuccess']) {
-        Utils.showSnackBar(
-            title: TextByNation.getStringByKey('notification'),
-            message: TextByNation.getStringByKey('photo_saved_successfully'));
-      } else {
-        Utils.showSnackBar(
-            title: TextByNation.getStringByKey('notification'),
-            message: TextByNation.getStringByKey('photo_saved_error'));
-      }
-    } else {
-      Utils.showSnackBar(
-          title: TextByNation.getStringByKey('notification'),
-          message: TextByNation.getStringByKey('error_delete_message'));
-    }
-  }
 
   readMessage() async {
     // String formattedTime = DateFormat('MM/dd/yyyy HH:mm:ss').format(timeNow);
@@ -858,7 +831,11 @@ class ChatDetailController extends GetxController {
     //
     //   }
     // } catch (e) {
-    //   Utils.showSnackBar(title: TextByNation.getStringByKey('notification'), message: '$e');
+    //  Utils.showToast(
+    //     Get.overlayContext!,
+    //     '$e',
+    //     type: ToastType.ERROR,
+    //   );
     // }
 
     if (chatList.isNotEmpty)
@@ -870,23 +847,20 @@ class ChatDetailController extends GetxController {
 
   messageState() async {
     String formattedTime = DateFormat('MM/dd/yyyy HH:mm:ss').format(timeNow);
-    var param = {
-      "keyCert":
-      Utils.generateMd5(Constant.NEXT_PUBLIC_KEY_CERT + formattedTime),
-      "time": formattedTime,
-      "uuid": lastMsgLineUuid
-    };
+    var param = {"keyCert": Utils.generateMd5(Constant.NEXT_PUBLIC_KEY_CERT + formattedTime), "time": formattedTime, "uuid": lastMsgLineUuid};
 
     if (lastMsgLineUuid.isNotEmpty)
       try {
-        var response = await APICaller.getInstance()
-            .post('v1/Chat/check-message-read-state', param);
+        var response = await APICaller.getInstance().post('v1/Chat/check-message-read-state', param);
         if (response != null) {
           readState = response['data'];
         }
       } catch (e) {
-        Utils.showSnackBar(
-            title: TextByNation.getStringByKey('notification'), message: '$e');
+        Utils.showToast(
+          Get.overlayContext!,
+          '$e',
+          type: ToastType.ERROR,
+        );
       }
   }
 
@@ -894,31 +868,27 @@ class ChatDetailController extends GetxController {
     try {
       isPinLoading.value = true;
       String formattedTime = DateFormat('MM/dd/yyyy HH:mm:ss').format(timeNow);
-      var param = {
-        "keyCert":
-        Utils.generateMd5(Constant.NEXT_PUBLIC_KEY_CERT + formattedTime),
-        "time": formattedTime,
-        "uuid": uuidChat
-      };
-      var data = await APICaller.getInstance()
-          .post('v1/Chat/list-messageline-pinned', param);
+      var param = {"keyCert": Utils.generateMd5(Constant.NEXT_PUBLIC_KEY_CERT + formattedTime), "time": formattedTime, "uuid": uuidChat};
+      var data = await APICaller.getInstance().post('v1/Chat/list-messageline-pinned', param);
       if (data != null) {
         List<dynamic> list = data['items'];
-        var listItem =
-        list.map((dynamic json) => ChatDetail.fromJson(json)).toList();
+        var listItem = list.map((dynamic json) => ChatDetail.fromJson(json)).toList();
         pinList.addAll(listItem);
         isPinLoading.value = false;
       } else {
         isPinLoading.value = false;
       }
     } catch (e) {
-      Utils.showSnackBar(
-          title: TextByNation.getStringByKey('error_message'), message: '$e');
+
+      Utils.showToast(
+        Get.overlayContext!,
+      '$e',
+        type: ToastType.ERROR,
+      );
+      // Utils.showSnackBar(title: TextByNation.getStringByKey('error_message'), message: '$e');
       isPinLoading.value = false;
     }
   }
-
-
 
   Future<void> _initRecorder() async {
     // Check if the recorder is already initialized
@@ -959,8 +929,6 @@ class ChatDetailController extends GetxController {
     }
   }
 
-
-
   Future<void> startOrStopRecording({bool isSend = false}) async {
     if (!_recorderIsInited) await _initRecorder();
     try {
@@ -996,29 +964,20 @@ class ChatDetailController extends GetxController {
     }
   }
 
-
-
-
-
-
-
   groupInfo() async {
     String formattedTime = DateFormat('MM/dd/yyyy HH:mm:ss').format(timeNow);
-    var param = {
-      "keyCert":
-      Utils.generateMd5(Constant.NEXT_PUBLIC_KEY_CERT + formattedTime),
-      "time": formattedTime,
-      "uuid": uuidChat
-    };
+    var param = {"keyCert": Utils.generateMd5(Constant.NEXT_PUBLIC_KEY_CERT + formattedTime), "time": formattedTime, "uuid": uuidChat};
     try {
-      var response =
-      await APICaller.getInstance().post('v1/Chat/group-info', param);
+      var response = await APICaller.getInstance().post('v1/Chat/group-info', param);
       if (response != null) {
         memberLength.value = response['data']['memCount'];
       }
     } catch (e) {
-      Utils.showSnackBar(
-          title: TextByNation.getStringByKey('notification'), message: '$e');
+      Utils.showToast(
+        Get.overlayContext!,
+        '$e',
+        type: ToastType.ERROR,
+      );
     }
   }
 
@@ -1027,8 +986,7 @@ class ChatDetailController extends GetxController {
       isAppResume = false;
       // await SocketManager().connect();
     }
-    await _socketManager.pinMessage(
-        roomUuid: uuidChat, listMsgUuid: selectedItems, state: state);
+    await _socketManager.pinMessage(roomUuid: uuidChat, listMsgUuid: selectedItems, state: state);
     selectedItems.clear();
   }
 
@@ -1045,19 +1003,14 @@ class ChatDetailController extends GetxController {
     replyChat.value = ChatDetail();
   }
 
-  likeMessage({required String uuid,
-    required int type,
-    required int status,
-    required String uuidUser}) async {
+  likeMessage({required String uuid, required int type, required int status, required String uuidUser}) async {
     if (isAppResume) {
       isAppResume = false;
     }
     //status
     /// 1: liked - 0: remove like
-    await _socketManager.likeMessage(
-        msgLineUuid: uuid, type: type, status: status, uuidUser: uuidUser);
+    await _socketManager.likeMessage(msgLineUuid: uuid, type: type, status: status, uuidUser: uuidUser);
   }
-
 
   setRead(dynamic message) {
     if (message['RoomUuid'] == uuidChat) {
@@ -1078,12 +1031,10 @@ class ChatDetailController extends GetxController {
 
   setDeleteMessage(dynamic message) async {
     if (message['RoomUuid'] == uuidChat) {
-      chatList.removeWhere(
-              (element) => message['ListMsgUuid'].contains(element.uuid));
+      chatList.removeWhere((element) => message['ListMsgUuid'].contains(element.uuid));
       // chatList.refresh();
 
-      pinList.removeWhere(
-              (element) => message['ListMsgUuid'].contains(element.uuid));
+      pinList.removeWhere((element) => message['ListMsgUuid'].contains(element.uuid));
       pinList.refresh();
     }
   }
@@ -1092,14 +1043,12 @@ class ChatDetailController extends GetxController {
     if (message['RoomUuid'] == uuidChat) {
       if (message['State'] == 0) {
         for (int i = 0; i < message['LstMsgUuid'].length; i++) {
-          int index = pinList.indexWhere(
-                  (element) => element.uuid! == message['LstMsgUuid'][i]);
+          int index = pinList.indexWhere((element) => element.uuid! == message['LstMsgUuid'][i]);
           pinList.removeAt(index);
         }
       } else {
         for (int i = 0; i < message['LstMsgUuid'].length; i++) {
-          int index = chatList.indexWhere(
-                  (element) => element.uuid! == message['LstMsgUuid'][i]);
+          int index = chatList.indexWhere((element) => element.uuid! == message['LstMsgUuid'][i]);
           if (!pinList.any((item) => item.uuid == message['LstMsgUuid'][i])) {
             chatList[index].fullName = decodedName(chatList[index].fullName!);
             pinList.insert(0, chatList[index]);
@@ -1110,10 +1059,8 @@ class ChatDetailController extends GetxController {
     }
   }
 
-
   setEditMessage(dynamic message) async {
-    int index = chatList
-        .indexWhere((element) => element.uuid! == message['MsgLineUuid']);
+    int index = chatList.indexWhere((element) => element.uuid! == message['MsgLineUuid']);
     if (index != -1) {
       chatList[index].content = message['Content'];
       chatList[index].status = 2;
@@ -1122,22 +1069,17 @@ class ChatDetailController extends GetxController {
   }
 
   setLikeMessage(dynamic message) async {
-    int index = chatList
-        .indexWhere((element) => element.uuid! == message['MsgLineUuid']);
+    int index = chatList.indexWhere((element) => element.uuid! == message['MsgLineUuid']);
     if (index != -1) {
       chatList[index].likeCount = chatList[index].likeCount! + 1;
       // chatList.refresh();
     }
   }
 
-
   blockMember(int type, String roomUuid, String userName) {
     //socket
-    _socketManager.blockMember(
-        roomUuid: roomUuid, type: type, userName: userName);
+    _socketManager.blockMember(roomUuid: roomUuid, type: type, userName: userName);
   }
-
-
 
   String decodedName(String name) {
     String decoded = name;

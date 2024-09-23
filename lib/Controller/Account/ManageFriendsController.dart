@@ -9,6 +9,8 @@ import 'package:live_yoko/Models/Account/Friend.dart';
 import 'package:live_yoko/Service/APICaller.dart';
 import 'package:live_yoko/Utils/Utils.dart';
 
+import '../../Utils/enum.dart';
+
 class ManageFriendsController extends GetxController
     with GetSingleTickerProviderStateMixin {
   Rx<TextEditingController> filterController = TextEditingController().obs;
@@ -118,8 +120,13 @@ class ManageFriendsController extends GetxController
         }
       }
     } catch (e) {
-      Utils.showSnackBar(
-          title: TextByNation.getStringByKey('notification'), message: '$e');
+      Utils.showToast(
+        Get.overlayContext!,
+        '$e',
+        type: ToastType.ERROR,
+      );
+      // Utils.showSnackBar(
+      //     title: TextByNation.getStringByKey('notification'), message: '$e');
     } finally {
       if (statusFriend == 2) {
         isLoading.value = await false;
@@ -144,17 +151,30 @@ class ManageFriendsController extends GetxController
       var response =
           await APICaller.getInstance().post('v1/Friend/accept-friend', param);
       if (response != null) {
-        Utils.showSnackBar(
-            title: TextByNation.getStringByKey('notification'),
-            message: TextByNation.getStringByKey('add_friend_ss') +
-                ' ' +
-                listReceivedFriend[index].friendFullName.toString());
+
+        Utils.showToast(
+          Get.overlayContext!,
+          TextByNation.getStringByKey('add_friend_ss') +
+              ' ' +
+              listReceivedFriend[index].friendFullName.toString(),
+          type: ToastType.SUCCESS,
+        );
+        // Utils.showSnackBar(
+        //     title: TextByNation.getStringByKey('notification'),
+        //     message: TextByNation.getStringByKey('add_friend_ss') +
+        //         ' ' +
+        //         listReceivedFriend[index].friendFullName.toString());
         listReceivedFriend.removeAt(index);
         listReceivedFriend.refresh();
       }
     } catch (e) {
-      Utils.showSnackBar(
-          title: TextByNation.getStringByKey('notification'), message: '$e');
+      // Utils.showSnackBar(
+      //     title: TextByNation.getStringByKey('notification'), message: '$e');
+      Utils.showToast(
+        Get.overlayContext!,
+        '$e',
+        type: ToastType.ERROR,
+      );
     }
   }
 
@@ -178,26 +198,48 @@ class ManageFriendsController extends GetxController
 
       if (response != null) {
         if (isRequired == true) {
-          Utils.showSnackBar(
-              title: TextByNation.getStringByKey('notification'),
-              message: TextByNation.getStringByKey('no_add_friend') +
-                  ' ' +
-                  listReceivedFriend[index].friendFullName.toString());
+          // Utils.showSnackBar(
+          //     title: TextByNation.getStringByKey('notification'),
+          //     message: TextByNation.getStringByKey('no_add_friend') +
+          //         ' ' +
+          //         listReceivedFriend[index].friendFullName.toString());
+
+          Utils.showToast(
+            Get.overlayContext!,
+            TextByNation.getStringByKey('no_add_friend') +
+                ' ' +
+                listReceivedFriend[index].friendFullName.toString(),
+            type: ToastType.ERROR,
+          );
           listReceivedFriend.removeAt(index);
           listReceivedFriend.refresh();
         } else {
-          Utils.showSnackBar(
-              title: TextByNation.getStringByKey('notification'),
-              message: TextByNation.getStringByKey('cancel_friend_send') +
-                  ' ' +
-                  listSendFriend[index].friendFullName.toString());
+
+
+          Utils.showToast(
+            Get.overlayContext!,
+            TextByNation.getStringByKey('cancel_friend_send') +
+                ' ' +
+                listSendFriend[index].friendFullName.toString(),
+            type: ToastType.INFORM,
+          );
+          // Utils.showSnackBar(
+          //     title: TextByNation.getStringByKey('notification'),
+          //     message: TextByNation.getStringByKey('cancel_friend_send') +
+          //         ' ' +
+          //         listSendFriend[index].friendFullName.toString());
           listSendFriend.removeAt(index);
           listSendFriend.refresh();
         }
       }
     } catch (e) {
-      Utils.showSnackBar(
-          title: TextByNation.getStringByKey('notification'), message: '$e');
+      // Utils.showSnackBar(
+      //     title: TextByNation.getStringByKey('notification'), message: '$e');
+      Utils.showToast(
+        Get.overlayContext!,
+        '$e',
+        type: ToastType.INFORM,
+      );
     }
   }
 }

@@ -15,6 +15,7 @@ import '../../Global/Constant.dart';
 import '../../Global/TextByNation.dart';
 import '../../Models/Chat/Chat.dart';
 import '../../Models/Chat/ChatDetailMember.dart';
+import '../../Navigation/RouteDefine.dart';
 import '../../Utils/Utils.dart';
 import '../../core/constant/theme/ThemeStyle.dart';
 import '../../core/image/Images.dart';
@@ -45,322 +46,321 @@ class _ProfileChatDetailState extends State<ProfileChatDetail> with AutomaticKee
   }
 
   @override
+  void dispose() {
+    Get.delete<ProfileChatDetailController>();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    controller.selectedChatDetail.value = widget.chatDetail;
-    return WillPopScope(
-      onWillPop: () async {
-        Get.delete<ProfileChatDetailController>();
-        return true;
-      },
-      child: Obx(() => Scaffold(
-            appBar: AppBar(
-              backgroundColor: Get.isDarkMode ? ColorValue.neutralColor : ColorValue.white,
-              titleSpacing: 24,
-              centerTitle: false,
-              title: Text(
-                'Group Info',
-                style: TextStyle(
-                  fontSize: 20,
-                  height: 28 / 20,
-                  fontWeight: FontWeight.w600,
-                  color: Get.isDarkMode ? ColorValue.textColor : Color(0xFF101114),
-                ),
+    return Obx(() => Scaffold(
+          appBar: AppBar(
+            backgroundColor: Get.isDarkMode ? ColorValue.neutralColor : ColorValue.white,
+            titleSpacing: 24,
+            centerTitle: false,
+            title: Text(
+              controller.roleId == 1 && controller.chatType == 2 ? 'Group Info' : 'User Info',
+              style: TextStyle(
+                fontSize: 20,
+                height: 28 / 20,
+                fontWeight: FontWeight.w600,
+                color: Get.isDarkMode ? Colors.white : ColorValue.textColor,
               ),
-              actions: [
-                Visibility(
-                    visible: controller.roleId == 1 && controller.chatType == 2,
+            ),
+            actions: [
+              Visibility(
+                  visible: controller.roleId == 1 && controller.chatType == 2,
+                  child: IconButtonCustom(
+                      icon: 'asset/icons/edit.svg',
+                      color: Get.isDarkMode ? ColorValue.white : ColorValue.neutralLineIcon,
+                      onTap: _showDialogRenameGroup)),
+              Visibility(
+                  visible: controller.roleId == 1 && controller.chatType == 2,
+                  child: Padding(
+                    padding: EdgeInsets.only(left: 16),
                     child: IconButtonCustom(
-                        icon: 'asset/icons/edit.svg',
+                        icon: 'asset/icons/add_chat.svg',
                         color: Get.isDarkMode ? ColorValue.white : ColorValue.neutralLineIcon,
-                        onTap: _showDialogRenameGroup)),
-                Visibility(
-                    visible: controller.roleId == 1 && controller.chatType == 2,
-                    child: Padding(
-                      padding: EdgeInsets.only(left: 16),
-                      child: IconButtonCustom(
-                          icon: 'asset/icons/add_chat.svg',
-                          color: Get.isDarkMode ? ColorValue.white : ColorValue.neutralLineIcon,
-                          onTap: () {
-                            //   show popup add member
-                            bottomSheetChatItem(context);
-                          }),
-                    )),
-                PopupMenuButton(
-                  offset: Offset(-25, 50),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                  icon: SvgPicture.asset(
-                    Images.three_dot_vertical_ic,
-                    color: Get.isDarkMode ? ColorValue.white : ColorValue.neutralLineIcon,
-                  ),
-                  itemBuilder: (context) {
-                    return [
-                      if (controller.roleId == 1)
-                        MyEntry(
-                          icon: Images.auto_delete_ic,
-                          title: AppLocalizations.of(context)!.auto_delete,
-                          onTap: () {
-                            UtilsWidget.showModalBottomSheetCustom([
-                              SizedBox(height: 12),
-                              Text(
-                                AppLocalizations.of(context)!.auto_delete_title,
-                                style: AppTextStyle.regularW500(size: 20, lineHeight: 24, color: ColorValue.neutralColor),
-                              ),
-                              SizedBox(height: 8),
-                              Text(AppLocalizations.of(context)!.auto_delete_content,
-                                  style: AppTextStyle.regularW400(
-                                      size: 12, lineHeight: 12 / 16, fontStyle: FontStyle.italic, color: ColorValue.textColor)),
-                              SizedBox(height: 8),
-                              ListView.separated(
-                                shrinkWrap: true,
-                                physics: const NeverScrollableScrollPhysics(),
-                                itemCount: controller.timeList.length,
-                                separatorBuilder: (context, index) => Container(
-                                  height: (.5),
-                                  color: ColorValue.colorBrCmr,
-                                ),
-                                itemBuilder: (context, index) {
-                                  return InkWell(
-                                    onTap: () async {
-                                      await controller.autoDelete(day: controller.timeList[index]);
-                                      Navigator.pop(context);
-                                    },
-                                    child: Padding(
-                                      padding: EdgeInsets.symmetric(vertical: 12),
-                                      child: Row(
-                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                        children: [
-                                          Text(
-                                            controller.timeList[index] == 0
-                                                ? AppLocalizations.of(context)!.off
-                                                : '${controller.timeList[index]} ${controller.timeList[index] > 1 ? AppLocalizations.of(context)!.days : AppLocalizations.of(context)!.day}',
-                                            style: AppTextStyle.regularW400(
-                                                size: 14,
-                                                lineHeight: 14 / 24,
-                                                color: controller.autoDeleteData == index ? ColorValue.colorPrimary : ColorValue.neutralColor),
-                                          ),
-                                          if (controller.autoDeleteData == index) SvgPicture.asset(Images.done_ic)
-                                        ],
-                                      ),
-                                    ),
-                                  );
-                                },
-                              ),
-                              SizedBox(height: 20),
-                            ]);
-                          },
-                        ),
-                      MyEntry(
-                        icon: Images.clear_history_ic,
-                        title: AppLocalizations.of(context)!.clear_history,
                         onTap: () {
-                          UtilsWidget.showDialogCustomInChatScreen(
-                              controller.isDeleteConversation,
-                              AppLocalizations.of(context)!.clear_history,
-                              AppLocalizations.of(context)!.label_are_you_sure_you_want_to_clear_your_chat_history,
-                              AppLocalizations.of(context)!.label_delete_converstation_chat, (p0) {
-                            controller.isDeleteConversation.value = !controller.isDeleteConversation.value;
-                          }, () async {
-                            await controller.clearMessage();
-                            Navigator.pop(context);
-                          }, isClear: true);
+                          //   show popup add member
+                          bottomSheetChatItem(context);
+                        }),
+                  )),
+              PopupMenuButton(
+                offset: Offset(-25, 50),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                icon: SvgPicture.asset(
+                  Images.three_dot_vertical_ic,
+                  color: Get.isDarkMode ? ColorValue.white : ColorValue.neutralLineIcon,
+                ),
+                itemBuilder: (context) {
+                  return [
+                    if (controller.roleId == 1)
+                      MyEntry(
+                        icon: Images.auto_delete_ic,
+                        title: AppLocalizations.of(context)!.auto_delete,
+                        onTap: () {
+                          UtilsWidget.showModalBottomSheetCustom([
+                            SizedBox(height: 12),
+                            Text(
+                              AppLocalizations.of(context)!.auto_delete_title,
+                              style: AppTextStyle.regularW500(size: 20, lineHeight: 24, color: ColorValue.neutralColor),
+                            ),
+                            SizedBox(height: 8),
+                            Text(AppLocalizations.of(context)!.auto_delete_content,
+                                style: AppTextStyle.regularW400(
+                                    size: 12, lineHeight: 12 / 16, fontStyle: FontStyle.italic, color: ColorValue.textColor)),
+                            SizedBox(height: 8),
+                            ListView.separated(
+                              shrinkWrap: true,
+                              physics: const NeverScrollableScrollPhysics(),
+                              itemCount: controller.timeList.length,
+                              separatorBuilder: (context, index) => Container(
+                                height: (.5),
+                                color: ColorValue.colorBrCmr,
+                              ),
+                              itemBuilder: (context, index) {
+                                return InkWell(
+                                  onTap: () async {
+                                    await controller.autoDelete(day: controller.timeList[index]);
+                                    Navigator.pop(context);
+                                  },
+                                  child: Padding(
+                                    padding: EdgeInsets.symmetric(vertical: 12),
+                                    child: Row(
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Text(
+                                          controller.timeList[index] == 0
+                                              ? AppLocalizations.of(context)!.off
+                                              : '${controller.timeList[index]} ${controller.timeList[index] > 1 ? AppLocalizations.of(context)!.days : AppLocalizations.of(context)!.day}',
+                                          style: AppTextStyle.regularW400(
+                                              size: 14,
+                                              lineHeight: 14 / 24,
+                                              color: controller.autoDeleteData == index ? ColorValue.colorPrimary : ColorValue.neutralColor),
+                                        ),
+                                        if (controller.autoDeleteData == index) SvgPicture.asset(Images.done_ic)
+                                      ],
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+                            SizedBox(height: 20),
+                          ]);
                         },
                       ),
+                    MyEntry(
+                      icon: Images.clear_history_ic,
+                      title: AppLocalizations.of(context)!.clear_history,
+                      onTap: () {
+                        UtilsWidget.showDialogCustomInChatScreen(
+                            controller.isDeleteConversation,
+                            AppLocalizations.of(context)!.clear_history,
+                            AppLocalizations.of(context)!.label_are_you_sure_you_want_to_clear_your_chat_history,
+                            AppLocalizations.of(context)!.label_delete_converstation_chat, (p0) {
+                          controller.isDeleteConversation.value = !controller.isDeleteConversation.value;
+                        }, () async {
+                          await controller.clearMessage();
+                          Navigator.pop(context);
+                        }, isClear: true);
+                      },
+                    ),
+                    MyEntry(
+                      icon: Images.delete_ic,
+                      title: AppLocalizations.of(context)!.delete_chat,
+                      onTap: () {
+                        UtilsWidget.showDialogCustomInChatScreen(controller.isDeleteConversation, AppLocalizations.of(context)!.delete_chat,
+                            AppLocalizations.of(context)!.label_you_cannot_undo_once_you_delete_this_copy_of_the_conversation, '', (p0) {}, () async {
+                          // await controller.deleteChat();
+                          Navigator.pop(context);
+                        }, isDeleteChat: true, isHiddenCheckbox: true);
+                      },
+                    ),
+                    if (controller.chatType == 2)
                       MyEntry(
-                        icon: Images.delete_ic,
-                        title: AppLocalizations.of(context)!.delete_chat,
+                        icon: Images.leave_group_ic,
+                        title: AppLocalizations.of(context)!.leave_group,
                         onTap: () {
                           UtilsWidget.showDialogCustomInChatScreen(
                               controller.isDeleteConversation,
-                              AppLocalizations.of(context)!.delete_chat,
-                              AppLocalizations.of(context)!.label_you_cannot_undo_once_you_delete_this_copy_of_the_conversation,
+                              AppLocalizations.of(context)!.leave_group,
+                              AppLocalizations.of(context)!.label_are_you_sure_you_want_to_leave_and_delete_this_group_chat_on_your_end,
                               '',
                               (p0) {}, () async {
-                            // await controller.deleteChat();
+                            await controller.leaveGroup();
                             Navigator.pop(context);
-                          }, isDeleteChat: true, isHiddenCheckbox: true);
+                          }, isLeave: true, isHiddenCheckbox: true);
                         },
                       ),
-                      if (controller.chatType == 2)
-                        MyEntry(
-                          icon: Images.leave_group_ic,
-                          title: AppLocalizations.of(context)!.leave_group,
-                          onTap: () {
-                            UtilsWidget.showDialogCustomInChatScreen(
-                                controller.isDeleteConversation,
-                                AppLocalizations.of(context)!.leave_group,
-                                AppLocalizations.of(context)!.label_are_you_sure_you_want_to_leave_and_delete_this_group_chat_on_your_end,
-                                '',
-                                (p0) {}, () async {
-                              await controller.leaveGroup();
-                              Navigator.pop(context);
-                            }, isLeave: true, isHiddenCheckbox: true);
-                          },
-                        ),
-                    ];
-                  },
-                ),
-              ],
-              actionsIconTheme: IconThemeData(
-                color: Get.isDarkMode ? ColorValue.white : ColorValue.neutralLineIcon,
+                  ];
+                },
               ),
+            ],
+            actionsIconTheme: IconThemeData(
+              color: Get.isDarkMode ? ColorValue.white : ColorValue.neutralLineIcon,
             ),
-            body: Container(
-              color: Get.isDarkMode ? ColorValue.neutralColor : Colors.white,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Container(
-                    decoration: const BoxDecoration(gradient: LinearGradient(colors: [ColorValue.colorPrimary, ColorValue.colorAppBar])),
-                    padding: EdgeInsets.all(10),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Stack(
-                              children: [
-                                controller.chatAvatar.isNotEmpty
-                                    ? ClipOval(
-                                        child: CachedNetworkImage(
-                                            imageUrl: Constant.BASE_URL_IMAGE + controller.chatAvatar.value, width: 48, height: 48))
-                                    : Container(
-                                        width: 48,
+          ),
+          body: Container(
+            color: Get.isDarkMode ? ColorValue.neutralColor : Colors.white,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  decoration: const BoxDecoration(gradient: LinearGradient(colors: [ColorValue.colorPrimary, ColorValue.colorAppBar])),
+                  padding: EdgeInsets.all(10),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Container(
+                              width: 50,
+                              height: 50,
+                              child: controller.chatAvatar.isNotEmpty
+                                  ? ClipOval(
+                                      child: Container(
                                         height: 48,
-                                        decoration:
-                                            BoxDecoration(shape: BoxShape.circle, gradient: Utils.getGradientForLetter(controller.chatName.value)),
-                                        child: Center(
-                                            child: Text(
-                                          Utils.getInitialsName(controller.chatName.value).toUpperCase(),
-                                          style: AppTextStyle.regularW600(size: 14, lineHeight: 24, color: Colors.white),
-                                          textAlign: TextAlign.center,
-                                        )),
+                                        width: 48,
+                                        decoration: BoxDecoration(),
+                                        child: Image.network(
+                                          Constant.BASE_URL_IMAGE + controller.chatAvatar.value,
+                                          fit: BoxFit.cover,
+                                          errorBuilder: (BuildContext context, Object exception, StackTrace? stackTrace) {
+                                            return Container(
+                                              decoration: BoxDecoration(shape: BoxShape.circle, color: ColorValue.colorBorder),
+                                              width: 48,
+                                              height: 48,
+                                            );
+                                          },
+                                        ),
                                       ),
-                                if (controller.isGroupAdmin.value == 1)
-                                  Positioned(
-                                      bottom: (-1.7),
-                                      right: -1,
-                                      child: PopupMenuButton(
-                                          color: Get.isDarkMode ? ColorValue.colorBrCmr : Colors.white,
-                                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                                          offset: Offset(-30, 20),
-                                          child: Container(
-                                            decoration: BoxDecoration(color: ColorValue.f0fad86, borderRadius: BorderRadius.circular(25)),
-                                            padding: const EdgeInsets.all(2),
+                                    )
+                                  : (controller.roleId == 1 && controller.chatType == 2)
+                                      ? GestureDetector(
+                                          onTap: () async {
+                                            await controller.getImageFiles(isCamera: false);
+                                            controller.changeGroupInfo();
+                                          },
+                                          child: Center(
                                             child: Container(
-                                              padding: const EdgeInsets.all(3),
-                                              decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(25)),
-                                              child: SvgPicture.asset(Images.camera_v1_ic),
+                                              decoration: BoxDecoration(
+                                                  border: Border.all(width: 3, color: Colors.white),
+                                                  gradient: LinearGradient(colors: [Color(0xff0CBE8C), Color(0xff5B72DE)]),
+                                                  shape: BoxShape.circle),
+                                              width: 50,
+                                              height: 50,
+                                              child: SvgPicture.asset(
+                                                'asset/icons/select_image.svg',
+                                                width: 48,
+                                                height: 48,
+                                                fit: BoxFit.scaleDown,
+                                              ),
                                             ),
                                           ),
-                                          itemBuilder: (context) => [
-                                                MyEntry(
-                                                  icon: Images.take_photo_ic,
-                                                  title: AppLocalizations.of(context)!.label_select_photo,
-                                                  onTap: () {
-                                                    Utils.getImage();
-                                                  },
-                                                ),
-                                                MyEntry(
-                                                  icon: Images.camera_ic,
-                                                  title: AppLocalizations.of(context)!.label_take_a_picture,
-                                                  onTap: () {
-                                                    Utils.getMedia(isCamera: true);
-                                                  },
-                                                ),
-                                              ]))
+                                        )
+                                      : Container(
+                                          width: 48,
+                                          height: 48,
+                                          decoration:
+                                              BoxDecoration(shape: BoxShape.circle, gradient: Utils.getGradientForLetter(controller.chatName.value)),
+                                          child: Center(
+                                              child: Text(
+                                            Utils.getInitialsName(controller.chatName.value).toUpperCase(),
+                                            style: AppTextStyle.regularW600(size: 14, lineHeight: 24, color: Colors.white),
+                                            textAlign: TextAlign.center,
+                                          )),
+                                        )),
+                          SizedBox(
+                            width: 8,
+                          ),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  controller.chatName.value,
+                                  style: AppTextStyle.regularW500(size: 16, lineHeight: 20, color: Colors.white),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                if (controller.chatType == 2) ...[
+                                  SizedBox(
+                                    height: 5,
+                                  ),
+                                  Text(
+                                    '${controller.memberLength.value} ${AppLocalizations.of(context)!.members.toLowerCase()}',
+                                    style: AppTextStyle.regularW400(size: 12, lineHeight: 16, color: ColorValue.fc9fad9),
+                                    overflow: TextOverflow.ellipsis,
+                                  )
+                                ]
                               ],
                             ),
-                            SizedBox(
-                              width: 8,
-                            ),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    controller.chatName.value,
-                                    style: AppTextStyle.regularW500(size: 16, lineHeight: 20, color: Colors.white),
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                  if (controller.chatType == 2) ...[
-                                    SizedBox(
-                                      height: 5,
-                                    ),
-                                    Text(
-                                      '${controller.memberLength.value} ${AppLocalizations.of(context)!.members.toLowerCase()}',
-                                      style: AppTextStyle.regularW400(size: 12, lineHeight: 16, color: ColorValue.fc9fad9),
-                                      overflow: TextOverflow.ellipsis,
-                                    )
-                                  ]
-                                ],
-                              ),
-                            )
-                          ],
-                        )
-                      ],
-                    ),
+                          )
+                        ],
+                      )
+                    ],
                   ),
-                  Expanded(
-                      child: Stack(
-                    children: [
-                      Positioned(
-                        top: 0,
-                        bottom: 0,
-                        left: 0,
-                        right: 0,
-                        child: SingleChildScrollView(
-                          controller: controller.scrollController,
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Padding(
-                                padding: EdgeInsets.symmetric(vertical: 12),
-                                child: SingleChildScrollView(
-                                  scrollDirection: Axis.horizontal,
-                                  child: Row(
-                                    children: [
-                                      SizedBox(
-                                        width: 20,
-                                      ),
-                                      if (controller.chatType == 2) ...[
-                                        _tabBar(index: 5, title: AppLocalizations.of(context)!.members),
-                                        SizedBox(
-                                          width: 8,
-                                        )
-                                      ],
-                                      _tabBar(index: 3, title: AppLocalizations.of(context)!.media),
+                ),
+                Expanded(
+                    child: Stack(
+                  children: [
+                    Positioned(
+                      top: 0,
+                      bottom: 0,
+                      left: 0,
+                      right: 0,
+                      child: SingleChildScrollView(
+                        controller: controller.scrollController,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Padding(
+                              padding: EdgeInsets.symmetric(vertical: 12),
+                              child: SingleChildScrollView(
+                                scrollDirection: Axis.horizontal,
+                                child: Row(
+                                  children: [
+                                    SizedBox(
+                                      width: 20,
+                                    ),
+                                    if (controller.chatType == 2) ...[
+                                      _tabBar(index: 5, title: AppLocalizations.of(context)!.members),
                                       SizedBox(
                                         width: 8,
-                                      ),
-                                      _tabBar(index: 2, title: AppLocalizations.of(context)!.sharelink),
-                                      SizedBox(
-                                        width: 8,
-                                      ),
-                                      _tabBar(index: 4, title: AppLocalizations.of(context)!.document),
-                                      SizedBox(
-                                        width: 20,
-                                      ),
+                                      )
                                     ],
-                                  ),
+                                    _tabBar(index: 3, title: AppLocalizations.of(context)!.media),
+                                    SizedBox(
+                                      width: 8,
+                                    ),
+                                    _tabBar(index: 2, title: AppLocalizations.of(context)!.sharelink),
+                                    SizedBox(
+                                      width: 8,
+                                    ),
+                                    _tabBar(index: 4, title: AppLocalizations.of(context)!.document),
+                                    SizedBox(
+                                      width: 20,
+                                    ),
+                                  ],
                                 ),
                               ),
-                              // controller.isLoading.value
-                              //     ? Center(
-                              //         child: CircularProgressIndicator(),
-                              //       )
-                              //     :
-                              _content()
-                            ],
-                          ),
+                            ),
+                            // controller.isLoading.value
+                            //     ? Center(
+                            //         child: CircularProgressIndicator(),
+                            //       )
+                            //     :
+                            _content()
+                          ],
                         ),
                       ),
-                    ],
-                  )),
-                ],
-              ),
+                    ),
+                  ],
+                )),
+              ],
             ),
-          )),
-    );
+          ),
+        ));
   }
 
   _tabBar({required int index, required String title}) {
@@ -413,7 +413,7 @@ class _ProfileChatDetailState extends State<ProfileChatDetail> with AutomaticKee
                 mainAxisCellCount: 1,
                 child: GestureDetector(
                   onTap: () {
-                    Navigation.navigateTo(page: 'MediaChatDetail', arguments: Constant.BASE_URL_IMAGE + controller.listImage[index]);
+                    Navigation.navigateTo(page: RouteDefine.mediaChatDetail, arguments: Constant.BASE_URL_IMAGE + controller.listImage[index]);
                   },
                   child: ClipRRect(
                       borderRadius: BorderRadius.circular(12),

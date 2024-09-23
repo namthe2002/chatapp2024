@@ -1,11 +1,8 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:typed_data';
 import 'package:any_link_preview/any_link_preview.dart';
-import 'package:audio_waveforms/audio_waveforms.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
-import 'package:emoji_regex/emoji_regex.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
@@ -20,11 +17,9 @@ import 'package:live_yoko/Models/Chat/ChatDetail.dart' as cd;
 import 'package:live_yoko/Global/ColorValue.dart';
 import 'package:live_yoko/Global/TextByNation.dart';
 import 'package:live_yoko/Navigation/Navigation.dart';
-import 'package:live_yoko/Utils/Speech2Text.dart';
-import 'package:live_yoko/Utils/Translator.dart';
+import 'package:live_yoko/Navigation/RouteDefine.dart';
 import 'package:live_yoko/Utils/Utils.dart';
 import 'package:live_yoko/View/Chat/ChatCreate.dart';
-import 'package:live_yoko/View/Chat/ProfileChatDetail.dart';
 import 'package:live_yoko/widget/my_entry.dart';
 import 'package:live_yoko/widget/single_tap_detector.dart';
 import 'package:lottie/lottie.dart';
@@ -34,7 +29,6 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../Controller/Chat/ChatController.dart';
 import '../../Models/Chat/Chat.dart';
 import '../../Models/Chat/emoji/emoji_model.dart';
-import '../../Service/SocketManager.dart';
 import '../../Service/giphy_get/screen/giphy_detail.dart';
 import '../../Utils/TextWithEmoji.dart';
 import '../../Utils/thumnail_generator.dart';
@@ -43,9 +37,8 @@ import '../../main.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../../widget/RecordTime.dart';
-import '../../widget/text_field_widget.dart';
 import '../../widget/utils_widget.dart';
-import 'ProfileChatDetail2.dart';
+import 'dart:html' as html;
 
 class ChatBoxDetail extends StatefulWidget {
   final Chat? chatDetail;
@@ -58,6 +51,8 @@ class ChatBoxDetail extends StatefulWidget {
 
 class _ChatBoxDetailState extends State<ChatBoxDetail> with TickerProviderStateMixin {
   final controller = Get.put(ChatDetailController());
+  Uint8List? _pastedImage;
+
   late TabController _tabEmojiController;
 
   Size size = Size(0, 0);
@@ -67,8 +62,6 @@ class _ChatBoxDetailState extends State<ChatBoxDetail> with TickerProviderStateM
   int _quality = 200;
 
   bool _attachHeaders = false;
-
-  int _timeMs = 0;
 
   GenThumbnailImage? futureImage;
 
@@ -89,14 +82,69 @@ class _ChatBoxDetailState extends State<ChatBoxDetail> with TickerProviderStateM
     'asset/icons/like.svg',
   ];
 
+  void _handlePaste() {
+    html.document.onPaste.listen((html.ClipboardEvent event) {
+      final items = event.clipboardData?.items;
+      if (items != null) {
+        for (int i = 0; i < items.length!; i++) {
+          final item = items[i];
+          if (item.type!.startsWith('image/')) {
+            final blob = item.getAsFile();
+            final reader = html.FileReader();
+            reader.readAsArrayBuffer(blob!);
+            reader.onLoadEnd.listen((_) {
+              setState(() {
+                _pastedImage = reader.result as Uint8List;
+              });
+            });
+          }
+        }
+      }
+    });
+  }
+
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
+    checkChatController();
     controller.initChatData();
+
     controller.selectedChatDetail.value = widget.chatDetail;
+    _handlePaste();
+    setColorText;
     _tabEmojiController = TabController(length: 3, vsync: this);
-    // _tabEmojiController.addListener(_updateTabHeight);
+  }
+
+  @override
+  void didUpdateWidget(covariant ChatBoxDetail oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    setColorText;
+  }
+
+  Future<void> setColorText() async {
+    int sizeText = await Utils.getIntValueWithKey(Constant.SIZE_TEXT);
+    String backgroundColor = await Utils.getStringValueWithKey(Constant.BR_COLOR);
+    String textColor = await Utils.getStringValueWithKey(Constant.TEXT_COLOR);
+    print('textColor: ${textColor}');
+    if (sizeText != 0) {
+      controller.sizeText.value = sizeText;
+    }
+    if (backgroundColor.isNotEmpty) {
+      controller.backgroundColor.value = int.parse(backgroundColor);
+    }
+    if (textColor.isNotEmpty) {
+      controller.textColor.value = int.parse(textColor);
+    }
+  }
+
+  Future<void> checkChatController() async {
+    if (Get.isRegistered<ChatController>()) {
+      var controller = await Get.find<ChatController>();
+      controller.isUnPin.value = await true;
+      await controller.refreshListChat();
+    } else {
+      print('chuakhoitaocontroller');
+    }
   }
 
   void _hideOverlay() {
@@ -110,8 +158,6 @@ class _ChatBoxDetailState extends State<ChatBoxDetail> with TickerProviderStateM
     if (_overlayEntry == null) {
       _overlayEntry = _createOverlayEntry(context);
       Overlay.of(context).insert(_overlayEntry!);
-
-      // Start the initial 2-second timer
       _overlayTimer = Timer(Duration(seconds: 2), () {
         if (!_hasMouseEntered) {
           _hideOverlay();
@@ -122,7 +168,6 @@ class _ChatBoxDetailState extends State<ChatBoxDetail> with TickerProviderStateM
 
   void _updateOverlayVisibility() {
     if (!_isOverIcon && !_isOverOverlay) {
-      // Start a 1-second timer when the mouse leaves
       _overlayTimer?.cancel();
       _overlayTimer = Timer(Duration(milliseconds: 100), _hideOverlay);
     }
@@ -259,8 +304,9 @@ class _ChatBoxDetailState extends State<ChatBoxDetail> with TickerProviderStateM
           ? Scaffold(body: emptyChat())
           : Scaffold(
               appBar: AppBar(
-                backgroundColor:
-                    controller.isShowMultiselect.value ? (Get.isDarkMode ? Color(controller.textColor) : Colors.white) : Color(controller.textColor),
+                backgroundColor: controller.isShowMultiselect.value
+                    ? (Get.isDarkMode ? Color(controller.textColor.value) : Colors.white)
+                    : Color(controller.textColor.value),
                 title: controller.isShowMultiselect.value
                     ? Text(
                         '${controller.selectedItems.length} ${TextByNation.getStringByKey('select')}',
@@ -382,10 +428,7 @@ class _ChatBoxDetailState extends State<ChatBoxDetail> with TickerProviderStateM
                     controller.isSearch.value
                         ? const SizedBox()
                         : IconButton(
-                            onPressed: () {
-                              // controller.isSearch.value = !controller.isSearch.value;
-                              // controller.textSearchController.clear();
-                            },
+                            onPressed: () {},
                             icon: Icon(
                               Icons.call,
                             ),
@@ -503,7 +546,8 @@ class _ChatBoxDetailState extends State<ChatBoxDetail> with TickerProviderStateM
                                                                           SizedBox(
                                                                             width: 20,
                                                                           ),
-                                                                          SvgPicture.asset('asset/icons/pin.svg', color: Color(controller.textColor)),
+                                                                          SvgPicture.asset('asset/icons/pin.svg',
+                                                                              color: Color(controller.textColor.value)),
                                                                           SizedBox(
                                                                             width: 10,
                                                                           ),
@@ -516,7 +560,7 @@ class _ChatBoxDetailState extends State<ChatBoxDetail> with TickerProviderStateM
                                                                                 style: TextStyle(
                                                                                     fontWeight: FontWeight.w400,
                                                                                     fontSize: 14,
-                                                                                    color: Color(controller.textColor)),
+                                                                                    color: Color(controller.textColor.value)),
                                                                               ),
                                                                               SizedBox(height: 5),
                                                                               _chatContentType(
@@ -559,22 +603,6 @@ class _ChatBoxDetailState extends State<ChatBoxDetail> with TickerProviderStateM
                                                                           SizedBox(
                                                                             width: 10,
                                                                           ),
-                                                                          // IconButton(
-                                                                          //     onPressed:
-                                                                          //         () async {
-                                                                          //       controller
-                                                                          //           .selectedItems
-                                                                          //           .add(controller
-                                                                          //               .pinList[0]
-                                                                          //               .uuid!);
-                                                                          //       await controller
-                                                                          //           .pinMessage(
-                                                                          //         state:
-                                                                          //             0,
-                                                                          //       );
-                                                                          //     },
-                                                                          //     icon: Icon(Icons
-                                                                          //         .close_rounded))
                                                                         ],
                                                                       ),
                                                                     ),
@@ -615,8 +643,7 @@ class _ChatBoxDetailState extends State<ChatBoxDetail> with TickerProviderStateM
                                                               return _chatItem(context,
                                                                   index: index - 1, key: ValueKey(controller.chatList[index - 1].uuid));
                                                             },
-                                                          )
-                                                          )
+                                                          ))
                                                         ],
                                                       )),
                                                   Positioned(
@@ -668,7 +695,7 @@ class _ChatBoxDetailState extends State<ChatBoxDetail> with TickerProviderStateM
                                             children: [
                                               SvgPicture.asset(
                                                 controller.isEdit.value == 1 ? 'asset/icons/edit.svg' : 'asset/icons/reply.svg',
-                                                color: Color(controller.textColor),
+                                                color: Color(controller.textColor.value),
                                               ),
                                               SizedBox(
                                                 width: 10,
@@ -681,7 +708,8 @@ class _ChatBoxDetailState extends State<ChatBoxDetail> with TickerProviderStateM
                                                     controller.isEdit.value == 1
                                                         ? TextByNation.getStringByKey('edit')
                                                         : '${TextByNation.getStringByKey('reply')} ${controller.decodedName(controller.replyChat.value.fullName ?? controller.replyChat.value.userSent!)}',
-                                                    style: TextStyle(color: Color(controller.textColor), fontSize: 14, fontWeight: FontWeight.w400),
+                                                    style: TextStyle(
+                                                        color: Color(controller.textColor.value), fontSize: 14, fontWeight: FontWeight.w400),
                                                   ),
                                                   SizedBox(
                                                     height: 8,
@@ -821,6 +849,19 @@ class _ChatBoxDetailState extends State<ChatBoxDetail> with TickerProviderStateM
                                                     ),
                                                   ),
                                                 ),
+                                                SizedBox(height: 10),
+
+                                                // Hiển thị ảnh nếu có ảnh được dán
+                                                if (_pastedImage != null)
+                                                  Container(
+                                                    margin: EdgeInsets.only(top: 10),
+                                                    padding: EdgeInsets.all(8),
+                                                    decoration: BoxDecoration(
+                                                      border: Border.all(color: Colors.grey),
+                                                    ),
+                                                    child: Image.memory(_pastedImage!),
+                                                  ),
+
                                                 controller.isTextFieldFocused.value
                                                     ? IconButton(
                                                         onPressed: () async {
@@ -947,7 +988,10 @@ class _ChatBoxDetailState extends State<ChatBoxDetail> with TickerProviderStateM
     final DateTime dt = originalFormat.parse(messageTime.timeCreated.toString(), true);
     final DateTime dt2 = originalFormat.parse(messageTime2.timeCreated.toString(), true);
     final DateTime dt3 = originalFormat.parse(messageTime3.timeCreated.toString(), true);
-    final DateTime dtData = originalFormat.parse(controller.chatList[index].timeCreated.toString(), true).toLocal();
+    // final DateTime dtData = originalFormat.parse(controller.chatList[index].timeCreated.toString(), true).toLocal();
+    final DateTime dtData = originalFormat
+        .parse(controller.chatList[index].timeCreated.toString())
+        .toUtc();
 
     final bool isNewTime = dt3.isAfter(dt2.subtract(Duration(minutes: 20)));
     final bool isNewTime2 = dt2.isAfter(dt.subtract(Duration(minutes: 20)));
@@ -991,7 +1035,7 @@ class _ChatBoxDetailState extends State<ChatBoxDetail> with TickerProviderStateM
                               height: 24,
                               width: 24,
                               margin: EdgeInsets.only(right: 20),
-                              decoration: BoxDecoration(shape: BoxShape.circle, color: Color(controller.textColor)),
+                              decoration: BoxDecoration(shape: BoxShape.circle, color: Color(controller.textColor.value)),
                               child: Center(
                                 child: Icon(
                                   Icons.check_rounded,
@@ -1178,8 +1222,8 @@ class _ChatBoxDetailState extends State<ChatBoxDetail> with TickerProviderStateM
               : BoxDecoration(
                   color: isMe
                       ? Get.isDarkMode
-                          ? Color.lerp(Color(controller.backgroundColor), Colors.black, 0.2)
-                          : Color(controller.backgroundColor)
+                          ? Color.lerp(Color(controller.backgroundColor.value), Colors.black, 0.2)
+                          : Color(controller.backgroundColor.value)
                       : (Get.isDarkMode ? Color.fromRGBO(31, 30, 30, 0.872) : Color.fromRGBO(240, 243, 251, 1)),
                   borderRadius: BorderRadius.circular(12)),
           child: Column(
@@ -1195,7 +1239,7 @@ class _ChatBoxDetailState extends State<ChatBoxDetail> with TickerProviderStateM
                       style: TextStyle(
                         fontWeight: FontWeight.w500,
                         fontSize: controller.sizeText.toDouble(),
-                        color: Color(controller.textColor),
+                        color: Color(controller.textColor.value),
                       ),
                     ),
                     SizedBox(
@@ -1249,7 +1293,7 @@ class _ChatBoxDetailState extends State<ChatBoxDetail> with TickerProviderStateM
                       Icon(
                         message.readState != 0 ? Icons.done_all_rounded : Icons.done_rounded,
                         size: 16,
-                        color: Color(controller.textColor),
+                        color: Color(controller.textColor.value),
                       )
                     ]
                   ],
@@ -1275,7 +1319,8 @@ class _ChatBoxDetailState extends State<ChatBoxDetail> with TickerProviderStateM
                               ? isMe
                                   ? Container(
                                       padding: const EdgeInsets.all(4),
-                                      decoration: BoxDecoration(color: Color(controller.backgroundColor), borderRadius: BorderRadius.circular(15)),
+                                      decoration:
+                                          BoxDecoration(color: Color(controller.backgroundColor.value), borderRadius: BorderRadius.circular(15)),
                                       child: Row(
                                         mainAxisAlignment: MainAxisAlignment.end,
                                         mainAxisSize: MainAxisSize.min,
@@ -1393,7 +1438,7 @@ class _ChatBoxDetailState extends State<ChatBoxDetail> with TickerProviderStateM
                                   ? Container(
                                       padding: EdgeInsets.all(message.contentType == 6 || message.contentType == 8 ? 4 : 0),
                                       decoration: message.contentType == 6 || message.contentType == 8
-                                          ? BoxDecoration(color: Color(controller.backgroundColor), borderRadius: BorderRadius.circular(15))
+                                          ? BoxDecoration(color: Color(controller.backgroundColor.value), borderRadius: BorderRadius.circular(15))
                                           : null,
                                       child: Row(mainAxisAlignment: MainAxisAlignment.end, children: [
                                         Text(
@@ -1413,7 +1458,7 @@ class _ChatBoxDetailState extends State<ChatBoxDetail> with TickerProviderStateM
                                           Icon(
                                             message.readState != 0 ? Icons.done_all_rounded : Icons.done_rounded,
                                             size: 16,
-                                            color: Color(controller.textColor),
+                                            color: Color(controller.textColor.value),
                                           )
                                         ]
                                       ]),
@@ -1438,7 +1483,8 @@ class _ChatBoxDetailState extends State<ChatBoxDetail> with TickerProviderStateM
                               ? isMe
                                   ? Container(
                                       padding: const EdgeInsets.all(4),
-                                      decoration: BoxDecoration(color: Color(controller.backgroundColor), borderRadius: BorderRadius.circular(15)),
+                                      decoration:
+                                          BoxDecoration(color: Color(controller.backgroundColor.value), borderRadius: BorderRadius.circular(15)),
                                       child: Row(
                                         mainAxisAlignment: MainAxisAlignment.end,
                                         mainAxisSize: MainAxisSize.min,
@@ -1556,7 +1602,7 @@ class _ChatBoxDetailState extends State<ChatBoxDetail> with TickerProviderStateM
                                   ? Container(
                                       padding: EdgeInsets.all(message.contentType == 6 || message.contentType == 8 ? 4 : 0),
                                       decoration: message.contentType == 6 || message.contentType == 8
-                                          ? BoxDecoration(color: Color(controller.backgroundColor), borderRadius: BorderRadius.circular(15))
+                                          ? BoxDecoration(color: Color(controller.backgroundColor.value), borderRadius: BorderRadius.circular(15))
                                           : null,
                                       child: Row(mainAxisAlignment: MainAxisAlignment.end, children: [
                                         Text(
@@ -1576,7 +1622,7 @@ class _ChatBoxDetailState extends State<ChatBoxDetail> with TickerProviderStateM
                                           Icon(
                                             message.readState != 0 ? Icons.done_all_rounded : Icons.done_rounded,
                                             size: 16,
-                                            color: Color(controller.textColor),
+                                            color: Color(controller.textColor.value),
                                           )
                                         ]
                                       ]),
@@ -1710,6 +1756,7 @@ class _ChatBoxDetailState extends State<ChatBoxDetail> with TickerProviderStateM
               width: Get.width * 0.22,
               child: AnyLinkPreview(
                 key: ValueKey(message.uuid),
+                urlLaunchMode: LaunchMode.platformDefault,
                 onTap: () async {
                   await launchUrl(Uri.parse(controller.getLink('${decoded}')));
                 },
@@ -1724,6 +1771,8 @@ class _ChatBoxDetailState extends State<ChatBoxDetail> with TickerProviderStateM
                   fontWeight: FontWeight.bold,
                   fontSize: 15,
                 ),
+                errorBody: '',
+                errorTitle: '',
                 bodyStyle: TextStyle(color: Colors.grey, fontSize: 12),
               ),
             )
@@ -1815,7 +1864,7 @@ class _ChatBoxDetailState extends State<ChatBoxDetail> with TickerProviderStateM
                                       Icon(
                                         message.readState != 0 ? Icons.done_all_rounded : Icons.done_rounded,
                                         size: 16,
-                                        color: Color(controller.textColor),
+                                        color: Color(controller.textColor.value),
                                       )
                                     ]
                                   ],
@@ -1846,7 +1895,7 @@ class _ChatBoxDetailState extends State<ChatBoxDetail> with TickerProviderStateM
                   ],
                 )
               : Container(
-                  width: Get.width * 0.22,
+                  width: Get.width * 0.15,
                   child: ListView.builder(
                     shrinkWrap: true,
                     physics: NeverScrollableScrollPhysics(),
@@ -1854,28 +1903,29 @@ class _ChatBoxDetailState extends State<ChatBoxDetail> with TickerProviderStateM
                     itemBuilder: (context, index) {
                       return GestureDetector(
                         onTap: () {
-                          Navigation.navigateTo(page: 'MediaChatDetail', arguments: Constant.BASE_URL_IMAGE + array[index]);
+                          Navigation.navigateTo(page: RouteDefine.mediaChatDetail, arguments: Constant.BASE_URL_IMAGE + array[index]);
                         },
                         child: Container(
                           height: Get.height * 0.3,
-                          width: Get.width * 0.22,
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                          ),
+                          // width: Get.width * 0.15,
+                          decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12)),
                           child: FittedBox(
-                            fit: BoxFit.fitHeight,
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(12),
-                              child: GenThumbnailImage(
-                                thumbnailRequest: ThumbnailRequest(
-                                  video: Constant.BASE_URL_IMAGE + array[index],
-                                  thumbnailPath: null,
-                                  imageFormat: _format,
-                                  maxHeight: (Get.height).toInt(),
-                                  maxWidth: (Get.width).toInt(),
-                                  timeMs: 1000,
-                                  quality: _quality,
-                                  attachHeaders: _attachHeaders,
+                            fit: BoxFit.contain, // This ensures the image fits within the box
+                            child: ClipRect(
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(12),
+                                child: GenThumbnailImage(
+                                  videoUrl: Constant.BASE_URL_IMAGE + array[index],
+                                  thumbnailRequest: ThumbnailRequest(
+                                    video: Constant.BASE_URL_IMAGE + array[index],
+                                    thumbnailPath: null,
+                                    imageFormat: _format,
+                                    maxHeight: (Get.height).toInt(),
+                                    maxWidth: (Get.width).toInt(),
+                                    timeMs: 0,
+                                    quality: _quality,
+                                    attachHeaders: _attachHeaders,
+                                  ),
                                 ),
                               ),
                             ),
@@ -1930,7 +1980,7 @@ class _ChatBoxDetailState extends State<ChatBoxDetail> with TickerProviderStateM
                     children: [
                       Container(
                         padding: EdgeInsets.all(12),
-                        decoration: BoxDecoration(color: Color(controller.textColor), borderRadius: BorderRadius.circular(12)),
+                        decoration: BoxDecoration(color: Color(controller.textColor.value), borderRadius: BorderRadius.circular(12)),
                         child: Icon(
                           Icons.download_outlined,
                           size: 24,
@@ -1961,7 +2011,7 @@ class _ChatBoxDetailState extends State<ChatBoxDetail> with TickerProviderStateM
                                   style: TextStyle(
                                     fontWeight: FontWeight.w400,
                                     fontSize: 14,
-                                    color: Color(controller.textColor),
+                                    color: Color(controller.textColor.value),
                                   ),
                                   overflow: TextOverflow.ellipsis,
                                 ))
@@ -1979,7 +2029,7 @@ class _ChatBoxDetailState extends State<ChatBoxDetail> with TickerProviderStateM
                                         style: TextStyle(
                                           fontWeight: FontWeight.w400,
                                           fontSize: 14,
-                                          color: Color(controller.textColor),
+                                          color: Color(controller.textColor.value),
                                         ),
                                         overflow: TextOverflow.ellipsis,
                                       ));
@@ -1989,7 +2039,7 @@ class _ChatBoxDetailState extends State<ChatBoxDetail> with TickerProviderStateM
                                     style: TextStyle(
                                       fontWeight: FontWeight.w400,
                                       fontSize: 14,
-                                      color: Color(controller.textColor),
+                                      color: Color(controller.textColor.value),
                                     ),
                                     overflow: TextOverflow.ellipsis,
                                   );
@@ -2132,7 +2182,8 @@ class _ChatBoxDetailState extends State<ChatBoxDetail> with TickerProviderStateM
                 absorbing: true,
                 child: Container(
                   padding: EdgeInsets.all(10),
-                  decoration: BoxDecoration(color: Colors.white, border: Border(left: BorderSide(color: Color(controller.textColor), width: 2))),
+                  decoration:
+                      BoxDecoration(color: Colors.white, border: Border(left: BorderSide(color: Color(controller.textColor.value), width: 2))),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -2143,7 +2194,6 @@ class _ChatBoxDetailState extends State<ChatBoxDetail> with TickerProviderStateM
                         color: Colors.white,
                         height: 24 / 14,
                       ),
-
                       SizedBox(
                         height: 10,
                       ),
@@ -2204,7 +2254,7 @@ class _ChatBoxDetailState extends State<ChatBoxDetail> with TickerProviderStateM
   _imageView({required String url}) {
     return GestureDetector(
       onTap: () {
-        Navigation.navigateTo(page: 'MediaChatDetail', arguments: url);
+        Navigation.navigateTo(page: RouteDefine.mediaChatDetail, arguments: url);
       },
       child: Image.network(
         url,
@@ -2401,7 +2451,7 @@ class _ChatBoxDetailState extends State<ChatBoxDetail> with TickerProviderStateM
                             }
                             ChatController chat = Get.find<ChatController>();
                             chat.forward = message;
-                            await Navigation.navigateTo(page: 'Chat', arguments: message);
+                            await Navigation.navigateTo(page: RouteDefine.chat, arguments: message);
                             chat.forward = cd.ChatDetail();
                             chat.update();
                           }
@@ -2484,7 +2534,7 @@ class _ChatBoxDetailState extends State<ChatBoxDetail> with TickerProviderStateM
                           onTap: () async {
                             List<dynamic> arrays = jsonDecode(decoded);
                             for (String array in arrays) {
-                              await controller.saveImage(Constant.BASE_URL_IMAGE + array);
+                              // await controller.saveImage(Constant.BASE_URL_IMAGE + array);
                             }
                             Navigator.pop(context);
                           },
@@ -2648,26 +2698,12 @@ class _ChatBoxDetailState extends State<ChatBoxDetail> with TickerProviderStateM
                               }),
                               SizedBox(height: 14),
                               UtilsWidget.itemShowBlockPopup(
-                                  // TextByNation.getStringByKey(
-                                  //     KeyByNation.lock_and_delete_messages),
-                                  AppLocalizations.of(context)!.delete_message,
-
-                                  // TextByNation.getStringByKey(KeyByNation
-                                  //     .block_and_delete_this_account_messages_in_the_group),
-                                  AppLocalizations.of(context)!.delete_group_confirm, () {
+                                  AppLocalizations.of(context)!.delete_message, AppLocalizations.of(context)!.delete_group_confirm, () {
                                 Navigator.pop(Get.context!);
                                 UtilsWidget.showDialogCustomInChatScreen(
                                     controller.isBlockMemberCheck,
-                                    // TextByNation.getStringByKey(
-                                    //     KeyByNation.lock_message),
                                     AppLocalizations.of(context)!.delete_group_confirm,
-
-                                    // TextByNation.getStringByKey(KeyByNation
-                                    //     .block_and_delete_this_account_messages_in_the_group),
                                     AppLocalizations.of(context)!.delete_chat,
-
-                                    // TextByNation.getStringByKey(
-                                    //     KeyByNation.remove_account_from_group),
                                     AppLocalizations.of(context)!.delete_group_confirm, (p0) {
                                   controller.isBlockMemberCheck.value = !controller.isBlockMemberCheck.value;
                                 }, () {
@@ -2788,7 +2824,7 @@ class _ChatBoxDetailState extends State<ChatBoxDetail> with TickerProviderStateM
                                 children: [
                                   Text(
                                     '${index + 1}',
-                                    style: TextStyle(fontWeight: FontWeight.w500, fontSize: 20, color: Color(controller.textColor)),
+                                    style: TextStyle(fontWeight: FontWeight.w500, fontSize: 20, color: Color(controller.textColor.value)),
                                   ),
                                   SizedBox(
                                     width: 16,

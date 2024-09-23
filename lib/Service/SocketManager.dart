@@ -10,6 +10,8 @@ import 'package:live_yoko/Global/Constant.dart';
 import 'package:live_yoko/Utils/Utils.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
+import '../Utils/enum.dart';
+
 class SocketManager {
   static WebSocketChannel? _channel;
   static SocketManager? _instance;
@@ -35,10 +37,13 @@ class SocketManager {
       dynamic data = json.decode(message.toString());
       print('dadada $data');
       if (data['MsgType'] == 20) {
-        if (data['Data'].length > 0)
-          Utils.showSnackBar(
-              title: '',
-              message: utf8.decode(base64Url.decode(data['Data'])));
+        if (data['Data'].length > 0) {
+          Utils.showToast(
+          Get.overlayContext!,
+          utf8.decode(base64Url.decode(data['Data'])),
+          type: ToastType.INFORM,
+        );
+        }
           return;
       } else if (data['MsgType'] == 11) {
         Utils.backLogin(true);
