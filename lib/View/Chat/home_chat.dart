@@ -822,63 +822,63 @@ class _HomeChatWebsiteState extends State<HomeChatWebsite> {
         ));
   }
 
-  Padding emptyChat() {
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 20),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Center(
-            child: Image.asset(
-              Get.isDarkMode ? 'asset/images/empty_chat_darkmode.png' : 'asset/images/empty_chat_lightmode.png',
-              width: 250,
-              height: 250,
-              fit: BoxFit.cover,
-            ),
-          ),
-          SizedBox(
-            height: 16,
-          ),
-          Text(
-            TextByNation.getStringByKey('welcome_chat'),
-            style: TextStyle(fontSize: 24, fontWeight: FontWeight.w500, color: ColorValue.colorPrimary),
-          ),
-          SizedBox(
-            height: 6,
-          ),
-          Text(
-            TextByNation.getStringByKey('welcome_content'),
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontWeight: FontWeight.w400,
-              fontSize: 12,
-              color: Get.isDarkMode ? ColorValue.colorTextDark : ColorValue.textColor,
-            ),
-          ),
-          SizedBox(
-            height: 20,
-          ),
-          InkWell(
-            onTap: () async {
-              await Navigation.navigateTo(page: 'ChatCreate');
-              // _homeController.refreshListChat();
-            },
-            child: Container(
-              decoration:
-                  BoxDecoration(borderRadius: BorderRadius.circular(12), gradient: LinearGradient(colors: [Color(0xff0CBE8C), Color(0xff5B72DE)])),
-              child: Padding(
-                  padding: EdgeInsets.symmetric(vertical: 12, horizontal: 20),
-                  child: Text(
-                    TextByNation.getStringByKey('create_chat'),
-                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.white),
-                  )),
-            ),
-          )
-        ],
-      ),
-    );
-  }
+  // Padding emptyChat() {
+  //   return Padding(
+  //     padding: EdgeInsets.symmetric(horizontal: 20),
+  //     child: Column(
+  //       mainAxisAlignment: MainAxisAlignment.center,
+  //       crossAxisAlignment: CrossAxisAlignment.center,
+  //       children: [
+  //         Center(
+  //           child: Image.asset(
+  //             Get.isDarkMode ? 'asset/images/empty_chat_darkmode.png' : 'asset/images/empty_chat_lightmode.png',
+  //             width: 250,
+  //             height: 250,
+  //             fit: BoxFit.cover,
+  //           ),
+  //         ),
+  //         SizedBox(
+  //           height: 16,
+  //         ),
+  //         Text(
+  //           TextByNation.getStringByKey('welcome_chat'),
+  //           style: TextStyle(fontSize: 24, fontWeight: FontWeight.w500, color: ColorValue.colorPrimary),
+  //         ),
+  //         SizedBox(
+  //           height: 6,
+  //         ),
+  //         Text(
+  //           TextByNation.getStringByKey('welcome_content'),
+  //           textAlign: TextAlign.center,
+  //           style: TextStyle(
+  //             fontWeight: FontWeight.w400,
+  //             fontSize: 12,
+  //             color: Get.isDarkMode ? ColorValue.colorTextDark : ColorValue.textColor,
+  //           ),
+  //         ),
+  //         SizedBox(
+  //           height: 20,
+  //         ),
+  //         InkWell(
+  //           onTap: () async {
+  //             await Navigation.navigateTo(page: 'ChatCreate');
+  //             // _homeController.refreshListChat();
+  //           },
+  //           child: Container(
+  //             decoration:
+  //                 BoxDecoration(borderRadius: BorderRadius.circular(12), gradient: LinearGradient(colors: [Color(0xff0CBE8C), Color(0xff5B72DE)])),
+  //             child: Padding(
+  //                 padding: EdgeInsets.symmetric(vertical: 12, horizontal: 20),
+  //                 child: Text(
+  //                   TextByNation.getStringByKey('create_chat'),
+  //                   style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.white),
+  //                 )),
+  //           ),
+  //         )
+  //       ],
+  //     ),
+  //   );
+  // }
 
   Widget homeChatWidget() {
     return Stack(
@@ -914,8 +914,7 @@ class _HomeChatWebsiteState extends State<HomeChatWebsite> {
                   color: Get.isDarkMode ? ColorValue.colorBrSearch : ColorValue.colorBrSearch,
                   borderRadius: BorderRadius.circular(20),
                 ),
-                child:
-                TextField(
+                child: TextField(
                   controller: _homeController.searchController,
                   focusNode: _homeController.searchNode,
                   onTap: () async {
@@ -943,7 +942,6 @@ class _HomeChatWebsiteState extends State<HomeChatWebsite> {
                       } else {
                         controller.isSearch.value = await true;
                       }
-
                       if (controller.debounce?.isActive ?? false) controller.debounce?.cancel();
                       controller.debounce = Timer(Duration(milliseconds: 2000), () async {
                         await controller.refreshData();
@@ -1009,11 +1007,13 @@ class _HomeChatWebsiteState extends State<HomeChatWebsite> {
                 height: 12,
               ),
               Expanded(
-                child: _homeController.showCustomContainer.value
-                    ? SearchChat()
-                    : _homeController.listChat.length == 0
-                        ? _buildEmptyChatList()
-                        : _buildChatList(),
+                child:
+
+                    //
+                    // _homeController.showCustomContainer.value
+                    //     ? SearchChat() :
+
+                    _homeController.listChat.length == 0 ? _buildEmptyChatList() : _buildChatList(),
               ),
             ],
           ),

@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:any_link_preview/any_link_preview.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
@@ -298,6 +299,9 @@ class _ChatBoxDetailState extends State<ChatBoxDetail> with TickerProviderStateM
 
   @override
   Widget build(BuildContext context) {
+    html.document.onContextMenu.listen((event) {
+      event.preventDefault();
+    });
     size = MediaQuery.of(context).size;
     return Obx(
       () => controller.selectedChatDetail.value == null
@@ -614,7 +618,7 @@ class _ChatBoxDetailState extends State<ChatBoxDetail> with TickerProviderStateM
                                                             padding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
                                                             addAutomaticKeepAlives: true,
                                                             itemCount: controller.chatList.length + 1,
-                                                            minCacheExtent: 10000,
+                                                            minCacheExtent: 6666,
                                                             itemBuilder: (BuildContext context, int index) {
                                                               if (index == 0) {
                                                                 return Obx(() => controller.userTyping.value.isEmpty
@@ -988,10 +992,7 @@ class _ChatBoxDetailState extends State<ChatBoxDetail> with TickerProviderStateM
     final DateTime dt = originalFormat.parse(messageTime.timeCreated.toString(), true);
     final DateTime dt2 = originalFormat.parse(messageTime2.timeCreated.toString(), true);
     final DateTime dt3 = originalFormat.parse(messageTime3.timeCreated.toString(), true);
-    // final DateTime dtData = originalFormat.parse(controller.chatList[index].timeCreated.toString(), true).toLocal();
-    final DateTime dtData = originalFormat
-        .parse(controller.chatList[index].timeCreated.toString())
-        .toUtc();
+    final DateTime dtData = originalFormat.parse(controller.chatList[index].timeCreated.toString()).toUtc();
 
     final bool isNewTime = dt3.isAfter(dt2.subtract(Duration(minutes: 20)));
     final bool isNewTime2 = dt2.isAfter(dt.subtract(Duration(minutes: 20)));
@@ -2568,155 +2569,151 @@ class _ChatBoxDetailState extends State<ChatBoxDetail> with TickerProviderStateM
             backgroundColor: Colors.transparent,
             insetPadding: EdgeInsets.symmetric(horizontal: 24),
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-            content: SizedBox(
-              width: Get.width * .7,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(11),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(12),
-                      color: Colors.white,
-                    ),
-                    child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: List.generate(
-                            listReaction.length,
-                            (index) => GestureDetector(
-                                  onTap: () async {
-                                    String uuidUser = await Utils.getStringValueWithKey(Constant.UUID_USER);
-                                    controller.likeMessage(uuid: message.uuid!, type: index, status: 1, uuidUser: uuidUser);
-                                    Navigator.pop(context);
-                                  },
-                                  child: SvgPicture.asset(
-                                    listReaction[index],
-                                    width: 30,
-                                    fit: BoxFit.fitWidth,
-                                  ),
-                                ))),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(11),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(12),
+                    color: Colors.white,
                   ),
-                  Divider(
-                    height: 4,
-                    color: Colors.transparent,
-                  ),
-                  Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12)),
-                    child: Column(
-                      children: [
-                        _customChildShowDialog('asset/icons/reply.svg', AppLocalizations.of(context)!.reply, () {
+                  child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: List.generate(
+                          listReaction.length,
+                          (index) => GestureDetector(
+                                onTap: () async {
+                                  String uuidUser = await Utils.getStringValueWithKey(Constant.UUID_USER);
+                                  controller.likeMessage(uuid: message.uuid!, type: index, status: 1, uuidUser: uuidUser);
+                                  Navigator.pop(context);
+                                },
+                                child: SvgPicture.asset(
+                                  listReaction[index],
+                                  width: 30,
+                                  fit: BoxFit.fitWidth,
+                                ),
+                              ))),
+                ),
+                Divider(
+                  height: 4,
+                  color: Colors.transparent,
+                ),
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12)),
+                  child: Column(
+                    children: [
+                      _customChildShowDialog('asset/icons/reply.svg', AppLocalizations.of(context)!.reply, () {
+                        controller.focusNode.requestFocus();
+                        controller.replyChat.value = message;
+                        controller.isEdit.value = 2;
+                        Navigator.of(context).pop();
+                      }),
+                      if (message.contentType != 6)
+                        _customChildShowDialog('asset/icons/copy.svg', AppLocalizations.of(context)!.copy, () {
+                          Clipboard.setData(ClipboardData(text: decoded));
+                          Navigator.of(context).pop();
+                        }),
+                      _customChildShowDialog('asset/icons/forward.svg', AppLocalizations.of(context)!.forward, () async {
+                        Navigator.of(context).pop();
+                        if (Get.isRegistered<ChatController>()) {
+                          if (controller.isAppResume) {
+                            controller.isAppResume = false;
+                          }
+                          ChatController chat = Get.find<ChatController>();
+                          chat.forward = message;
+                          // await Navigation.navigateTo(
+                          //     page: RouterName.chat, arguments: message);
+                          chat.forward = cd.ChatDetail();
+                          chat.update();
+                        }
+                      }),
+                      if (isMe && (message.contentType == 1 || message.contentType == 2) && message.forwardFrom == null)
+                        _customChildShowDialog('asset/icons/edit.svg', AppLocalizations.of(context)!.edit, () {
                           controller.focusNode.requestFocus();
                           controller.replyChat.value = message;
-                          controller.isEdit.value = 2;
+                          controller.isEdit.value = 1;
+                          controller.textMessageController.text = decoded;
                           Navigator.of(context).pop();
                         }),
-                        if (message.contentType != 6)
-                          _customChildShowDialog('asset/icons/copy.svg', AppLocalizations.of(context)!.copy, () {
-                            Clipboard.setData(ClipboardData(text: decoded));
-                            Navigator.of(context).pop();
-                          }),
-                        _customChildShowDialog('asset/icons/forward.svg', AppLocalizations.of(context)!.forward, () async {
+                      _customChildShowDialog(!controller.pinList.value.contains(message) ? 'asset/icons/pin.svg' : 'asset/icons/un_pin.svg',
+                          !controller.pinList.value.contains(message) ? AppLocalizations.of(context)!.pin : AppLocalizations.of(context)!.un_pin, () {
+                        Navigator.of(context).pop();
+                        controller.selectedItems.value.add(uuidChat);
+                        controller.pinMessage(state: !controller.pinList.value.contains(message) ? 1 : 0);
+                      }),
+                      if (controller.chatList.length > 1)
+                        _customChildShowDialog('asset/icons/multiple_select.svg', AppLocalizations.of(context)!.multiple_select, () async {
+                          controller.selectedItems.clear();
+                          controller.selectedItems.add(message.uuid!);
+                          controller.isShowMultiselect.value = true;
                           Navigator.of(context).pop();
-                          if (Get.isRegistered<ChatController>()) {
-                            if (controller.isAppResume) {
-                              controller.isAppResume = false;
+                        }),
+                      if (isMe)
+                        _customChildShowDialog('asset/icons/delete.svg', AppLocalizations.of(context)!.delete, () {
+                          Navigator.pop(context);
+                          UtilsWidget.showDialogCustomInChatScreen(
+                              controller.isDeleteOwnOrMulti,
+                              AppLocalizations.of(context)!.delete_message,
+                              AppLocalizations.of(context)!.delete_message,
+                              AppLocalizations.of(context)!.delete_group_confirm,
+                              (value) => controller.isDeleteOwnOrMulti.value = !controller.isDeleteOwnOrMulti.value, () {
+                            if (controller.isClickLoading) {
+                              controller.isClickLoading = false;
+                              controller.selectedItems.value.clear();
+                              controller.selectedItems.value.add(uuidChat);
+                              controller.deleteMessage();
+                              Navigator.of(context).pop();
+                              controller.isClickLoading = true;
                             }
-                            ChatController chat = Get.find<ChatController>();
-                            chat.forward = message;
-                            // await Navigation.navigateTo(
-                            //     page: RouterName.chat, arguments: message);
-                            chat.forward = cd.ChatDetail();
-                            chat.update();
-                          }
+                          }, isDelete: true);
                         }),
-                        if (isMe && (message.contentType == 1 || message.contentType == 2) && message.forwardFrom == null)
-                          _customChildShowDialog('asset/icons/edit.svg', AppLocalizations.of(context)!.edit, () {
-                            controller.focusNode.requestFocus();
-                            controller.replyChat.value = message;
-                            controller.isEdit.value = 1;
-                            controller.textMessageController.text = decoded;
-                            Navigator.of(context).pop();
-                          }),
-                        _customChildShowDialog(!controller.pinList.value.contains(message) ? 'asset/icons/pin.svg' : 'asset/icons/un_pin.svg',
-                            !controller.pinList.value.contains(message) ? AppLocalizations.of(context)!.pin : AppLocalizations.of(context)!.un_pin,
-                            () {
-                          Navigator.of(context).pop();
-                          controller.selectedItems.value.add(uuidChat);
-                          controller.pinMessage(state: !controller.pinList.value.contains(message) ? 1 : 0);
-                        }),
-                        if (controller.chatList.length > 1)
-                          _customChildShowDialog('asset/icons/multiple_select.svg', AppLocalizations.of(context)!.multiple_select, () async {
-                            controller.selectedItems.clear();
-                            controller.selectedItems.add(message.uuid!);
-                            controller.isShowMultiselect.value = true;
-                            Navigator.of(context).pop();
-                          }),
-                        if (isMe)
-                          _customChildShowDialog('asset/icons/delete.svg', AppLocalizations.of(context)!.delete, () {
-                            Navigator.pop(context);
-                            UtilsWidget.showDialogCustomInChatScreen(
-                                controller.isDeleteOwnOrMulti,
-                                AppLocalizations.of(context)!.delete_message,
-                                AppLocalizations.of(context)!.delete_message,
-                                AppLocalizations.of(context)!.delete_group_confirm,
-                                (value) => controller.isDeleteOwnOrMulti.value = !controller.isDeleteOwnOrMulti.value, () {
-                              if (controller.isClickLoading) {
-                                controller.isClickLoading = false;
-                                controller.selectedItems.value.clear();
-                                controller.selectedItems.value.add(uuidChat);
-                                controller.deleteMessage();
-                                Navigator.of(context).pop();
-                                controller.isClickLoading = true;
-                              }
-                            }, isDelete: true);
-                          }),
-                        if (roleId == 1 && !isMe)
-                          _customChildShowDialog('asset/icons/copy.svg', AppLocalizations.of(context)!.lock_account, () async {
-                            Navigator.pop(context);
-                            UtilsWidget.showModalBottomSheetCustom([
-                              SizedBox(height: 14),
-                              Text(AppLocalizations.of(context)!.lock_account,
-                                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.w500, height: 28 / 20, color: ColorValue.neutralColor)),
-                              SizedBox(height: 4),
-                              Text(
-                                // TextByNation.getStringByKey(KeyByNation
-                                //     .choose_one_of_the_reasons_below),
+                      if (roleId == 1 && !isMe)
+                        _customChildShowDialog('asset/icons/copy.svg', AppLocalizations.of(context)!.lock_account, () async {
+                          Navigator.pop(context);
+                          UtilsWidget.showModalBottomSheetCustom([
+                            SizedBox(height: 14),
+                            Text(AppLocalizations.of(context)!.lock_account,
+                                style: TextStyle(fontSize: 20, fontWeight: FontWeight.w500, height: 28 / 20, color: ColorValue.neutralColor)),
+                            SizedBox(height: 4),
+                            Text(
+                              // TextByNation.getStringByKey(KeyByNation
+                              //     .choose_one_of_the_reasons_below),
 
-                                AppLocalizations.of(context)!.choose_mode,
-                                style: TextStyle(fontSize: 14, fontWeight: FontWeight.w400, height: 24 / 14, color: ColorValue.neutralColor),
-                              ),
-                              SizedBox(height: 14),
-                              UtilsWidget.itemShowBlockPopup(
-                                  // TextByNation.getStringByKey(
-                                  //     KeyByNation.lock_message),
-                                  AppLocalizations.of(context)!.delete_message,
-                                  // TextByNation.getStringByKey(KeyByNation
-                                  //     .block_this_account_messages_in_the_group),
-                                  AppLocalizations.of(context)!.delete_message, () {
-                                controller.blockMember(13, message.msgRoomUuid ?? '', message.userSent ?? '');
-                              }),
-                              SizedBox(height: 14),
-                              UtilsWidget.itemShowBlockPopup(
-                                  AppLocalizations.of(context)!.delete_message, AppLocalizations.of(context)!.delete_group_confirm, () {
-                                Navigator.pop(Get.context!);
-                                UtilsWidget.showDialogCustomInChatScreen(
-                                    controller.isBlockMemberCheck,
-                                    AppLocalizations.of(context)!.delete_group_confirm,
-                                    AppLocalizations.of(context)!.delete_chat,
-                                    AppLocalizations.of(context)!.delete_group_confirm, (p0) {
-                                  controller.isBlockMemberCheck.value = !controller.isBlockMemberCheck.value;
-                                }, () {
-                                  controller.blockMember(16, message.msgRoomUuid ?? '', message.userSent ?? '');
-                                }, isLock: true);
-                              }),
-                            ]);
-                          }, isMore: true),
-                      ],
-                    ),
+                              AppLocalizations.of(context)!.choose_mode,
+                              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w400, height: 24 / 14, color: ColorValue.neutralColor),
+                            ),
+                            SizedBox(height: 14),
+                            UtilsWidget.itemShowBlockPopup(
+                                // TextByNation.getStringByKey(
+                                //     KeyByNation.lock_message),
+                                AppLocalizations.of(context)!.delete_message,
+                                // TextByNation.getStringByKey(KeyByNation
+                                //     .block_this_account_messages_in_the_group),
+                                AppLocalizations.of(context)!.delete_message, () {
+                              controller.blockMember(13, message.msgRoomUuid ?? '', message.userSent ?? '');
+                            }),
+                            SizedBox(height: 14),
+                            UtilsWidget.itemShowBlockPopup(
+                                AppLocalizations.of(context)!.delete_message, AppLocalizations.of(context)!.delete_group_confirm, () {
+                              Navigator.pop(Get.context!);
+                              UtilsWidget.showDialogCustomInChatScreen(
+                                  controller.isBlockMemberCheck,
+                                  AppLocalizations.of(context)!.delete_group_confirm,
+                                  AppLocalizations.of(context)!.delete_chat,
+                                  AppLocalizations.of(context)!.delete_group_confirm, (p0) {
+                                controller.isBlockMemberCheck.value = !controller.isBlockMemberCheck.value;
+                              }, () {
+                                controller.blockMember(16, message.msgRoomUuid ?? '', message.userSent ?? '');
+                              }, isLock: true);
+                            }),
+                          ]);
+                        }, isMore: true),
+                    ],
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
           );
         });
@@ -2734,7 +2731,10 @@ class _ChatBoxDetailState extends State<ChatBoxDetail> with TickerProviderStateM
             Row(children: [
               SvgPicture.asset(icon),
               SizedBox(width: 12),
-              Text(title),
+              Text(
+                title,
+                style: TextStyle(color: Color(controller.textColor.value))
+              ),
             ]),
             isMore == true ? Icon(Icons.arrow_forward_ios_outlined, size: 20) : const SizedBox()
           ],

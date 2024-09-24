@@ -37,6 +37,7 @@ import '../../Models/Chat/Chat.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'dart:js' as js;
 
+import '../../Models/Chat/emoji/emoji_model.dart';
 import '../../Utils/enum.dart';
 
 class ChatDetailController extends GetxController {
@@ -44,8 +45,9 @@ class ChatDetailController extends GetxController {
   String userName = '';
   var selectedChatDetail = Rxn<Chat>();
 
-  // RxList<ChatDetail> chatList = RxList<ChatDetail>();
-  List<ChatDetail> chatList = [];
+  RxList<ChatDetail> chatList = RxList<ChatDetail>();
+
+  // List<ChatDetail> chatList = [];
   RxBool isChatLoading = true.obs;
   RxInt totalPageChat = 1.obs;
   int pageSize = 24;
@@ -81,7 +83,6 @@ class ChatDetailController extends GetxController {
   final ItemScrollController itemScrollController = ItemScrollController();
   final ItemPositionsListener itemPositionsListener = ItemPositionsListener.create();
 
-  // final focusNode = FocusNode();
   RxBool isSearch = false.obs;
   TextEditingController textSearchController = TextEditingController();
   RxString chatName = ''.obs;
@@ -101,7 +102,7 @@ class ChatDetailController extends GetxController {
   RxBool isPinLoading = true.obs;
   RxInt memberLength = 0.obs;
   RxInt isEdit = 0.obs; //0:chat - 1:edit - 2:rep
-  static String nameChanelDownload = 'fileDownloading';
+  // static String nameChanelDownload = 'fileDownloading';
   final AppController appController = Get.find();
   bool isClickLoading = true;
   bool isAppResume = false;
@@ -136,7 +137,6 @@ class ChatDetailController extends GetxController {
     });
     recorder = AudioRecorder();
     itemPositionsListener.itemPositions.addListener(loadMoreItems);
-
     textMessageController.addListener(() {
       if (textMessageController.text.trim().isNotEmpty) {
         isTextFieldFocused.value = true;
@@ -149,12 +149,11 @@ class ChatDetailController extends GetxController {
         isVisible.value = true;
       }
     });
-
     textSearchController.addListener(() {
       onSearchChanged();
     });
 
-    IsolateNameServer.registerPortWithName(receivePort.sendPort, nameChanelDownload);
+    // IsolateNameServer.registerPortWithName(receivePort.sendPort, nameChanelDownload);
     receivePort.listen((message) {
       progress.value = message;
       if (message == 100 || message == -1) {
@@ -214,18 +213,14 @@ class ChatDetailController extends GetxController {
     super.onClose();
     itemPositionsListener.itemPositions.removeListener(loadMoreItems);
     await readMessage();
-    // FlutterDownloader.cancelAll();
-    // FlutterDownloader.remove(taskId: nameChanelDownload);
     receivePort.close();
-    IsolateNameServer.removePortNameMapping(nameChanelDownload);
+    // IsolateNameServer.removePortNameMapping(nameChanelDownload);
     recorder.dispose();
   }
-
 
   loadMoreItems() async {
     final itemPositions = itemPositionsListener.itemPositions.value.toList();
     final lastItemPosition = itemPositions.isNotEmpty ? itemPositions.last : null;
-
     bool isIndexZeroVisible = itemPositions.any((position) => position.index <= 1);
     if (isIndexZeroVisible) {
       isAddNewMessage = false;
@@ -457,10 +452,9 @@ class ChatDetailController extends GetxController {
         contentType: type,
         replyMsgUuid: replyChat.value.uuid,
         CountryCode: GlobalValue.getInstance().getCountryCode());
-    // print('thecoicb $type');
     textMessageController.clear();
-    replyChat.value = ChatDetail();
-    responseFile.clear();
+    // replyChat.value = ChatDetail();
+    // responseFile.clear();
   }
 
   setNewMessage(int msgType, dynamic message) {
@@ -531,7 +525,7 @@ class ChatDetailController extends GetxController {
         }
       }
       userTyping.value = '';
-      // chatList.refresh();
+      chatList.refresh();
     } else {
       if (msgType == 0) {
         String decoded = newMessage.content ?? '';
@@ -584,7 +578,6 @@ class ChatDetailController extends GetxController {
       if (responseFile.isNotEmpty) {
         await sendMessage(content: responseFile.toString(), type: 4);
       } else {
-
         Utils.showToast(
           Get.overlayContext!,
           TextByNation.getStringByKey('unable_send'),
@@ -616,7 +609,6 @@ class ChatDetailController extends GetxController {
         responseFile = listItem;
         fileData.clear();
       } else {
-        // Utils.showSnackBar(title: TextByNation.getStringByKey('error_file'), message: 'Upload file failed');
         Utils.showToast(
           Get.overlayContext!,
           'Upload file failed',
@@ -778,7 +770,7 @@ class ChatDetailController extends GetxController {
     // chatList.refresh();
     // selectedItems.clear();
     // if (Get.isRegistered<ChatContrller>()) {
-    //   Get.find<ChatContrller>().refreshListChat();s
+    //   Get.find<ChatContrller>().refreshListChat();
     // }
   }
 
@@ -814,7 +806,6 @@ class ChatDetailController extends GetxController {
     }
     return spans;
   }
-
 
   readMessage() async {
     // String formattedTime = DateFormat('MM/dd/yyyy HH:mm:ss').format(timeNow);
@@ -879,10 +870,9 @@ class ChatDetailController extends GetxController {
         isPinLoading.value = false;
       }
     } catch (e) {
-
       Utils.showToast(
         Get.overlayContext!,
-      '$e',
+        '$e',
         type: ToastType.ERROR,
       );
       // Utils.showSnackBar(title: TextByNation.getStringByKey('error_message'), message: '$e');
@@ -1007,7 +997,7 @@ class ChatDetailController extends GetxController {
     if (isAppResume) {
       isAppResume = false;
     }
-    //status
+
     /// 1: liked - 0: remove like
     await _socketManager.likeMessage(msgLineUuid: uuid, type: type, status: status, uuidUser: uuidUser);
   }
@@ -1018,7 +1008,7 @@ class ChatDetailController extends GetxController {
         if (chatList[i].readState == 1) break;
         chatList[i].readState = 1;
       }
-      // chatList.refresh();
+      chatList.refresh();
     }
   }
 
@@ -1032,7 +1022,7 @@ class ChatDetailController extends GetxController {
   setDeleteMessage(dynamic message) async {
     if (message['RoomUuid'] == uuidChat) {
       chatList.removeWhere((element) => message['ListMsgUuid'].contains(element.uuid));
-      // chatList.refresh();
+      chatList.refresh();
 
       pinList.removeWhere((element) => message['ListMsgUuid'].contains(element.uuid));
       pinList.refresh();
@@ -1064,16 +1054,19 @@ class ChatDetailController extends GetxController {
     if (index != -1) {
       chatList[index].content = message['Content'];
       chatList[index].status = 2;
-      // chatList.refresh();
+      chatList.refresh();
     }
   }
 
   setLikeMessage(dynamic message) async {
     int index = chatList.indexWhere((element) => element.uuid! == message['MsgLineUuid']);
-    if (index != -1) {
-      chatList[index].likeCount = chatList[index].likeCount! + 1;
-      // chatList.refresh();
-    }
+
+    Emojis emoji = Emojis.fromJson(message);
+
+
+    chatList[index].emojis?.add(emoji);
+    chatList.refresh();
+
   }
 
   blockMember(int type, String roomUuid, String userName) {

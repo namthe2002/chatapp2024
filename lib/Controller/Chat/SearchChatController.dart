@@ -27,13 +27,13 @@ class SearchChatController extends GetxController {
   Timer? debounce;
   ChatDetail forward = ChatDetail();
   RxBool isLoadState = true.obs;
+  var selectedChatDetail = Chat();
 
   @override
   void onInit() async {
     listUserRecent.value = await Utils.getListFromSharedPreferences();
     scrollController.addListener(() {
-      if (scrollController.position.maxScrollExtent ==
-          scrollController.offset) {
+      if (scrollController.position.maxScrollExtent == scrollController.offset) {
         if (hasMore.value) {
           page++;
           getSearchChat();
@@ -42,7 +42,6 @@ class SearchChatController extends GetxController {
     });
     super.onInit();
   }
-
 
   @override
   void onReady() {
@@ -66,8 +65,7 @@ class SearchChatController extends GetxController {
     String formattedTime = DateFormat('MM/dd/yyyy HH:mm:ss').format(timeNow);
     try {
       var param = {
-        "keyCert":
-            Utils.generateMd5(Constant.NEXT_PUBLIC_KEY_CERT + formattedTime),
+        "keyCert": Utils.generateMd5(Constant.NEXT_PUBLIC_KEY_CERT + formattedTime),
         "time": formattedTime,
         "pageSize": pageSize,
         "page": page,
@@ -75,8 +73,7 @@ class SearchChatController extends GetxController {
         "type": 1
       };
 
-      var response =
-          await APICaller.getInstance().post('v1/Chat/message-room', param);
+      var response = await APICaller.getInstance().post('v1/Chat/message-room', param);
       if (response != null) {
         List<dynamic> list = response['items'];
         var listItem = list.map((dynamic json) => Chat.fromJson(json)).toList();
@@ -91,17 +88,13 @@ class SearchChatController extends GetxController {
         '$e',
         type: ToastType.ERROR,
       );
-      // Utils.showSnackBar(title: 'Thông báo', message: '$e');
     } finally {
       isLoading.value = await false;
     }
   }
 
   forwardMessage({required String uuid}) async {
-    await SocketManager().forwardMessage(
-      roomUuid: uuid,
-      msgLineUuid: forward.uuid!
-    );
+    await SocketManager().forwardMessage(roomUuid: uuid, msgLineUuid: forward.uuid!);
     Navigation.goBack();
   }
 }

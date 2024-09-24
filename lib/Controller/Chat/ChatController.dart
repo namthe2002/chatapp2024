@@ -111,19 +111,6 @@ class ChatController extends GetxController {
     // });
     await getChat();
     await sendListOnline();
-    scrollController.addListener(() {
-      if (scrollController.position.userScrollDirection == ScrollDirection.reverse) {
-        if (isVisible == true) {
-          isVisible.value = false;
-        }
-      } else {
-        if (scrollController.position.userScrollDirection == ScrollDirection.forward) {
-          if (isVisible == false) {
-            isVisible.value = true;
-          }
-        }
-      }
-    });
 
     scrollController.addListener(() {
       if (scrollController.position.maxScrollExtent == scrollController.offset) {
@@ -136,11 +123,10 @@ class ChatController extends GetxController {
       }
     });
 
-
     searchController.addListener(() {
       if (searchController.text.isNotEmpty) {
-        timeOffSearch?.cancel(); // Dừng timer nếu có văn bản
-          showCustomContainer.value = true; // Hiển thị widget Container
+        timeOffSearch?.cancel();
+        showCustomContainer.value = true;
       } else if (searchNode.hasFocus) {
         startTimer();
       }
@@ -155,21 +141,16 @@ class ChatController extends GetxController {
     super.onClose();
   }
 
-
-
-
-void startTimer() {
-  timeOffSearch?.cancel();
-  timeOffSearch = Timer(Duration(seconds: 3), () {
-    if (searchController.text.isEmpty) {
+  void startTimer() {
+    timeOffSearch?.cancel();
+    timeOffSearch = Timer(Duration(seconds: 2), () {
+      if (searchController.text.isEmpty) {
         showCustomContainer.value = false;
-    }
-  });
-}
+      }
+    });
+  }
 
-
-
-sendListOnline() async {
+  sendListOnline() async {
     List<String> listPartnerUuid = [];
     for (var item in listChat) {
       if (item.type == 1 && item.partnerUuid != null) {
@@ -190,10 +171,7 @@ sendListOnline() async {
   String getTimeMessage(String time) {
     DateFormat originalFormat = DateFormat("yyyy-MM-dd'T'HH:mm:ss");
 
-
-    final DateTime messageDateTime = (originalFormat.tryParse(time, true) ??
-        originalFormat.parse(DateTime.now.toString()))
-        .toUtc();
+    final DateTime messageDateTime = (originalFormat.tryParse(time, true) ?? originalFormat.parse(DateTime.now.toString())).toUtc();
     DateTime now = DateTime.now();
     DateTime today = DateTime(now.year, now.month, now.day);
     String timeUpadte;
@@ -513,7 +491,8 @@ sendListOnline() async {
         Get.overlayContext!,
         '$e',
         type: ToastType.ERROR,
-      );print('have some error is: ${e.toString()}');
+      );
+      print('have some error is: ${e.toString()}');
       isLoading.value = false;
     } finally {
       isLoading.value = false;
@@ -542,7 +521,7 @@ sendListOnline() async {
         }
       }
     } catch (e) {
-     Utils.showToast(
+      Utils.showToast(
         Get.overlayContext!,
         '$e',
         type: ToastType.ERROR,
@@ -568,7 +547,7 @@ sendListOnline() async {
         // Utils.showSnackBar(title: TextByNation.getStringByKey('notification'), message: TextByNation.getStringByKey('delete_message'));
       }
     } catch (e) {
-     Utils.showToast(
+      Utils.showToast(
         Get.overlayContext!,
         '$e',
         type: ToastType.ERROR,
@@ -592,7 +571,6 @@ sendListOnline() async {
       var param = {"keyCert": Utils.generateMd5(Constant.NEXT_PUBLIC_KEY_CERT + formattedTime), "time": formattedTime, "uuid": listChat[index].uuid};
       var data = await APICaller.getInstance().delete('v1/Chat/delete-history-message-room', body: param);
       if (data != null) {
-
         Utils.showToast(
           Get.overlayContext!,
           TextByNation.getStringByKey('delete_message'),
@@ -602,7 +580,7 @@ sendListOnline() async {
         refreshListChat();
       }
     } catch (e) {
-     Utils.showToast(
+      Utils.showToast(
         Get.overlayContext!,
         '$e',
         type: ToastType.ERROR,

@@ -11,6 +11,8 @@ import 'package:live_yoko/Global/TextByNation.dart';
 import 'package:live_yoko/Navigation/Navigation.dart';
 import 'package:live_yoko/Utils/Utils.dart';
 
+import '../../Controller/Chat/ChatController.dart';
+import '../../Controller/Chat/ProfileChatDetailController.dart';
 import '../../Controller/Chat/SearchChatController.dart';
 import '../../Models/Chat/Chat.dart';
 import '../../Navigation/RouteDefine.dart';
@@ -158,16 +160,15 @@ class SearchChat extends StatelessWidget {
       onTap: () async {
         if (controller.listUserRecent.length > 1) {
           Chat itemchat = await controller.listUserRecent[index];
-          if (!Get.isRegistered<ChatDetailController>()) {
-            Navigation.navigateTo(page: RouteDefine.chatBoxDetail, arguments: {
-              'uuid': controller.listUserRecent[index].uuid,
-              'name': controller.listUserRecent[index].ownerName,
-              'type': controller.listUserRecent[index].type,
-              'ownerUuid': controller.listUserRecent[index].ownerUuid,
-              'avatar': controller.listUserRecent[index].avatar ?? '',
-              'lastMsgLineUuid': controller.listUserRecent[index].lastMsgLineUuid
-            });
-          }
+          controller.selectedChatDetail.uuid = controller.listUserRecent[index].uuid;
+          controller.selectedChatDetail.ownerUuid = await Utils.getStringValueWithKey(Constant.UUID_USER);
+          controller.selectedChatDetail.ownerName = controller.listUserRecent[index].ownerName;
+          controller.selectedChatDetail.avatar = controller.listUserRecent[index].avatar ?? '';
+          controller.selectedChatDetail.lastMsgLineUuid = controller.listUserRecent[index].lastMsgLineUuid;
+          Get.delete<ChatDetailController>();
+          Get.delete<ProfileChatDetailController>();
+          Get.find<ChatController>().selectChatItem(controller.selectedChatDetail);
+          Get.appUpdate();
           controller.listUserRecent.removeAt(index);
           controller.listUserRecent.insert(0, itemchat);
           await Utils.saveListToSharedPreferences(controller.listUserRecent);
@@ -340,16 +341,27 @@ class SearchChat extends StatelessWidget {
             await Utils.saveListToSharedPreferences(controller.listUserRecent);
           }
         }
-        if (!Get.isRegistered<ChatDetailController>()) {
-          Navigation.navigateTo(page: 'ChatDetail', arguments: {
-            'uuid': controller.listChat[index].uuid,
-            'name': controller.listChat[index].ownerName,
-            'type': controller.listChat[index].type,
-            'ownerUuid': controller.listChat[index].ownerUuid,
-            'avatar': controller.listChat[index].avatar ?? '',
-            'lastMsgLineUuid': controller.listChat[index].lastMsgLineUuid
-          });
-        }
+        // if (!Get.isRegistered<ChatDetailController>()) {
+        //   Navigation.navigateTo(page: 'ChatDetail', arguments: {
+        //     'uuid': controller.listChat[index].uuid,
+        //     'name': controller.listChat[index].ownerName,
+        //     'type': controller.listChat[index].type,
+        //     'ownerUuid': controller.listChat[index].ownerUuid,
+        //     'avatar': controller.listChat[index].avatar ?? '',
+        //     'lastMsgLineUuid': controller.listChat[index].lastMsgLineUuid
+        //   });
+        // }
+        controller.selectedChatDetail.uuid = controller.listUserRecent[index].uuid;
+        controller.selectedChatDetail.ownerUuid = await Utils.getStringValueWithKey(Constant.UUID_USER);
+        controller.selectedChatDetail.ownerName = controller.listUserRecent[index].ownerName;
+        controller.selectedChatDetail.avatar = controller.listUserRecent[index].avatar ?? '';
+        controller.selectedChatDetail.lastMsgLineUuid = controller.listUserRecent[index].lastMsgLineUuid;
+        Get.delete<ChatDetailController>();
+        Get.delete<ProfileChatDetailController>();
+        Get.find<ChatController>().searchNode.unfocus();
+        Get.find<ChatController>().searchController.clear();
+        Get.find<ChatController>().selectChatItem(controller.selectedChatDetail);
+        Get.appUpdate();
       },
       child: Container(
         child: Padding(
