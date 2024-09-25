@@ -9,7 +9,6 @@ import 'package:live_yoko/Global/GlobalValue.dart';
 import 'package:live_yoko/Global/TextByNation.dart';
 import 'package:live_yoko/Service/APICaller.dart';
 import 'package:live_yoko/Utils/Utils.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
@@ -19,8 +18,10 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:get/get_state_manager/src/simple/get_controllers.dart';
+import 'package:live_yoko/main.dart';
 
 import '../../Navigation/Navigation.dart';
+import '../../Utils/enum.dart';
 
 class LoginController extends GetxController {
   TextEditingController textUserName = TextEditingController();
@@ -45,15 +46,14 @@ class LoginController extends GetxController {
   DateTime timeNow = DateTime.now();
   String otpData = '';
 
-
   @override
   void onInit() {
     super.onInit();
     _init();
   }
+
   void _init() async {
-    String accessToken =
-    await Utils.getStringValueWithKey(Constant.ACCESS_TOKEN);
+    String accessToken = await Utils.getStringValueWithKey(Constant.ACCESS_TOKEN);
     textUserName.text = '0123456788';
     textPass.text = '12345678';
     // if (accessToken.isNotEmpty) {
@@ -62,14 +62,25 @@ class LoginController extends GetxController {
 
   Future forgotpass() async {
     if (phoneNumberForgotpass.text.trim().isEmpty) {
-      Utils.showSnackBar(
-          title: TextByNation.getStringByKey('notification'),
-          message: TextByNation.getStringByKey('phone_null'));
-    } else if (!RegularExpressions.hexPhoneNumber
-        .hasMatch(phoneNumberForgotpass.value.text)) {
-      Utils.showSnackBar(
-          title: TextByNation.getStringByKey('notification'),
-          message: TextByNation.getStringByKey('phone_valid'));
+      // Utils.showSnackBar(
+      //     title: TextByNation.getStringByKey('notification'),
+      //     message: TextByNation.getStringByKey('phone_null'));
+
+      Utils.showToast(
+        Get.overlayContext!,
+        TextByNation.getStringByKey('phone_null'),
+        type: ToastType.ERROR,
+      );
+    } else if (!RegularExpressions.hexPhoneNumber.hasMatch(phoneNumberForgotpass.value.text)) {
+      // Utils.showSnackBar(
+      //     title: TextByNation.getStringByKey('notification'),
+      //     message:);
+
+      Utils.showToast(
+        Get.overlayContext!,
+        TextByNation.getStringByKey('phone_valid'),
+        type: ToastType.ERROR,
+      );
     } else {
       await otpResetPass();
     }
@@ -78,49 +89,62 @@ class LoginController extends GetxController {
 
   Future resetPassWord() async {
     if (passForgotpass.text != passRetypeForgotpass.text) {
-      Utils.showSnackBar(
-          title: TextByNation.getStringByKey('notification'),
-          message: TextByNation.getStringByKey('pass_valiate_overlap'));
+      Utils.showToast(
+        Get.overlayContext!,
+        TextByNation.getStringByKey('pass_valiate_overlap'),
+        type: ToastType.ERROR,
+      );
+      // Utils.showSnackBar(title: TextByNation.getStringByKey('notification'), message: TextByNation.getStringByKey('pass_valiate_overlap'));
     } else if (passForgotpass.text.length < 8) {
-      Utils.showSnackBar(
-          title: TextByNation.getStringByKey('notification'),
-          message: TextByNation.getStringByKey('pass_validate'));
+      Utils.showToast(
+        Get.overlayContext!,
+        TextByNation.getStringByKey('pass_validate'),
+        type: ToastType.ERROR,
+      );
+      // Utils.showSnackBar(title: TextByNation.getStringByKey('notification'), message:);
     } else if (passForgotpass.text.trim() == '') {
-      Utils.showSnackBar(
-          title: TextByNation.getStringByKey('notification'),
-          message: TextByNation.getStringByKey(
-              'pass_null')); // Vui lòng nhập mật khẩu
+      Utils.showToast(
+        Get.overlayContext!,
+        TextByNation.getStringByKey('pass_null'),
+        type: ToastType.ERROR,
+      );
+      // Utils.showSnackBar(
+          // title: TextByNation.getStringByKey('notification'), message: TextByNation.getStringByKey('pass_null')); // Vui lòng nhập mật khẩu
     } else if (passRetypeForgotpass.text.trim() == '') {
-      Utils.showSnackBar(
-          title: TextByNation.getStringByKey('notification'),
-          message: TextByNation.getStringByKey(
-              'pass_re_null')); // Vui lòng nhập lại mật khẩu
+      Utils.showToast(
+        Get.overlayContext!,
+        TextByNation.getStringByKey('pass_re_null'),
+        type: ToastType.ERROR,
+      );
+      // Utils.showSnackBar(title: TextByNation.getStringByKey('notification'), message: TextByNation.getStringByKey('pass_re_null'));
     } else {
       try {
-        String formattedTime =
-            DateFormat('MM/dd/yyyy HH:mm:ss').format(timeNow);
+        String formattedTime = DateFormat('MM/dd/yyyy HH:mm:ss').format(timeNow);
         var param = {
-          "keyCert":
-              Utils.generateMd5(Constant.NEXT_PUBLIC_KEY_CERT + formattedTime),
+          "keyCert": Utils.generateMd5(Constant.NEXT_PUBLIC_KEY_CERT + formattedTime),
           "time": formattedTime,
           "userName": phoneNumberForgotpass.text,
           "otpCode": otpForgotpass.text,
-          "newPass": await Utils.generateMd5(
-              Constant.NEXT_PUBLIC_KEY_PASS + passForgotpass.text),
+          "newPass": await Utils.generateMd5(Constant.NEXT_PUBLIC_KEY_PASS + passForgotpass.text),
         };
-        var data = await APICaller.getInstance()
-            .post('v1/Account/forget-password', param);
+        var data = await APICaller.getInstance().post('v1/Account/forget-password', param);
         if (data != null) {
           forgotPassState.value = 0;
           Get.close(1);
-          Utils.showSnackBar(
-              title: TextByNation.getStringByKey('notification'),
-              message: TextByNation.getStringByKey('pass_reset_ss'));
+
+          Utils.showToast(
+            Get.overlayContext!,
+            TextByNation.getStringByKey('pass_reset_ss'),
+            type: ToastType.SUCCESS,
+          );
+          // Utils.showSnackBar(title: TextByNation.getStringByKey('notification'), message: TextByNation.getStringByKey('pass_reset_ss'));
         }
       } catch (e) {
-        Utils.showSnackBar(
-            title: TextByNation.getStringByKey('notification'), message: '$e');
-      }
+        Utils.showToast(
+        Get.overlayContext!,
+        '$e',
+        type: ToastType.ERROR,
+      );}
     }
     isLoading.value = false;
   }
@@ -136,8 +160,7 @@ class LoginController extends GetxController {
     } catch (e) {}
     try {
       var param = {
-        "keyCert":
-            Utils.generateMd5(Constant.NEXT_PUBLIC_KEY_CERT + formattedTime),
+        "keyCert": Utils.generateMd5(Constant.NEXT_PUBLIC_KEY_CERT + formattedTime),
         "time": formattedTime,
         "userName": textPhoneNumberRegister.text.trim(),
         "ip": ipAddress,
@@ -147,25 +170,32 @@ class LoginController extends GetxController {
         "fcmToken": GlobalValue.getInstance().getFCMToken(),
         "fullName": textFullNameRegister.text.trim(),
         "roleId": 0,
-        "password": Utils.generateMd5(
-            Constant.NEXT_PUBLIC_KEY_PASS + textPassConfirmRegister.text),
+        "password": Utils.generateMd5(Constant.NEXT_PUBLIC_KEY_PASS + textPassConfirmRegister.text),
         "otpCode": otpData,
         "email": ""
       };
-      var data =
-          await APICaller.getInstance().post('v1/Account/register', param);
+      var data = await APICaller.getInstance().post('v1/Account/register', param);
       if (data != null) {
         Get.close(1);
-        Utils.showSnackBar(
-            title: TextByNation.getStringByKey('notification'),
-            message: TextByNation.getStringByKey('resgiter_ss'));
-        Utils.login(
-            userName: textPhoneNumberRegister.text,
-            password: textPassConfirmRegister.text);
+        Utils.showToast(
+          Get.overlayContext!,
+          TextByNation.getStringByKey('resgiter_ss'),
+          type: ToastType.SUCCESS,
+        );
+        // Utils.showSnackBar(title: TextByNation.getStringByKey('notification'), message: TextByNation.getStringByKey('resgiter_ss'));
+        Utils.login(userName: textPhoneNumberRegister.text, password: textPassConfirmRegister.text);
       }
     } catch (e) {
-      Utils.showSnackBar(
-          title: TextByNation.getStringByKey('notification'), message: '$e');
+      Utils.showToast(
+        Get.overlayContext!,
+        TextByNation.getStringByKey('pass_valiate_overlap'),
+        type: ToastType.ERROR,
+      );
+     Utils.showToast(
+        Get.overlayContext!,
+        '$e',
+        type: ToastType.ERROR,
+      );
     }
   }
 
@@ -173,19 +203,21 @@ class LoginController extends GetxController {
     String formattedTime = DateFormat('MM/dd/yyyy HH:mm:ss').format(timeNow);
     try {
       var param = {
-        "keyCert":
-            Utils.generateMd5(Constant.NEXT_PUBLIC_KEY_CERT + formattedTime),
+        "keyCert": Utils.generateMd5(Constant.NEXT_PUBLIC_KEY_CERT + formattedTime),
         "time": formattedTime,
         "phoneNumber": phoneNumberForgotpass.text.trim(),
       };
-      var data =
-          await APICaller.getInstance().post('v1/Account/request-otp', param);
+      var data = await APICaller.getInstance().post('v1/Account/request-otp', param);
       if (data != null) {
         forgotPassState.value = 1;
       }
     } catch (e) {
-      Utils.showSnackBar(
-          title: TextByNation.getStringByKey('notification'), message: '$e');
+
+      Utils.showToast(
+        Get.overlayContext!,
+        '$e',
+        type: ToastType.ERROR,
+      );
     } finally {
       isLoading.value = false;
     }
@@ -195,20 +227,21 @@ class LoginController extends GetxController {
     String formattedTime = DateFormat('MM/dd/yyyy HH:mm:ss').format(timeNow);
     try {
       var param = {
-        "keyCert":
-            Utils.generateMd5(Constant.NEXT_PUBLIC_KEY_CERT + formattedTime),
+        "keyCert": Utils.generateMd5(Constant.NEXT_PUBLIC_KEY_CERT + formattedTime),
         "time": formattedTime,
         "phoneNumber": textPhoneNumberRegister.text.trim()
       };
-      var data = await APICaller.getInstance()
-          .post('v1/Account/request-register-otp', param);
+      var data = await APICaller.getInstance().post('v1/Account/request-register-otp', param);
       if (data != null) {
         isOTP.value = !isOTP.value;
         otpData = '123456';
       }
     } catch (e) {
-      Utils.showSnackBar(
-          title: TextByNation.getStringByKey('notification'), message: '$e');
+      Utils.showToast(
+        Get.overlayContext!,
+        '$e',
+        type: ToastType.ERROR,
+      );
     }
   }
 }
@@ -231,15 +264,6 @@ class QrController extends GetxController {
         DateTime.now().hour.toString().padLeft(2, '0');
     return sha256.convert(utf8.encode(timeString + "888" + input)).toString();
   }
-
-  // String getHMACSHA256(String input) {
-  //   String base64Key = 'CDMobApp scrt key';
-  //   List<int> messageBytes = utf8.encode(input);
-  //   List<int> key = base64.decode(base64Key);
-  //   Hmac hmac = Hmac(sha256, key);
-  //   Digest digest = hmac.convert(messageBytes);
-  //   return base64.encode(digest.bytes);
-  // }
 
   void loadOverlayImage() async {
     final completer = Completer<ui.Image>();

@@ -9,6 +9,7 @@ import 'package:live_yoko/Global/ColorValue.dart';
 import 'package:live_yoko/Global/Constant.dart';
 import 'package:live_yoko/Global/TextByNation.dart';
 import 'package:live_yoko/Navigation/Navigation.dart';
+import 'package:live_yoko/Navigation/RouteDefine.dart';
 import 'package:live_yoko/Utils/Utils.dart';
 
 class AdminAccount extends StatelessWidget {
@@ -388,7 +389,7 @@ class AdminAccount extends StatelessWidget {
     return InkWell(
       onTap: () {
         Navigation.navigateTo(
-            page: 'AccountDetail', arguments: controller.listContact[index]);
+            page: RouteDefine.accountDetail, arguments: controller.listContact[index]);
       },
       child: Container(
         child: Padding(
@@ -510,7 +511,7 @@ class AdminAccount extends StatelessWidget {
                       borderRadius: BorderRadius.circular(8),
                       onTap: () {
                         Navigation.navigateTo(
-                            page: 'AccountDetail',
+                            page: RouteDefine.accountDetail,
                             arguments: controller.listContact[index]);
                       },
                       child: Container(

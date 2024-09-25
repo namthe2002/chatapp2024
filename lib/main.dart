@@ -12,15 +12,34 @@ import 'package:live_yoko/Global/Constant.dart';
 import 'package:live_yoko/Global/TextByNation.dart';
 import 'package:live_yoko/Service/PushNotification/PushNotification.dart';
 import 'package:live_yoko/Utils/Utils.dart';
-import 'package:live_yoko/View/Chat/ProfileChatDetail.dart';
+import 'package:live_yoko/View/Account/Friend.dart';
 import 'package:live_yoko/View/Chat/home_chat.dart';
 import 'package:responsive_framework/responsive_wrapper.dart';
 import 'Global/Themes.dart';
+import 'Navigation/RouteDefine.dart';
 import 'Service/PushNotification/firebase_options.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'View/Account/AccountDetail.dart';
+import 'View/Account/AddAccount.dart';
+import 'View/Account/AdminAccount.dart';
+import 'View/Account/ChangePassword.dart';
+import 'View/Account/ChatSetting.dart';
+import 'View/Account/LanguageSettings.dart';
+import 'View/Account/ManageFriends.dart';
+import 'View/Account/NotificationSetting.dart';
 import 'View/Account/Splash.dart';
-import 'View/Chat/ProfileChatDetail2.dart';
+import 'View/Account/UpdateProfile.dart';
+import 'View/Chat/ChatCreate.dart';
+import 'View/Chat/GroupCreate.dart';
+import 'View/Chat/GroupCreateStep2.dart';
+import 'View/Chat/MediaChatDetail.dart';
+import 'View/Chat/ProfileChatDetail.dart';
+import 'View/Chat/SearchChat.dart';
+import 'View/Chat/theme_mode_page.dart';
 import 'View/Login/Login.dart';
+import 'View/Login/forgotPass/forgotPassword.dart';
+import 'View/Login/login_qr.dart';
+import 'View/Register/register.dart';
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 int roleId = 0;
@@ -59,12 +78,34 @@ Future<void> main() async {
               return child ?? Container();
             }
           },
+          navigatorKey: navigatorKey,
+          title: 'ChatWeb',
           initialRoute: '/',
-          routes: {
-            '/': (context) => Splash(),
-            '/home': (context) => HomeChatWebsite(), // Sửa route từ /widget thành /home
-            '/profile': (context) => ProfileChatDetail(),
-          },
+          getPages: [
+            GetPage(name: RouteDefine.login, page: () => Login()),
+            GetPage(name: RouteDefine.chat, popGesture: false, page: () => HomeChatWebsite()),
+            GetPage(name: RouteDefine.searchChat, page: () => SearchChat()),
+            GetPage(name: RouteDefine.updateProfile, page: () => UpdateProfile()),
+            GetPage(name: RouteDefine.friend, page: () => Friend()),
+            GetPage(name: RouteDefine.manageFriends, page: () => ManageFriends()),
+            GetPage(name: RouteDefine.languageSettings, page: () => LanguageSettings()),
+            GetPage(name: RouteDefine.notificationSetting, page: () => NotificationSetting()),
+            GetPage(name: RouteDefine.chatSetting, page: () => ChatSetting()),
+            GetPage(name: RouteDefine.chatCreate, page: () => ChatCreate()),
+            GetPage(name: RouteDefine.groupCreate, page: () => GroupCreate()),
+            GetPage(name: RouteDefine.groupCreateStep2, page: () => GroupCreateStep2()),
+            GetPage(name: RouteDefine.mediaChatDetail, page: () => MediaChatDetail()),
+            GetPage(name: RouteDefine.profileChatDetail, popGesture: false, page: () => ProfileChatDetail()),
+            GetPage(name: RouteDefine.adminAccount, page: () => AdminAccount()),
+            GetPage(name: RouteDefine.addAccount, page: () => AddAccount()),
+            GetPage(name: RouteDefine.accountDetail, page: () => AccountDetail()),
+            GetPage(name: RouteDefine.changePassword, page: () => ChangePassword()),
+            GetPage(name: RouteDefine.loginQr, page: () => LoginQr()),
+            GetPage(name: RouteDefine.register, page: () => Register()),
+            GetPage(name: RouteDefine.forgotPassword, page: () => ForgotPassword()),
+            GetPage(name: RouteDefine.selectThemeMode, page: () => SelectThemeMode()),
+            GetPage(name: '/', page: () => Splash()),
+          ],
           theme: lightTheme,
           darkTheme: darkTheme,
           themeMode: isAutoMode == false
@@ -129,17 +170,3 @@ Future startNotification() async {
     PushNotifications.navigationInNotification(message.data);
   }
 }
-
-//
-// import 'package:flutter/material.dart';
-//
-// import 'Component/WaveAudioForm.dart';
-//
-// final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
-// int roleId = 0;
-//
-// void main() {
-//   runApp(MaterialApp(debugShowCheckedModeBanner: false,
-//     home: AudioWaveformScreen( audioUrl: 'https://www2.cs.uic.edu/~i101/SoundFiles/gettysburg10.wav'),  // Thay thế bằng link file .wav của bạn
-//   ));
-// }

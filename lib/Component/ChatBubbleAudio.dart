@@ -25,46 +25,60 @@ class WaveBubbleState extends State<ChatBubbleAudio> {
   late AudioPlayer _audioPlayer;
   Duration _totalDuration = Duration();
   Duration _currentPosition = Duration();
+  bool _isAudioLoaded = false;
   late StreamSubscription<PlayerState> playerStateSubscription;
 
   @override
   void initState() {
     super.initState();
     _audioPlayer = AudioPlayer();
-    _initPlayer();
-    // _amplitudeStream = _createAmplitudeStream();
+    _loadAudioMetadata();
   }
 
-  Future<void> _initPlayer() async {
+  Future<void> _loadAudioMetadata() async {
     try {
-      await _audioPlayer.setUrl(widget.url);
-
-      _audioPlayer.durationStream.listen((duration) {
-        setState(() {
-          _totalDuration = duration ?? Duration();
-        });
-      });
-
-      _audioPlayer.positionStream.listen((position) {
-        setState(() {
-          _currentPosition = position;
-        });
-      });
-
-      _audioPlayer.playerStateStream.listen((state) {
-        if (state.processingState == ProcessingState.completed) {
-          setState(() {
-            _currentPosition = Duration.zero;
-            _audioPlayer.stop();
-          });
-          _audioPlayer.seek(Duration.zero);
-        }
-      });
+      // Chỉ tải metadata mà không phát âm thanh
+      await _audioPlayer.setUrl(widget.url, preload: false);
+      _totalDuration = (await _audioPlayer.load()) ?? Duration(); // Lấy thời lượng
+      setState(() {});
     } catch (e) {
-      print("Error loading audio: $e");
+      print("Error loading audio metadata: $e");
     }
   }
 
+
+  Future<void> _playAudio() async {
+    if (!_isAudioLoaded) {
+      try {
+        await _audioPlayer.setUrl(widget.url);
+        _isAudioLoaded = true;
+        _audioPlayer.positionStream.listen((position) {
+          setState(() {
+            _currentPosition = position;
+          });
+        });
+
+        _audioPlayer.playerStateStream.listen((state) {
+          if (state.processingState == ProcessingState.completed) {
+            setState(() {
+              _currentPosition = Duration.zero;
+              _audioPlayer.stop();
+            });
+            _audioPlayer.seek(Duration.zero);
+          }
+        });
+      } catch (e) {
+        print("Error loading audio for playback: $e");
+        return;
+      }
+    }
+
+    if (_audioPlayer.playing) {
+      await _audioPlayer.pause();
+    } else {
+      await _audioPlayer.play();
+    }
+  }
 
   String _formatDuration(Duration duration) {
     String twoDigits(int n) => n.toString().padLeft(2, '0');
@@ -86,11 +100,7 @@ class WaveBubbleState extends State<ChatBubbleAudio> {
       children: [
         GestureDetector(
           onTap: () async {
-            if (_audioPlayer.playing) {
-              await _audioPlayer.pause();
-            } else {
-              await _audioPlayer.play();
-            }
+            await _playAudio(); // Chỉ tải và phát khi nhấn
           },
           child: Container(
             padding: EdgeInsets.all(7),
@@ -99,7 +109,7 @@ class WaveBubbleState extends State<ChatBubbleAudio> {
               color: Color.fromRGBO(17, 185, 145, 1),
             ),
             child: Icon(
-             _audioPlayer.playing ? Icons.stop_rounded : Icons.play_arrow_rounded,
+              _audioPlayer.playing ? Icons.stop_rounded : Icons.play_arrow_rounded,
               size: 16,
               color: Colors.white,
             ),
@@ -112,9 +122,7 @@ class WaveBubbleState extends State<ChatBubbleAudio> {
           padding: EdgeInsets.all(6),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(50),
-            color: Get.isDarkMode
-                ? Color.fromRGBO(152, 152, 152, 1.0)
-                : Color.fromRGBO(228, 230, 236, 1),
+            color: Get.isDarkMode ? Color.fromRGBO(152, 152, 152, 1.0) : Color.fromRGBO(228, 230, 236, 1),
           ),
           child: Text(
             '${_formatDuration(_currentPosition)} / ${_formatDuration(_totalDuration)}',

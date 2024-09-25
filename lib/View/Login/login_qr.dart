@@ -12,6 +12,7 @@ import 'package:live_yoko/Navigation/Navigation.dart';
 import 'package:live_yoko/Utils/Utils.dart';
 import 'package:live_yoko/widget/single_tap_detector.dart';
 
+import '../../Navigation/RouteDefine.dart';
 import 'QrCode/qr_code.dart';
 
 class LoginQr extends StatelessWidget {
@@ -123,7 +124,7 @@ class LoginQr extends StatelessWidget {
                         SizedBox(height: 16),
                         GestureDetector(
                           onTap: () async {
-                            Navigation.navigateTo(page: 'Login');
+                            Navigation.goBack(result: true);
                           },
                           child: Container(
                             // height: 48,
@@ -139,9 +140,6 @@ class LoginQr extends StatelessWidget {
                                 colors: [
                                   Color.fromRGBO(12, 190, 140, 1),
                                   Color.fromRGBO(91, 114, 222, 1)
-
-                                  // Color.fromRGBO(12, 190, 140, 1),
-                                  // Color.fromRGBO(91, 114, 222, 1),
                                 ],
                                 stops: [0.0607, 0.9222],
                               ),

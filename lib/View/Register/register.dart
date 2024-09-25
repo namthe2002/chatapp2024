@@ -12,6 +12,7 @@ import 'package:live_yoko/Utils/Utils.dart';
 import 'package:live_yoko/widget/single_tap_detector.dart';
 
 import '../../Navigation/Navigation.dart';
+import '../../Utils/enum.dart';
 
 class Register extends StatefulWidget {
   Register({Key? key}) : super(key: key);
@@ -370,87 +371,157 @@ class _RegisterState extends State<Register> {
                                 controller.isOTP.value =
                                     !controller.isOTP.value;
                               } else {
-                                Utils.showSnackBar(
-                                    title: TextByNation.getStringByKey(
-                                        'notification'),
-                                    message: TextByNation.getStringByKey(
-                                        'otp_no_valid'));
+                                Utils.showToast(
+                                  Get.overlayContext!,
+                                  TextByNation.getStringByKey(
+                                      'otp_no_valid'),
+                                  type: ToastType.ERROR,
+                                );
+                                // Utils.showSnackBar(
+                                //     title: TextByNation.getStringByKey(
+                                //         'notification'),
+                                //     message: TextByNation.getStringByKey(
+                                //         'otp_no_valid'));
                               }
                             } else {
-                              Utils.showSnackBar(
-                                  title: TextByNation.getStringByKey(
-                                      'notification'),
-                                  message:
-                                      TextByNation.getStringByKey('enter_otp'));
+                              Utils.showToast(
+                                Get.overlayContext!,
+                                TextByNation.getStringByKey('enter_otp'),
+                                type: ToastType.ERROR,
+                              );
+                              // Utils.showSnackBar(
+                              //     title: TextByNation.getStringByKey(
+                              //         'notification'),
+                              //     message:
+                              //         TextByNation.getStringByKey('enter_otp'));
                             }
                           } else {
                             if (controller
                                 .textPhoneNumberRegister.text.isEmpty) {
-                              Utils.showSnackBar(
-                                  title: TextByNation.getStringByKey(
-                                      'notification'),
-                                  message: TextByNation.getStringByKey(
-                                      'phone_empty'));
+
+                              Utils.showToast(
+                                Get.overlayContext!,
+                                  TextByNation.getStringByKey(
+                                            'phone_empty'),
+                                type: ToastType.ERROR,
+                              );
+                              // Utils.showSnackBar(
+                              //     title: TextByNation.getStringByKey(
+                              //         'notification'),
+                              //     message: TextByNation.getStringByKey(
+                              //         'phone_empty'));
                             } else if (controller
                                 .textFullNameRegister.text.isEmpty) {
-                              Utils.showSnackBar(
-                                  title: TextByNation.getStringByKey(
-                                      'notification'),
-                                  message: TextByNation.getStringByKey(
-                                      'name_empty'));
+                              Utils.showToast(
+                                Get.overlayContext!,
+                                TextByNation.getStringByKey(
+                                    'phone_empty'),
+                                type: ToastType.ERROR,
+                              );
+                              // Utils.showSnackBar(
+                              //     title: TextByNation.getStringByKey(
+                              //         'notification'),
+                              //     message: TextByNation.getStringByKey(
+                              //         'name_empty'));
                             } else if (controller
                                 .textPassRegister.text.isEmpty) {
-                              Utils.showSnackBar(
-                                  title: TextByNation.getStringByKey(
-                                      'notification'),
-                                  message: TextByNation.getStringByKey(
-                                      'password_empty'));
+                              Utils.showToast(
+                                Get.overlayContext!,
+                                TextByNation.getStringByKey(
+                                    'password_empty'),
+                                type: ToastType.ERROR,
+                              );
+                              // Utils.showSnackBar(
+                              //     title: TextByNation.getStringByKey(
+                              //         'notification'),
+                              //     message: TextByNation.getStringByKey(
+                              //         'password_empty'));
                             } else if (controller
                                 .textPassConfirmRegister.text.isEmpty) {
-                              Utils.showSnackBar(
-                                  title: TextByNation.getStringByKey(
-                                      'notification'),
-                                  message: TextByNation.getStringByKey(
-                                      'confirm_password_empty'));
+
+                              Utils.showToast(
+                                Get.overlayContext!,
+                                TextByNation.getStringByKey(
+                                    'confirm_password_empty'),
+                                type: ToastType.ERROR,
+                              );
+
+                              // Utils.showSnackBar(
+                              //     title: TextByNation.getStringByKey(
+                              //         'notification'),
+                              //     message: TextByNation.getStringByKey(
+                              //         'confirm_password_empty'));
                             } else if (controller
                                     .textPassConfirmRegister.text.length <
                                 8) {
-                              Utils.showSnackBar(
-                                  title: TextByNation.getStringByKey(
-                                      'notification'),
-                                  message: TextByNation.getStringByKey(
-                                      'pass_validate'));
+
+                              Utils.showToast(
+                                Get.overlayContext!,
+                                TextByNation.getStringByKey(
+                                    'pass_validate'),
+                                type: ToastType.ERROR,
+                              );
+                              // Utils.showSnackBar(
+                              //     title: TextByNation.getStringByKey(
+                              //         'notification'),
+                              //     message: TextByNation.getStringByKey(
+                              //         'pass_validate'));
                             } else if (controller
                                     .textPassConfirmRegister.text.length <
                                 8) {
-                              Utils.showSnackBar(
-                                  title: TextByNation.getStringByKey(
-                                      'notification'),
-                                  message: TextByNation.getStringByKey(
-                                      'pass_validate'));
+
+                              Utils.showToast(
+                                Get.overlayContext!,
+                                TextByNation.getStringByKey(
+                                    'pass_validate'),
+                                type: ToastType.ERROR,
+                              );
+                              // Utils.showSnackBar(
+                              //     title: TextByNation.getStringByKey(
+                              //         'notification'),
+                              //     message: TextByNation.getStringByKey(
+                              //         'pass_validate'));
                             } else if (controller
                                     .textPassConfirmRegister.text !=
                                 controller.textPassConfirmRegister.text) {
-                              Utils.showSnackBar(
-                                  title: TextByNation.getStringByKey(
-                                      'notification'),
-                                  message: TextByNation.getStringByKey(
-                                      'pass_valiate_overlap'));
+                              Utils.showToast(
+                                Get.overlayContext!,
+                                TextByNation.getStringByKey(
+                                    'pass_valiate_overlap'),
+                                type: ToastType.ERROR,
+                              );
+                              // Utils.showSnackBar(
+                              //     title: TextByNation.getStringByKey(
+                              //         'notification'),
+                              //     message: TextByNation.getStringByKey(
+                              //         'pass_valiate_overlap'));
                             } else if (!RegularExpressions.hexPhoneNumber
                                 .hasMatch(controller
                                     .textPhoneNumberRegister.value.text)) {
-                              Utils.showSnackBar(
-                                  title: TextByNation.getStringByKey(
-                                      'notification'),
-                                  message: TextByNation.getStringByKey(
-                                      'phone_no_valid'));
+                              Utils.showToast(
+                                Get.overlayContext!,
+                                TextByNation.getStringByKey(
+                                    'phone_no_valid'),
+                                type: ToastType.ERROR,
+                              );
+                              // Utils.showSnackBar(
+                              //     title: TextByNation.getStringByKey(
+                              //         'notification'),
+                              //     message: TextByNation.getStringByKey(
+                              //         'phone_no_valid'));
                             } else if (controller.textPassRegister.text !=
                                 controller.textPassConfirmRegister.text) {
-                              Utils.showSnackBar(
-                                  title: TextByNation.getStringByKey(
-                                      'notification'),
-                                  message: TextByNation.getStringByKey(
-                                      'pass_no_joint'));
+                              Utils.showToast(
+                                Get.overlayContext!,
+                                TextByNation.getStringByKey(
+                                    'pass_no_joint'),
+                                type: ToastType.ERROR,
+                              );
+                              // Utils.showSnackBar(
+                              //     title: TextByNation.getStringByKey(
+                              //         'notification'),
+                              //     message: TextByNation.getStringByKey(
+                              //         'pass_no_joint'));
                             } else {
                               if (controller.otpData.isEmpty) {
                                 await controller.otp();

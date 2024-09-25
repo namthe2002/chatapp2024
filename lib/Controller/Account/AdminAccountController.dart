@@ -9,6 +9,8 @@ import 'package:live_yoko/Models/Account/Account.dart';
 import 'package:live_yoko/Service/APICaller.dart';
 import 'package:live_yoko/Utils/Utils.dart';
 
+import '../../Utils/enum.dart';
+
 class AdminAccountController extends GetxController {
   Rx<TextEditingController> filterController = TextEditingController().obs;
   RxBool isSearch = false.obs;
@@ -85,8 +87,13 @@ class AdminAccountController extends GetxController {
         }
       }
     } catch (e) {
-      Utils.showSnackBar(
-          title: TextByNation.getStringByKey('notification'), message: '$e');
+      // Utils.showSnackBar(
+      //     title: TextByNation.getStringByKey('notification'), message: '$e');
+      Utils.showToast(
+        Get.overlayContext!,
+        '$e',
+        type: ToastType.ERROR,
+      );
     } finally {
       isLoangding.value = await false;
     }

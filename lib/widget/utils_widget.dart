@@ -15,26 +15,18 @@ class UtilsWidget {
       builder: (context) {
         return Container(
           padding: EdgeInsets.fromLTRB(20, 8, 20, 20),
-          decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius:
-                  BorderRadiusDirectional.vertical(top: Radius.circular(15))),
-          child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  alignment: Alignment.center,
-                  child: Container(
-                    width: 40,
-                    height: 5,
-                    decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(15),
-                        color: ColorValue.colorPlaceholder),
-                  ),
-                ),
-                ...List.generate(widgets.length, (index) => widgets[index])
-              ]),
+          decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadiusDirectional.vertical(top: Radius.circular(15))),
+          child: Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisSize: MainAxisSize.min, children: [
+            Container(
+              alignment: Alignment.center,
+              child: Container(
+                width: 40,
+                height: 5,
+                decoration: BoxDecoration(borderRadius: BorderRadius.circular(15), color: ColorValue.colorPlaceholder),
+              ),
+            ),
+            ...List.generate(widgets.length, (index) => widgets[index])
+          ]),
         );
       },
     );
@@ -61,80 +53,56 @@ class UtilsWidget {
         context: Get.context!,
         builder: (context) => AlertDialog(
               contentPadding: const EdgeInsets.all(32),
-              insetPadding: const EdgeInsets.all(20),
-              content: ConstrainedBox(
-                constraints: BoxConstraints(minWidth: Get.width * .9),
-                child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
+              // insetPadding: const EdgeInsets.all(20),
+              content: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Text(title, style: TextStyle(fontWeight: FontWeight.w400, fontSize: 24, height: 32 / 24, color: ColorValue.neutralColor)),
+                isLock == true
+                    ? Obx(() => isCheck.value == false
+                        ? SizedBox(height: 48)
+                        : Text(description,
+                            style: TextStyle(fontWeight: FontWeight.w400, fontSize: 14, height: 24 / 14, color: ColorValue.textColor)))
+                    : Text(description, style: TextStyle(fontWeight: FontWeight.w400, fontSize: 14, height: 24 / 14, color: ColorValue.textColor)),
+                if (isHiddenCheckbox == false) ...[
+                  SizedBox(height: 25,),
+                  Row(
                     children: [
-                      Text(title,
-                          style: TextStyle(
-                              fontWeight: FontWeight.w400,
-                              fontSize: 24,
-                              height: 32 / 24,
-                              color: ColorValue.neutralColor)),
-                      isLock == true
-                          ? Obx(() => isCheck.value == false
-                              ? SizedBox(height: 48)
-                              : Text(description,
-                                  style: TextStyle(
-                                      fontWeight: FontWeight.w400,
-                                      fontSize: 14,
-                                      height: 24 / 14,
-                                      color: ColorValue.textColor)))
-                          : Text(description,
-                              style: TextStyle(
-                                  fontWeight: FontWeight.w400,
-                                  fontSize: 14,
-                                  height: 24 / 14,
-                                  color: ColorValue.textColor)),
-                      if (isHiddenCheckbox == false) ...[
-                        Row(
-                          children: [
-                            Obx(() => Checkbox(
-                                  value: isCheck.value,
-                                  checkColor: Colors.white,
-                                  onChanged: onChange,
-                                  activeColor: ColorValue.colorPrimary,
-                                  shape: RoundedRectangleBorder(
-                                      side: BorderSide(
-                                          color: ColorValue.colorBorder,
-                                          width: 2),
-                                      borderRadius: BorderRadius.circular(4)),
-                                )),
-                            Expanded(
-                              child: Text(option,
-                                  style: TextStyle(
-                                      fontWeight: FontWeight.w400,
-                                      fontSize: 14,
-                                      height: 22 / 14,
-                                      color: ColorValue.neutralColor)),
-                            ),
-                          ],
-                        ),
-                      ],
-                      SizedBox(height: 24),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [
-                          _button(() {
-                            Navigator.pop(context);
-                          }, context, isCancel: true),
-                          SizedBox(width: 16),
-                          _button(onTap, context,
-                              isDelete: isDelete,
-                              isLock: isLock,
-                              isUnLock: isUnLock,
-                              isClear: isClear,
-                              isDeleteChat: isDeleteChat,
-                              isLeave: isLeave,
-                              isLockProfile: isLockProfile,
-                              isRemoveRole: isRemoveRole)
-                        ],
-                      ),
-                    ]),
-              ),
+                      Obx(() => Checkbox(
+                            value: isCheck.value,
+                            checkColor: Colors.white,
+                            onChanged: onChange,
+                            activeColor: ColorValue.colorPrimary,
+                            shape: RoundedRectangleBorder(
+                                side: BorderSide(color: ColorValue.colorBorder, width: 2), borderRadius: BorderRadius.circular(4)),
+                          )),
+                      Text(option, style: TextStyle(fontWeight: FontWeight.w400, fontSize: 14, height: 22 / 14, color: ColorValue.neutralColor)),
+                    ],
+                  ),
+                ],
+                SizedBox(
+                  height: 30,
+                ),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Expanded(
+                        child: _button(() {
+                      Navigator.pop(context);
+                    }, context, isCancel: true)),
+
+                    _button(onTap, context,
+                        isDelete: isDelete,
+                        isLock: isLock,
+                        isUnLock: isUnLock,
+                        isClear: isClear,
+                        isDeleteChat: isDeleteChat,
+                        isLeave: isLeave,
+                        isLockProfile: isLockProfile,
+                        isRemoveRole: isRemoveRole)
+                  ],
+                ),
+              ]),
             ));
   }
 
@@ -165,28 +133,20 @@ class UtilsWidget {
                               : isLeave == true
                                   ? AppLocalizations.of(context)!.leave_group
                                   : isLockProfile == true
-                                      ? AppLocalizations.of(context)!
-                                          .lock_account
+                                      ? AppLocalizations.of(context)!.lock_account
                                       : isRemoveRole == true
-                                          ? AppLocalizations.of(context)!
-                                              .delete_chat
-                                          : AppLocalizations.of(context)!
-                                              .cancel)
+                                          ? AppLocalizations.of(context)!.delete_chat
+                                          : AppLocalizations.of(context)!.cancel)
               .toUpperCase(),
           style: TextStyle(
               fontWeight: FontWeight.w600,
               fontSize: 16,
-              height: 24,
-              color: (isDelete == true ||
-                      isLock == true ||
-                      isLockProfile == true ||
-                      isRemoveRole == true)
+              height: 24 / 16,
+              color: (isDelete == true || isLock == true || isLockProfile == true || isRemoveRole == true)
                   ? ColorValue.neutralLineIcon
                   : isUnLock == true
                       ? ColorValue.colorPrimary
-                      : isDeleteChat == true ||
-                              isClear == true ||
-                              isLeave == true
+                      : isDeleteChat == true || isClear == true || isLeave == true
                           ? ColorValue.colorPrimary
                           : ColorValue.textColor)),
     );
@@ -195,24 +155,11 @@ class UtilsWidget {
   static itemShowBlockPopup(String title, String content, VoidCallback onTap) {
     return InkWell(
       onTap: onTap,
-      child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(title,
-                style: TextStyle(
-                    fontSize: 14,
-                    height: 24 / 14,
-                    color: ColorValue.neutralColor,
-                    fontWeight: FontWeight.w400)),
-            SizedBox(height: 4),
-            Text(content,
-                style: TextStyle(
-                    fontSize: 12,
-                    height: 16 / 12,
-                    color: ColorValue.colorBorder,
-                    fontWeight: FontWeight.w400)),
-          ]),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisSize: MainAxisSize.min, children: [
+        Text(title, style: TextStyle(fontSize: 14, height: 24 / 14, color: ColorValue.neutralColor, fontWeight: FontWeight.w400)),
+        SizedBox(height: 4),
+        Text(content, style: TextStyle(fontSize: 12, height: 16 / 12, color: ColorValue.colorBorder, fontWeight: FontWeight.w400)),
+      ]),
     );
   }
 }

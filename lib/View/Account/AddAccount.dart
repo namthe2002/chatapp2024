@@ -7,6 +7,8 @@ import 'package:live_yoko/Global/TextByNation.dart';
 import 'package:live_yoko/Models/Chat/PositionType.dart';
 import 'package:live_yoko/Utils/Utils.dart';
 
+import '../../Utils/enum.dart';
+
 class AddAccount extends StatelessWidget {
   AddAccount({Key? key}) : super(key: key);
 
@@ -203,23 +205,49 @@ class AddAccount extends StatelessWidget {
                 child: GestureDetector(
                   onTap: () async {
                     if (controller.userName.text.isEmpty) {
-                      Utils.showSnackBar(
-                          title: TextByNation.getStringByKey('notification'),
-                          message:
-                              TextByNation.getStringByKey('user_name_empty'));
+                      Utils.showToast(
+                        Get.overlayContext!,
+                        TextByNation.getStringByKey('user_name_empty'),
+                        type: ToastType.ERROR,
+                      );
+                      // Utils.showSnackBar(
+                      //     title: TextByNation.getStringByKey('notification'),
+                      //     message:
+                      //         TextByNation.getStringByKey('user_name_empty'));
                     } else if (controller.email.text.isEmpty) {
-                      Utils.showSnackBar(
-                          title: TextByNation.getStringByKey('notification'),
-                          message: TextByNation.getStringByKey('email_empty'));
+                      Utils.showToast(
+                        Get.overlayContext!,
+                        TextByNation.getStringByKey('email_empty'),
+                        type: ToastType.ERROR,
+                      );
+
+
+                      // Utils.showSnackBar(
+                      //     title: TextByNation.getStringByKey('notification'),
+                      //     message: TextByNation.getStringByKey('email_empty'));
                     } else if (!controller.hexEmail
                         .hasMatch(controller.email.text)) {
-                      Utils.showSnackBar(
-                          title: TextByNation.getStringByKey('notification'),
-                          message: TextByNation.getStringByKey('email_format'));
+
+
+                      Utils.showToast(
+                        Get.overlayContext!,
+                        TextByNation.getStringByKey('email_format'),
+                        type: ToastType.ERROR,
+                      );
+                      // Utils.showSnackBar(
+                      //     title: TextByNation.getStringByKey('notification'),
+                      //     message: TextByNation.getStringByKey('email_format'));
                     } else if (controller.firstName.text.isEmpty) {
-                      Utils.showSnackBar(
-                          title: TextByNation.getStringByKey('notification'),
-                          message: TextByNation.getStringByKey('name_empty'));
+
+                      Utils.showToast(
+                        Get.overlayContext!,
+                        TextByNation.getStringByKey('name_empty'),
+                        type: ToastType.ERROR,
+                      );
+
+                      // Utils.showSnackBar(
+                      //     title: TextByNation.getStringByKey('notification'),
+                      //     message: TextByNation.getStringByKey('name_empty'));
                     } else {
                       await controller.changeGroupInfo();
                     }

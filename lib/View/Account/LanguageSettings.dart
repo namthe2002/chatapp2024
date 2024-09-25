@@ -10,9 +10,12 @@ import 'package:live_yoko/Utils/Utils.dart';
 import '../../Controller/Account/LanguageSettingsController.dart';
 import '../../Global/ColorValue.dart';
 
+
 class LanguageSettings extends StatelessWidget {
   var delete = Get.delete<LanguageSettingsController>();
   LanguageSettingsController controller = Get.put(LanguageSettingsController());
+
+  LanguageSettings({super.key});
 
   @override
   Widget build(BuildContext context) {

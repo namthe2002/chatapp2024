@@ -19,7 +19,6 @@ class GroupCreateStep2 extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Obx(() => (Scaffold(
-          // appBar: appBar(),
           body: body(context),
         )));
   }

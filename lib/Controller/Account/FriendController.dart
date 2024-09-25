@@ -8,11 +8,10 @@ import 'package:live_yoko/Controller/Chat/ChatDetailController.dart';
 import 'package:live_yoko/Global/Constant.dart';
 import 'package:live_yoko/Global/TextByNation.dart';
 import 'package:live_yoko/Models/Account/Contact.dart';
-import 'package:live_yoko/Navigation/Navigation.dart';
 import 'package:live_yoko/Service/APICaller.dart';
 import 'package:live_yoko/Utils/Utils.dart';
-
 import '../../Models/Chat/Chat.dart';
+import '../../Utils/enum.dart';
 import '../Chat/ProfileChatDetailController.dart';
 
 class FriendController extends GetxController {
@@ -88,8 +87,13 @@ class FriendController extends GetxController {
         // Get.put(ChatController()).selectedChatItem = selectedChatDetail;
       }
     } catch (e) {
-      Utils.showSnackBar(
-          title: TextByNation.getStringByKey('notification'), message: '$e');
+      // Utils.showSnackBar(
+      //     title: TextByNation.getStringByKey('notification'), message: '$e');
+      Utils.showToast(
+        Get.overlayContext!,
+        '$e',
+        type: ToastType.ERROR,
+      );
     } finally {
       isLoangding.value = false;
     }
@@ -126,8 +130,13 @@ class FriendController extends GetxController {
         }
       }
     } catch (e) {
-      Utils.showSnackBar(
-          title: TextByNation.getStringByKey('notification'), message: '$e');
+      // Utils.showSnackBar(
+      //     title: TextByNation.getStringByKey('notification'), message: '$e');
+      Utils.showToast(
+        Get.overlayContext!,
+        '$e',
+        type: ToastType.ERROR,
+      );
     } finally {
       isLoangding.value = false;
     }
@@ -152,13 +161,24 @@ class FriendController extends GetxController {
       if (response != null) {
         listContact.removeAt(index);
         listContact.refresh();
-        Utils.showSnackBar(
-            title: TextByNation.getStringByKey('notification'),
-            message: TextByNation.getStringByKey('cancal_friend_ss'));
+        // Utils.showSnackBar(
+        //     title: TextByNation.getStringByKey('notification'),
+        //     message: TextByNation.getStringByKey('cancal_friend_ss'));
+        Utils.showToast(
+          Get.overlayContext!,
+          TextByNation.getStringByKey('cancal_friend_ss'),
+          type: ToastType.SUCCESS,
+        );
       }
     } catch (e) {
-      Utils.showSnackBar(
-          title: TextByNation.getStringByKey('notification'), message: '$e');
+      // Utils.showSnackBar(
+      //     title: TextByNation.getStringByKey('notification'), message: '$e');
+
+      Utils.showToast(
+        Get.overlayContext!,
+       '$e',
+        type: ToastType.ERROR,
+      );
     } finally {
       requestDone = true;
     }

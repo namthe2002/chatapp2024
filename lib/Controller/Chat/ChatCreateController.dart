@@ -4,14 +4,12 @@ import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:live_yoko/Controller/Chat/ChatDetailController.dart';
 import 'package:live_yoko/Global/Constant.dart';
-import 'package:live_yoko/Global/TextByNation.dart';
 import 'package:live_yoko/Models/Account/Contact.dart';
-import 'package:live_yoko/Navigation/Navigation.dart';
 import 'package:live_yoko/Service/APICaller.dart';
 
 import '../../Models/Chat/Chat.dart';
 import '../../Utils/Utils.dart';
-import '../../View/Chat/home_chat.dart';
+import '../../Utils/enum.dart';
 import 'ChatController.dart';
 import 'ProfileChatDetailController.dart';
 
@@ -36,8 +34,7 @@ class ChatCreateController extends GetxController {
     uuidAcount = await Utils.getStringValueWithKey(Constant.UUID_USER);
     getFriend();
     scrollController.addListener(() {
-      if (scrollController.position.maxScrollExtent ==
-          scrollController.offset) {
+      if (scrollController.position.maxScrollExtent == scrollController.offset) {
         if (hasMore.value) {
           page++;
           getFriend();
@@ -62,15 +59,13 @@ class ChatCreateController extends GetxController {
     String formattedTime = DateFormat('MM/dd/yyyy HH:mm:ss').format(timeNow);
     try {
       var param = {
-        "keyCert":
-            Utils.generateMd5(Constant.NEXT_PUBLIC_KEY_CERT + formattedTime),
+        "keyCert": Utils.generateMd5(Constant.NEXT_PUBLIC_KEY_CERT + formattedTime),
         "time": formattedTime,
         "type": 1,
         "ownerUuid": listContact[index].uuid,
       };
 
-      var response = await APICaller.getInstance()
-          .post('v1/Chat/create-message-room', param);
+      var response = await APICaller.getInstance().post('v1/Chat/create-message-room', param);
       if (response != null) {
         if (Get.isRegistered<ChatController>()) {
           var controller = await Get.find<ChatController>();
@@ -78,39 +73,23 @@ class ChatCreateController extends GetxController {
           await controller.refreshListChat();
         }
 
-
-
-
         selectedChatDetail.uuid = response['data'];
-        selectedChatDetail.ownerUuid =
-            await Utils.getStringValueWithKey(Constant.UUID_USER);
-        selectedChatDetail.ownerName =
-            listContact[index].fullName ?? listContact[index].userName;
+        selectedChatDetail.ownerUuid = await Utils.getStringValueWithKey(Constant.UUID_USER);
+        selectedChatDetail.ownerName = listContact[index].fullName ?? listContact[index].userName;
         selectedChatDetail.type = 1;
         selectedChatDetail.avatar = listContact[index].avatar ?? '';
-
-
-
-
 
         Get.delete<ChatDetailController>();
         Get.delete<ProfileChatDetailController>();
         Get.find<ChatController>().selectChatItem(selectedChatDetail);
         Get.appUpdate();
-
-
-        // Navigation.navigateTo(page: 'ChatDetail', arguments: {
-        //   'uuid': response['data'], // uuid phòng gọi api tạo phòng trước
-        //   'name': listContact[index].fullName ?? listContact[index].userName,
-        //   'type': 1,
-        //   'ownerUuid': await Utils.getStringValueWithKey(
-        //       Constant.UUID_USER), // uu đăng nhập
-        //   'avatar': listContact[index].avatar ?? ''
-        // });
       }
     } catch (e) {
-      Utils.showSnackBar(
-          title: TextByNation.getStringByKey('notification'), message: '$e');
+      Utils.showToast(
+        Get.overlayContext!,
+        '$e',
+        type: ToastType.ERROR,
+      );
     } finally {
       isLoangding.value = await false;
     }
@@ -122,8 +101,7 @@ class ChatCreateController extends GetxController {
     String formattedTime = DateFormat('MM/dd/yyyy HH:mm:ss').format(timeNow);
     try {
       var param = {
-        "keyCert":
-            Utils.generateMd5(Constant.NEXT_PUBLIC_KEY_CERT + formattedTime),
+        "keyCert": Utils.generateMd5(Constant.NEXT_PUBLIC_KEY_CERT + formattedTime),
         "time": formattedTime,
         "uuid": await Utils.getStringValueWithKey(Constant.UUID_USER),
         "pageSize": pageSize,
@@ -131,12 +109,10 @@ class ChatCreateController extends GetxController {
         "keyword": filterController.value.text
       };
 
-      var response =
-          await APICaller.getInstance().post('v1/Member/find-member', param);
+      var response = await APICaller.getInstance().post('v1/Member/find-member', param);
       if (response != null) {
         List<dynamic> list = response['items'];
-        var listItem =
-            list.map((dynamic json) => Contact.fromJson(json)).toList();
+        var listItem = list.map((dynamic json) => Contact.fromJson(json)).toList();
         for (Contact constant in listItem) {
           if (constant.uuid != uuidAcount) listContact.add(constant);
         }
@@ -145,8 +121,13 @@ class ChatCreateController extends GetxController {
         }
       }
     } catch (e) {
-      Utils.showSnackBar(
-          title: TextByNation.getStringByKey('notification'), message: '$e');
+      Utils.showToast(
+        Get.overlayContext!,
+        '$e',
+        type: ToastType.ERROR,
+      );
+      // Utils.showSnackBar(
+      //     title: TextByNation.getStringByKey('notification'), message: '$e');
     } finally {
       isLoangding.value = await false;
     }
